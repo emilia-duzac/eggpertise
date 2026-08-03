@@ -349,14 +349,42 @@ export interface ProductoCompleto {
 }
 
 const FABRICANTE_ORDER = [
+  "tratamiento-de-estiercol-eggpertise",
   "eggpertise-compostaje",
+  "dacs",
+  "winterwarm",
+  "farmrob",
   "jaulas",
   "sistemas-de-jaulas",
-  "dacs",
   "sime-tek",
-  "winterwarm",
   "landmeco",
 ];
+
+const PRODUCTO_PRINCIPAL_ORDER = [
+  "sistema-de-compostaje-y-biodigestion",
+  "magfan-plus",
+  "calefactor-dxc-80",
+  "jaulas-de-cria-recria",
+];
+
+function getProductoPrincipalOrderIndex(producto: Producto): number {
+  const orderIndex = PRODUCTO_PRINCIPAL_ORDER.indexOf(producto.slug);
+
+  return orderIndex === -1 ? Number.MAX_SAFE_INTEGER : orderIndex;
+}
+
+function sortProductosPrincipales(productos: Producto[]): Producto[] {
+  return [...productos].sort((a, b) => {
+    const orderDiff =
+      getProductoPrincipalOrderIndex(a) - getProductoPrincipalOrderIndex(b);
+
+    if (orderDiff !== 0) {
+      return orderDiff;
+    }
+
+    return a.nombre.localeCompare(b.nombre, "es", { sensitivity: "base" });
+  });
+}
 
 function getFabricanteOrderIndex(distributor: Distributor): number {
   const slug = distributor.slug;
@@ -613,7 +641,7 @@ export async function getProductosPrincipales(): Promise<Producto[]> {
     const response = await graphqlRequest(PRODUCTOS_PRINCIPALES_QUERY);
     const productos = response.data.productoCollection
       .items as ProductoGraphQLResponse[];
-    return productos.map(parseProductoFromGraphQL);
+    return sortProductosPrincipales(productos.map(parseProductoFromGraphQL));
   } catch (error) {
     console.error("Error fetching productos principales:", error);
     return [];
