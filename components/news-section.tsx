@@ -83,6 +83,10 @@ function NewsCard({ noticia }: { noticia: Noticia }) {
 }
 
 export function NewsSection({ noticias }: NewsSectionProps) {
+  if (noticias.length === 0) {
+    return null;
+  }
+
   return (
     <section
       id="noticias"
@@ -109,19 +113,11 @@ export function NewsSection({ noticias }: NewsSectionProps) {
           </p>
         </div>
 
-        {noticias.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            {noticias.map((noticia) => (
-              <NewsCard key={noticia.id} noticia={noticia} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground text-lg">
-              No hay noticias disponibles en este momento.
-            </p>
-          </div>
-        )}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+          {noticias.map((noticia) => (
+            <NewsCard key={noticia.id} noticia={noticia} />
+          ))}
+        </div>
       </div>
     </section>
   );
