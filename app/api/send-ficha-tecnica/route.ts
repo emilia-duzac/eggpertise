@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
 import {
   getFichaTecnicaNotificationTemplate,
   getFichaTecnicaUserTemplate,
 } from "@/lib/email-templates";
 import { syncLeadToSpreadsheet } from "@/lib/leads-sheet";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { sendEmail } from "@/lib/resend";
 
 export async function POST(request: Request) {
   try {
@@ -41,22 +39,7 @@ export async function POST(request: Request) {
       fichaTecnicaNombre,
     };
 
-    // Send notification to admin
-    await resend.emails.send({
-      from: "EggPertise <noreply@eggpertise.com>",
-      to: [process.env.CONTACT_EMAIL || "info@eggpertise.com"],
-      subject: `Nueva solicitud de ficha técnica: ${productoNombre}`,
-      html: getFichaTecnicaNotificationTemplate(templateData),
-    });
-
-    // Send ficha técnica to user
-    await resend.emails.send({
-      from: "EggPertise <noreply@eggpertise.com>",
-      to: [email],
-      subject: `Ficha Técnica - ${productoNombre}`,
-      html: getFichaTecnicaUserTemplate(templateData),
-    });
-
+    // Recorded before the emails so the lead survives a failed send.
     await syncLeadToSpreadsheet({
       nombre: `${nombre} ${apellido}`,
       email,
@@ -64,6 +47,22 @@ export async function POST(request: Request) {
       telefono,
       mensaje: `Descarga de ficha técnica: ${productoNombre}`,
       fuente: "Descarga Ficha Técnica",
+    });
+
+    // Send notification to admin
+    await sendEmail({
+      from: "EggPertise <noreply@eggpertise.com>",
+      to: [process.env.CONTACT_EMAIL || "info@eggpertise.com"],
+      subject: `Nueva solicitud de ficha técnica: ${productoNombre}`,
+      html: getFichaTecnicaNotificationTemplate(templateData),
+    });
+
+    // Send ficha técnica to user
+    await sendEmail({
+      from: "EggPertise <noreply@eggpertise.com>",
+      to: [email],
+      subject: `Ficha Técnica - ${productoNombre}`,
+      html: getFichaTecnicaUserTemplate(templateData),
     });
 
     return NextResponse.json(

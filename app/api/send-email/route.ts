@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
 import { getContactFormEmailTemplate } from "@/lib/email-templates";
 import { syncLeadToSpreadsheet } from "@/lib/leads-sheet";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { sendEmail } from "@/lib/resend";
 
 export async function POST(request: Request) {
   try {
@@ -27,15 +25,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Send email using Resend
-    const data = await resend.emails.send({
-      from: "EggPertise Contact Form <noreply@eggpertise.com>",
-      to: [process.env.CONTACT_EMAIL || "info@eggpertise.com"],
-      replyTo: email,
-      subject: `Nueva consulta de ${nombre} - ${empresa}`,
-      html: getContactFormEmailTemplate({ nombre, email, empresa, pais, mensaje }),
-    });
-
+    // Recorded before the email so the lead survives a failed send.
     await syncLeadToSpreadsheet({
       nombre,
       email,
@@ -43,6 +33,14 @@ export async function POST(request: Request) {
       pais,
       mensaje,
       fuente: "Formulario Web",
+    });
+
+    const data = await sendEmail({
+      from: "EggPertise Contact Form <noreply@eggpertise.com>",
+      to: [process.env.CONTACT_EMAIL || "info@eggpertise.com"],
+      replyTo: email,
+      subject: `Nueva consulta de ${nombre} - ${empresa}`,
+      html: getContactFormEmailTemplate({ nombre, email, empresa, pais, mensaje }),
     });
 
     return NextResponse.json(
@@ -58,7 +56,6 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error: "Error al enviar el email. Por favor intente nuevamente.",
-        details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
     );

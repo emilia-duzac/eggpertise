@@ -35,8 +35,9 @@ interface LeadInput {
 /**
  * Mirrors a lead to the leads spreadsheet.
  *
- * This is a secondary channel: the caller has already delivered the email, so
- * a failure here is logged and swallowed rather than failing the request.
+ * This is a secondary channel: a failure here is logged and swallowed rather
+ * than failing the request. Callers invoke it before sending the email, so the
+ * lead is kept even when the email is rejected.
  */
 export async function syncLeadToSpreadsheet(lead: LeadInput): Promise<void> {
   if (!LEADS_SHEET_ENDPOINT) return;
