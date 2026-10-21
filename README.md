@@ -31,7 +31,7 @@ Creá un archivo `.env.local` en la raíz a partir de [`.env.example`](.env.exam
 | Variable | Para qué |
 |---|---|
 | `CONTENTFUL_SPACE_ID`, `CONTENTFUL_DELIVERY_TOKEN` | Leer el contenido. Sin ellas el sitio no carga datos |
-| `RESEND_API_KEY`, `CONTACT_EMAIL` | Enviar los emails de los formularios |
+| `RESEND_API_KEY`, `CONTACT_EMAIL`, `MAIL_DOMAIN` (opcional) | Enviar los emails de los formularios. `MAIL_DOMAIN` cambia el dominio del remitente |
 | `LEADS_SHEET_ENDPOINT`, `LEADS_SHEET_TOKEN` | Copiar los leads a la planilla. Si falta el endpoint, se omite **sin avisar** |
 
 Dónde conseguir cada valor: [`docs/accesos.md`](docs/accesos.md). En producción las variables se cargan en Vercel (ver [`docs/deploy.md`](docs/deploy.md)).

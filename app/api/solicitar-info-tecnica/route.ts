@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
 import { syncLeadToSpreadsheet } from "@/lib/leads-sheet";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { mailFrom, sendEmail } from "@/lib/resend";
 
 export async function POST(request: Request) {
   try {
@@ -28,8 +26,18 @@ export async function POST(request: Request) {
       timeZone: "America/Argentina/Buenos_Aires",
     });
 
-    await resend.emails.send({
-      from: "EggPertise <noreply@eggpertise.com>",
+    // Recorded before the email so the lead survives a failed send.
+    await syncLeadToSpreadsheet({
+      email,
+      empresa,
+      pais,
+      telefono,
+      mensaje: `Solicitud de información técnica sobre ${productoNombre}`,
+      fuente: "Solicitud Info Técnica",
+    });
+
+    await sendEmail({
+      from: mailFrom(),
       to: [process.env.CONTACT_EMAIL || "info@eggpertise.com"],
       subject: `Nueva solicitud de información técnica: ${productoNombre}`,
       html: `
@@ -56,15 +64,6 @@ export async function POST(request: Request) {
           </body>
         </html>
       `,
-    });
-
-    await syncLeadToSpreadsheet({
-      email,
-      empresa,
-      pais,
-      telefono,
-      mensaje: `Solicitud de información técnica sobre ${productoNombre}`,
-      fuente: "Solicitud Info Técnica",
     });
 
     return NextResponse.json({ success: true }, { status: 200 });
