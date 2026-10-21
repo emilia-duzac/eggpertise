@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { trackEvent } from "@/lib/gtm";
 import { Download, Loader2, CheckCircle, Mail } from "lucide-react";
 
 interface FichaTecnicaModalProps {
@@ -64,6 +65,7 @@ export function FichaTecnicaModal({
         throw new Error(data.error || "Error al enviar");
       }
 
+      trackEvent("form_ficha_tecnica");
       setIsSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al enviar el email");
