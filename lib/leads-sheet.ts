@@ -1,6 +1,10 @@
 const LEADS_SHEET_ENDPOINT = process.env.LEADS_SHEET_ENDPOINT;
 const LEADS_SHEET_TOKEN = process.env.LEADS_SHEET_TOKEN;
 
+// Callers wait on the sync before sending the email, and Apps Script can be
+// slow to answer, so it is cut off rather than allowed to hold the request.
+const SYNC_TIMEOUT_MS = 5000;
+
 /**
  * A lead as the spreadsheet expects it. Keys must match the header row
  * exactly: the Apps Script maps the payload by header name and silently
@@ -35,8 +39,9 @@ interface LeadInput {
 /**
  * Mirrors a lead to the leads spreadsheet.
  *
- * This is a secondary channel: the caller has already delivered the email, so
- * a failure here is logged and swallowed rather than failing the request.
+ * This is a secondary channel: a failure here is logged and swallowed rather
+ * than failing the request. Callers invoke it before sending the email, so the
+ * lead is kept even when the email is rejected.
  */
 export async function syncLeadToSpreadsheet(lead: LeadInput): Promise<void> {
   if (!LEADS_SHEET_ENDPOINT) return;
@@ -62,6 +67,7 @@ export async function syncLeadToSpreadsheet(lead: LeadInput): Promise<void> {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: LEADS_SHEET_TOKEN, ...row }),
+      signal: AbortSignal.timeout(SYNC_TIMEOUT_MS),
     });
 
     // fetch only rejects on network errors, so a non-2xx has to be checked

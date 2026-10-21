@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
 import {
   getFichaTecnicaNotificationTemplate,
   getFichaTecnicaUserTemplate,
 } from "@/lib/email-templates";
 import { syncLeadToSpreadsheet } from "@/lib/leads-sheet";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { mailFrom, sendEmail } from "@/lib/resend";
 
 export async function POST(request: Request) {
   try {
@@ -41,22 +39,7 @@ export async function POST(request: Request) {
       fichaTecnicaNombre,
     };
 
-    // Send notification to admin
-    await resend.emails.send({
-      from: "EggPertise <noreply@eggpertise.com>",
-      to: [process.env.CONTACT_EMAIL || "info@eggpertise.com"],
-      subject: `Nueva solicitud de ficha técnica: ${productoNombre}`,
-      html: getFichaTecnicaNotificationTemplate(templateData),
-    });
-
-    // Send ficha técnica to user
-    await resend.emails.send({
-      from: "EggPertise <noreply@eggpertise.com>",
-      to: [email],
-      subject: `Ficha Técnica - ${productoNombre}`,
-      html: getFichaTecnicaUserTemplate(templateData),
-    });
-
+    // Recorded before the emails so the lead survives a failed send.
     await syncLeadToSpreadsheet({
       nombre: `${nombre} ${apellido}`,
       email,
@@ -65,6 +48,32 @@ export async function POST(request: Request) {
       mensaje: `Descarga de ficha técnica: ${productoNombre}`,
       fuente: "Descarga Ficha Técnica",
     });
+
+    // Both are attempted even if one fails: a rejected admin notification
+    // must not stop the user from getting the ficha técnica they asked for.
+    const results = await Promise.allSettled([
+      // Notification to admin
+      sendEmail({
+        from: mailFrom(),
+        to: [process.env.CONTACT_EMAIL || "info@eggpertise.com"],
+        subject: `Nueva solicitud de ficha técnica: ${productoNombre}`,
+        html: getFichaTecnicaNotificationTemplate(templateData),
+      }),
+      // Ficha técnica to user
+      sendEmail({
+        from: mailFrom(),
+        to: [email],
+        subject: `Ficha Técnica - ${productoNombre}`,
+        html: getFichaTecnicaUserTemplate(templateData),
+      }),
+    ]);
+
+    const failed = results.find(
+      (result): result is PromiseRejectedResult => result.status === "rejected"
+    );
+    if (failed) {
+      throw failed.reason;
+    }
 
     return NextResponse.json(
       {
@@ -78,7 +87,6 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error: "Error al enviar la ficha técnica. Por favor intente nuevamente.",
-        details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
     );
