@@ -51,6 +51,18 @@ curl -L -X POST "<URL /exec>" \
 
 Debe responder `{"ok":true}` y aparecer una fila. Borrar la fila de prueba.
 
+## Estado actual y traspaso del Apps Script
+
+- El proyecto se llama **"EggPertise - Captura de leads"** y es **independiente** (no está ligado a la planilla). Se creó con una cuenta `@eggpertise.com` y está compartido como editor con otra persona (ver [`accesos.md`](accesos.md)).
+- La implementación corre **"Como yo"**: con los permisos de la cuenta que la desplegó, que tiene que poder escribir en la planilla. **Compartir el proyecto no cambia con qué cuenta corre.**
+- El secreto (`SHARED_SECRET`) está dentro del script y en Vercel (`LEADS_SHEET_TOKEN`). **No está en el repo**: el archivo `docs/apps-script/lead-capture.gs` tiene un valor de relleno.
+
+**Para traspasarlo a otra persona** (por ejemplo, si se va quien lo desplegó):
+1. La nueva persona abre el proyecto (ya compartido) → *Implementar → Nueva implementación → Aplicación web*, con **Ejecutar como: Yo** y **Acceso: Cualquier persona**.
+2. Autoriza los permisos y copia la nueva URL `/exec`.
+3. En Vercel, actualiza `LEADS_SHEET_ENDPOINT` con esa URL y redeploya Production.
+4. Prueba un formulario y verifica que aparezca la fila.
+
 ## Recrear el Apps Script (si se pierde acceso al original)
 
 No hace falta recuperar el deployment anterior; alcanza con crear uno nuevo.
@@ -70,5 +82,6 @@ No hace falta recuperar el deployment anterior; alcanza con crear uno nuevo.
 
 - El `Dashboard` de la planilla muestra `#REF!` en "TOTAL LEADS", y "Leads por País" solo cuenta Argentina, Chile, Uruguay y Brasil.
 - La lista desplegable de `Fuente` en `Config` solo tiene Formulario Web, WhatsApp, Linkedin y Recomendación. Faltan "Solicitud Info Técnica" y "Descarga Ficha Técnica".
-- La planilla es legible por cualquiera con el link: restringirla.
+- Los formularios de información técnica y de ficha técnica no piden todos los datos: el de información técnica no pide nombre y el de ficha técnica no pide empresa, así que esas celdas quedan vacías.
+- No hay columna `Teléfono`: el teléfono se guarda dentro de `Notas`. Si se agrega la columna a la planilla, el script la llena solo.
 - No hay alerta cuando la copia falla. Idea: que el script avise por mail ante error.

@@ -98,7 +98,8 @@ docs/                           documentación
 | Documento | Para qué |
 |---|---|
 | [`docs/accesos.md`](docs/accesos.md) | Quién es dueño de cada servicio y cómo pedir acceso |
-| [`docs/deploy.md`](docs/deploy.md) | Deploy, variables y mover el repo de org |
+| [`docs/deploy.md`](docs/deploy.md) | Deploy, ambientes y mover el repo de org |
+| [`docs/dns.md`](docs/dns.md) | Dominio y DNS: inventario de registros y qué no tocar |
 | [`docs/contenido.md`](docs/contenido.md) | Modelo de Contentful y carga de contenido |
 | [`docs/leads.md`](docs/leads.md) | Cómo viaja un lead y cómo diagnosticar si dejan de llegar |
 | [`docs/arquitectura.md`](docs/arquitectura.md) | Decisiones y cosas no obvias del código |
