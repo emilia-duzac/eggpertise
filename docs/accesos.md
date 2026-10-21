@@ -25,7 +25,7 @@ Regla de oro: **cada servicio tiene al menos 2 administradores con cuenta `@eggp
 
 Si cualquiera de estos se pierde, algo deja de funcionar. Conviene resolverlos en este orden:
 
-1. **GoDaddy sin acceso propio.** Sin él no se puede tocar el DNS: ni el dominio, ni el correo, ni Resend. Pedir "Acceso delegado" a `emilia.duzac@eggpertise.com`.
+1. **GoDaddy sin acceso propio.** Sin él no se puede tocar el DNS: ni el dominio, ni el correo, ni Resend.
 2. **Vercel en una cuenta Hobby personal.** Una sola persona puede entrar. Pasar a un plan que permita equipo y sumar una segunda persona. Hobby además limita el uso comercial: revisar los términos.
 3. **El Apps Script corre con los permisos de una cuenta** ("Ejecutar como: Yo"). Si esa cuenta pierde acceso a la planilla, los leads dejan de guardarse sin avisar. Ver el traspaso en [`leads.md`](leads.md).
 4. **Gestor de contraseñas:** todavía no hay. Los secretos viven solo en Vercel.

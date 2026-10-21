@@ -103,7 +103,6 @@ docs/                           documentación
 | [`docs/contenido.md`](docs/contenido.md) | Modelo de Contentful y carga de contenido |
 | [`docs/leads.md`](docs/leads.md) | Cómo viaja un lead y cómo diagnosticar si dejan de llegar |
 | [`docs/arquitectura.md`](docs/arquitectura.md) | Decisiones y cosas no obvias del código |
-| [`docs/historial-migracion.md`](docs/historial-migracion.md) | Cómo se pasó el sitio a un Vercel propio y qué quedó pendiente |
 | [`CLAUDE.md`](CLAUDE.md) | Reglas cortas para agentes de código |
 
 `docs/superpowers/` contiene un spec y un plan de i18n (español/portugués) que
