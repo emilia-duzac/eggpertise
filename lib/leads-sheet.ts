@@ -1,6 +1,10 @@
 const LEADS_SHEET_ENDPOINT = process.env.LEADS_SHEET_ENDPOINT;
 const LEADS_SHEET_TOKEN = process.env.LEADS_SHEET_TOKEN;
 
+// Callers wait on the sync before sending the email, and Apps Script can be
+// slow to answer, so it is cut off rather than allowed to hold the request.
+const SYNC_TIMEOUT_MS = 5000;
+
 /**
  * A lead as the spreadsheet expects it. Keys must match the header row
  * exactly: the Apps Script maps the payload by header name and silently
@@ -63,6 +67,7 @@ export async function syncLeadToSpreadsheet(lead: LeadInput): Promise<void> {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: LEADS_SHEET_TOKEN, ...row }),
+      signal: AbortSignal.timeout(SYNC_TIMEOUT_MS),
     });
 
     // fetch only rejects on network errors, so a non-2xx has to be checked

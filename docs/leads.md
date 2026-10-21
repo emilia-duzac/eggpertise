@@ -10,10 +10,10 @@ Cada lead se envía por **email** y además se copia a una **planilla de Google*
 ```
 Formulario web
   └─► POST /api/send-email | /api/solicitar-info-tecnica | /api/send-ficha-tecnica
-        1. Resend manda un email a CONTACT_EMAIL        (canal principal)
-        2. syncLeadToSpreadsheet() (lib/leads-sheet.ts)  (canal secundario)
+        1. syncLeadToSpreadsheet() (lib/leads-sheet.ts) guarda el lead
               └─► POST a LEADS_SHEET_ENDPOINT (Web App de Google Apps Script)
                     └─► el script agrega una fila en la hoja "Leads"
+        2. Resend manda un email a CONTACT_EMAIL        (aviso al equipo)
 ```
 
 - La planilla es **"LEADS WEB EggPertise"** (pestañas `Leads`, `Dashboard`, `Config`), en el Shared Drive "Marketing". ID en [`accesos.md`](accesos.md).
@@ -22,7 +22,9 @@ Formulario web
 
 ## Por qué puede fallar sin que nadie se entere
 
-La copia a la planilla **nunca rompe el formulario**: si falla, se escribe un error en el log (`Spreadsheet sync failed for <email>`) y el usuario ve "enviado". El email sale igual, así que el problema solo se nota mirando la planilla.
+La copia a la planilla **nunca rompe el formulario**: si falla (o si Apps Script no responde en 5 segundos), se escribe un error en el log (`Spreadsheet sync failed for <email>`) y se sigue con el email. El usuario ve "enviado", así que el problema solo se nota mirando la planilla o los logs.
+
+El orden es **primero la planilla y después el email**, para que el lead quede registrado aunque el email falle. Si Resend rechaza el email, el usuario ve un error ("Error al enviar el email...") y en el log aparece `Resend rejected the email: <motivo>`. En ese caso el lead ya está en la planilla, y si el usuario reintenta puede quedar duplicado.
 
 Además, si `LEADS_SHEET_ENDPOINT` no está definida, la copia se omite sin ningún mensaje.
 
@@ -36,6 +38,8 @@ Revisar en este orden:
 4. **Cuenta dueña del script:** el script corre con los permisos de la cuenta que lo desplegó ("Ejecutar como: Yo"). Esa cuenta tiene que poder **escribir en la planilla**. Si se le quitó acceso (por ejemplo, alguien que dejó el proyecto), el script falla.
 5. **URL del deployment:** cada nueva implementación puede cambiar la URL `/exec`. Tiene que coincidir con `LEADS_SHEET_ENDPOINT`.
 6. **La planilla:** que exista la pestaña `Leads` y que los encabezados no se hayan renombrado.
+
+**Si el usuario ve un error pero el lead sí está en la planilla**, el problema es Resend (key inválida, dominio sin verificar). Buscar `Resend rejected the email` en los logs de Vercel.
 
 **Prueba directa del script** (sin pasar por la web):
 
