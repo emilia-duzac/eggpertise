@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getContactFormEmailTemplate } from "@/lib/email-templates";
 import { syncLeadToSpreadsheet } from "@/lib/leads-sheet";
-import { sendEmail } from "@/lib/resend";
+import { mailFrom, sendEmail } from "@/lib/resend";
 
 export async function POST(request: Request) {
   try {
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     });
 
     const data = await sendEmail({
-      from: "EggPertise Contact Form <noreply@eggpertise.com>",
+      from: mailFrom("EggPertise Contact Form"),
       to: [process.env.CONTACT_EMAIL || "info@eggpertise.com"],
       replyTo: email,
       subject: `Nueva consulta de ${nombre} - ${empresa}`,

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { syncLeadToSpreadsheet } from "@/lib/leads-sheet";
-import { sendEmail } from "@/lib/resend";
+import { mailFrom, sendEmail } from "@/lib/resend";
 
 export async function POST(request: Request) {
   try {
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     });
 
     await sendEmail({
-      from: "EggPertise <noreply@eggpertise.com>",
+      from: mailFrom(),
       to: [process.env.CONTACT_EMAIL || "info@eggpertise.com"],
       subject: `Nueva solicitud de información técnica: ${productoNombre}`,
       html: `

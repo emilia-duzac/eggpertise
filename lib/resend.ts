@@ -17,6 +17,16 @@ function getClient(): Resend {
 }
 
 /**
+ * Builds the `from` header. The domain can be overridden with MAIL_DOMAIN so a
+ * verified subdomain (e.g. mail.eggpertise.com) can send while the root domain
+ * is still registered with another Resend account.
+ */
+export function mailFrom(name = "EggPertise"): string {
+  const domain = process.env.MAIL_DOMAIN || "eggpertise.com";
+  return `${name} <noreply@${domain}>`;
+}
+
+/**
  * Sends an email and throws when Resend rejects it.
  *
  * The SDK reports API failures (invalid key, unverified domain, ...) in the
