@@ -40,3 +40,13 @@ El remitente es `noreply@eggpertise.com` (dominio verificado en Resend).
 Los destinatarios van a `CONTACT_EMAIL`, o a `info@eggpertise.com` por defecto.
 
 Detalle de los leads y su planilla en [`leads.md`](leads.md).
+
+## Emails
+
+- Todos los envíos pasan por `sendEmail` (`lib/resend.ts`), que **falla si Resend rechaza el mail**. El SDK de Resend no lanza error cuando la API rechaza un envío: lo devuelve dentro de la respuesta, y sin esa revisión un mail rechazado parece enviado.
+- El cliente de Resend se crea **al enviar**, no al cargar el módulo. Así el build no depende de `RESEND_API_KEY`.
+- **Remitente:** `mailFrom()` arma `noreply@<MAIL_DOMAIN>`. Si no hay variable, usa `eggpertise.com`. Hoy `MAIL_DOMAIN=mail.eggpertise.com`, porque el dominio raíz sigue registrado en la cuenta vieja de Resend (ver [`dns.md`](dns.md)).
+- **Destinatario de los avisos:** `CONTACT_EMAIL`, o `info@eggpertise.com` si no está definida. Una dirección mal formada hace fallar los tres formularios (`Invalid 'to' field`).
+- **Reply-To:** solo el formulario de contacto lo usa (con el mail de quien escribió). El mail de la ficha técnica que recibe el usuario no tiene, así que una respuesta no llega a nadie.
+- **Orden dentro de cada ruta:** primero se guarda el lead en la planilla y después se manda el mail. Un fallo del mail muestra un error al usuario pero no pierde el lead; si el usuario reintenta, puede quedar duplicado.
+- En la **ficha técnica** se mandan dos mails (aviso al equipo y ficha al usuario) y se intentan ambos aunque falle uno.

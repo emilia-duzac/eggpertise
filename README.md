@@ -98,10 +98,12 @@ docs/                           documentación
 | Documento | Para qué |
 |---|---|
 | [`docs/accesos.md`](docs/accesos.md) | Quién es dueño de cada servicio y cómo pedir acceso |
-| [`docs/deploy.md`](docs/deploy.md) | Deploy, variables y mover el repo de org |
+| [`docs/deploy.md`](docs/deploy.md) | Deploy, ambientes y mover el repo de org |
+| [`docs/dns.md`](docs/dns.md) | Dominio y DNS: inventario de registros y qué no tocar |
 | [`docs/contenido.md`](docs/contenido.md) | Modelo de Contentful y carga de contenido |
 | [`docs/leads.md`](docs/leads.md) | Cómo viaja un lead y cómo diagnosticar si dejan de llegar |
 | [`docs/arquitectura.md`](docs/arquitectura.md) | Decisiones y cosas no obvias del código |
+| [`docs/historial-migracion.md`](docs/historial-migracion.md) | Cómo se pasó el sitio a un Vercel propio y qué quedó pendiente |
 | [`CLAUDE.md`](CLAUDE.md) | Reglas cortas para agentes de código |
 
 `docs/superpowers/` contiene un spec y un plan de i18n (español/portugués) que
