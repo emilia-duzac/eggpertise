@@ -4,7 +4,7 @@ import {
   getFichaTecnicaUserTemplate,
 } from "@/lib/email-templates";
 import { syncLeadToSpreadsheet } from "@/lib/leads-sheet";
-import { sendEmail } from "@/lib/resend";
+import { mailFrom, sendEmail } from "@/lib/resend";
 
 export async function POST(request: Request) {
   try {
@@ -54,14 +54,14 @@ export async function POST(request: Request) {
     const results = await Promise.allSettled([
       // Notification to admin
       sendEmail({
-        from: "EggPertise <noreply@eggpertise.com>",
+        from: mailFrom(),
         to: [process.env.CONTACT_EMAIL || "info@eggpertise.com"],
         subject: `Nueva solicitud de ficha técnica: ${productoNombre}`,
         html: getFichaTecnicaNotificationTemplate(templateData),
       }),
       // Ficha técnica to user
       sendEmail({
-        from: "EggPertise <noreply@eggpertise.com>",
+        from: mailFrom(),
         to: [email],
         subject: `Ficha Técnica - ${productoNombre}`,
         html: getFichaTecnicaUserTemplate(templateData),

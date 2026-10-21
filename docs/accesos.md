@@ -36,6 +36,7 @@ Regla de oro: **cada servicio tiene al menos 2 administradores con cuenta `@eggp
 | `CONTENTFUL_SPACE_ID`, `CONTENTFUL_DELIVERY_TOKEN` | Contentful → Settings → API keys | Vercel (env vars) + gestor de contraseñas |
 | `RESEND_API_KEY` | Resend → API Keys | Vercel (env vars) + gestor de contraseñas |
 | `CONTACT_EMAIL` | No es secreto | Vercel (env vars) |
+| `MAIL_DOMAIN` (opcional) | No es secreto. Dominio verificado en Resend desde el que se envía | Vercel (env vars) |
 | `LEADS_SHEET_ENDPOINT` | URL `/exec` al desplegar el Apps Script | Vercel (env vars) |
 | `LEADS_SHEET_TOKEN` | Lo inventa quien despliega el script | Vercel (env vars) + dentro del script (`SHARED_SECRET`) |
 
