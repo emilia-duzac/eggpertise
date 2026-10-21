@@ -1,6 +1,6 @@
 # Arquitectura y decisiones
 
-**Última revisión:** 2026-10-20. Esto es lo que no se ve leyendo el código por
+**Última revisión:** 2026-10-21. Esto es lo que no se ve leyendo el código por
 arriba.
 
 ## Flujo de datos
@@ -40,6 +40,15 @@ El remitente es `noreply@eggpertise.com` (dominio verificado en Resend).
 Los destinatarios van a `CONTACT_EMAIL`, o a `info@eggpertise.com` por defecto.
 
 Detalle de los leads y su planilla en [`leads.md`](leads.md).
+
+## Analítica y Tag Manager
+
+- **Google Tag Manager** se carga desde `components/google-tag-manager.tsx`, que está en `app/layout.tsx` (todas las páginas). Solo se activa si `NEXT_PUBLIC_GTM_ID` está definida y tiene forma de ID de GTM (`GTM-XXXX`); sin la variable no carga nada. Se define solo en Production, para que los previews no ensucien las métricas, y se lee al construir: hay que redeployar.
+- **Eventos de los formularios:** cada formulario llama a `trackEvent()` (`lib/gtm.ts`) justo después de `response.ok`, así que solo se avisa cuando el envío salió bien. Deja `{ event: "form_contacto" | "form_ficha_tecnica" | "form_info_tecnica" }` en el `dataLayer`. **Nunca pasar datos personales** (mail, teléfono, nombre): llegarían a terceros.
+- **Qué se hace con esos eventos no está en el código:** los tags (Pixel de Meta, GA4) y sus triggers se arman en la web de GTM. Para sumar un evento hay que agregarlo a `GtmEvent`, llamarlo donde ocurre y armar su trigger en GTM. Las visitas y los clics en WhatsApp los detecta GTM solo, sin código.
+- **GA4 sigue instalado directo** con `gtag` en `app/layout.tsx` (ID `G-LH9L77P6YJ`, agregado el 2026-01-09). Si el contenedor de GTM suma una etiqueta de GA4, **cada visita se cuenta dos veces**: en ese mismo cambio hay que sacar el `gtag` del layout.
+- **Vercel Analytics** (`<Analytics />`) es independiente de lo anterior y no usa cookies.
+- **Cookies:** GA4 (`_ga`) y, cuando se active, el Pixel de Meta se cargan sin pedir consentimiento. No hay banner ni política de privacidad.
 
 ## Emails
 
