@@ -1,17 +1,14 @@
 import {
   contactCard,
   dataTable,
-  icon,
   label,
   link,
   paragraph,
   quote,
   raw,
-  signature,
   title,
 } from "../components";
 import {
-  CLIENT_SIGNATURE,
   clientReplyTo,
   contactDrafts,
   salesContactText,
@@ -47,10 +44,7 @@ export function contactTeamEmail(data: ContactRequest, date: string): EmailMessa
           { label: "Empresa", value: company },
         ],
         [
-          {
-            label: "Email",
-            value: raw(icon("gmail") + link(email, `mailto:${email}`)),
-          },
+          { label: "Email", value: raw(link(email, `mailto:${email}`)) },
           { label: "País", value: country },
         ],
       ]) +
@@ -95,8 +89,7 @@ export function contactClientEmail(data: ContactRequest): EmailMessage {
       title(heading) +
       paragraph(escapeHtml(received)) +
       paragraph(escapeHtml(contactIntro)) +
-      contactCard(contactDrafts.contact(name, company)) +
-      signature(),
+      contactCard(contactDrafts.contact(name, company)),
   });
 
   const text = renderPlainText({
@@ -105,7 +98,6 @@ export function contactClientEmail(data: ContactRequest): EmailMessage {
       received,
       contactIntro,
       salesContactText(),
-      CLIENT_SIGNATURE,
     ],
     footerReason,
   });

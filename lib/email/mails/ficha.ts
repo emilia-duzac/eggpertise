@@ -2,17 +2,15 @@ import {
   button,
   contactCard,
   dataTable,
-  icon,
   label,
   link,
   note,
   paragraph,
   raw,
-  signature,
+  statusNote,
   title,
 } from "../components";
 import {
-  CLIENT_SIGNATURE,
   SALES_CONTACT_INTRO,
   clientReplyTo,
   contactDrafts,
@@ -57,8 +55,7 @@ export function fichaClientEmail(data: FichaRequest): EmailMessage {
         `También podés acceder desde el navegador copiando el enlace: ${link(fichaUrl, fichaUrl)}`
       ) +
       paragraph(SALES_CONTACT_INTRO) +
-      contactCard(contactDrafts.ficha(product.name)) +
-      signature(),
+      contactCard(contactDrafts.ficha(product.name)),
   });
 
   const text = renderPlainText({
@@ -67,7 +64,6 @@ export function fichaClientEmail(data: FichaRequest): EmailMessage {
       `${greeting}\n${fichaUrl}`,
       SALES_CONTACT_INTRO,
       salesContactText(),
-      CLIENT_SIGNATURE,
     ],
     footerReason,
   });
@@ -84,31 +80,30 @@ export function fichaClientEmail(data: FichaRequest): EmailMessage {
 export function fichaTeamEmail(data: FichaRequest, date: string): EmailMessage {
   const { firstName, lastName, email, phone, country, product, fichaName } = data;
   const fullName = `${firstName} ${lastName}`;
-  const heading = "Nueva solicitud de ficha técnica";
+  const heading = `Solicitud de ficha técnica de ${product.name}`;
+  const status = "El cliente ya recibió la ficha por mail.";
   const footerReason = `Aviso automático desde eggpertise.com · ${date}`;
 
   const html = renderEmail({
-    preheader: `${fullName} pidió la ficha de ${product.name}.`,
+    preheader: `${fullName} pidió la ficha de ${product.name}. Ya la recibió.`,
     footerReason,
     internal: true,
     body:
-      label("Aviso interno · Descarga Ficha Técnica") +
+      label("Aviso interno · Ficha enviada") +
       title(heading) +
+      statusNote(`<b>${status}</b>`) +
       dataTable([
+        [
+          { label: "Producto", value: product.name },
+          { label: "Ficha solicitada", value: fichaName },
+        ],
         [
           { label: "Nombre", value: fullName },
           { label: "País", value: country },
         ],
         [
-          {
-            label: "Email",
-            value: raw(icon("gmail") + link(email, `mailto:${email}`)),
-          },
+          { label: "Email", value: raw(link(email, `mailto:${email}`)) },
           { label: "Teléfono", value: phone },
-        ],
-        [
-          { label: "Producto", value: product.name },
-          { label: "Ficha solicitada", value: fichaName },
         ],
       ]),
   });
@@ -116,14 +111,15 @@ export function fichaTeamEmail(data: FichaRequest, date: string): EmailMessage {
   const text = renderPlainText({
     title: heading,
     paragraphs: [
-      `Nombre: ${fullName}\nPaís: ${country}\nEmail: ${email}\nTeléfono: ${phone}\nProducto: ${product.name}\nFicha solicitada: ${fichaName}`,
+      status,
+      `Producto: ${product.name}\nFicha solicitada: ${fichaName}\nNombre: ${fullName}\nPaís: ${country}\nEmail: ${email}\nTeléfono: ${phone}`,
     ],
     footerReason,
     internal: true,
   });
 
   return {
-    subject: `Nueva solicitud de ficha técnica: ${product.name}`,
+    subject: `Ficha enviada: ${product.name} · ${fullName}`.replace(/\s+/g, " "),
     html,
     text,
     replyTo: email,

@@ -1,5 +1,4 @@
 import {
-  CLIENT_SIGNATURE,
   EMAIL_ASSETS_URL,
   SALES_CONTACT,
   mailtoLink,
@@ -62,14 +61,17 @@ export function button(labelText: string, href: string): string {
   );
 }
 
-/** Closing line of the emails that reach the client. */
-export function signature(value = CLIENT_SIGNATURE): string {
-  return `<p style="margin:24px 0 0;font-family:${fontStack};font-size:${fontSizes.signature}px;line-height:1.6;color:${colors.ink};">${escapeHtml(value)}</p>`;
-}
-
 /** What the visitor wrote, set apart with a rule on the left. */
 export function quote(value: string): string {
   return `<div style="margin:0 0 20px;padding:2px 0 2px 16px;border-left:3px solid ${colors.sky};font-family:${fontStack};font-size:${fontSizes.data}px;line-height:1.6;color:${colors.ink};white-space:pre-wrap;">${escapeHtml(value)}</div>`;
+}
+
+/**
+ * Says where a request stands. Work still to do gets the rule in the secondary
+ * blue; something already done gets the light one. Takes markup, like paragraph.
+ */
+export function statusNote(html: string, pending = false): string {
+  return `<div style="margin:0 0 20px;padding:2px 0 2px 16px;border-left:3px solid ${pending ? colors.navy2 : colors.sky};font-family:${fontStack};font-size:${fontSizes.body}px;line-height:1.6;color:${colors.ink};">${html}</div>`;
 }
 
 export type DataCell = { label: string; value: string | Raw };
@@ -103,7 +105,7 @@ export function dataTable(rows: DataCell[][]): string {
 }
 
 /** Icon shown inline before a value. Displayed at 20px, exported at 60px. */
-export function icon(name: "whatsapp" | "gmail"): string {
+function icon(name: "whatsapp" | "gmail"): string {
   return `<img src="${EMAIL_ASSETS_URL}/${name}.png" width="${imageSizes.icon}" height="${imageSizes.icon}" alt="" style="vertical-align:-5px;margin-right:8px;border:0;">`;
 }
 
@@ -126,7 +128,7 @@ export function contactCard(draft: { subject: string; message: string }): string
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;background:${colors.paper};border:1px solid ${colors.line};border-radius:20px;">` +
     `<tr><td style="padding:18px 20px 6px;">` +
     `<div style="font-family:${fontStack};font-weight:900;font-size:17px;color:${colors.navy};">${escapeHtml(SALES_CONTACT.name)}</div>` +
-    `<div style="font-family:${fontStack};font-size:${fontSizes.signature}px;color:${colors.muted};">${escapeHtml(SALES_CONTACT.role)} · EggPertise</div>` +
+    `<div style="font-family:${fontStack};font-size:${fontSizes.secondary}px;color:${colors.muted};">${escapeHtml(SALES_CONTACT.role)} · EggPertise</div>` +
     `</td></tr>` +
     `<tr><td style="padding:8px 20px 0;">${pill({
       icon: "whatsapp",

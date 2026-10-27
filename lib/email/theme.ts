@@ -32,7 +32,7 @@ export const fontSizes = {
   body: 16,
   data: 15,
   note: 13,
-  signature: 14,
+  secondary: 14,
   label: 11,
   footer: 12,
 } as const;

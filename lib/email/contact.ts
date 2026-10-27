@@ -36,12 +36,9 @@ export function clientReplyTo(): string[] {
   return [SALES_CONTACT.email, teamInbox()];
 }
 
-/** Closing line of the emails that reach the client. */
-export const CLIENT_SIGNATURE = "Gracias por tu interés en EggPertise.";
-
 /** Introduces the sales contact in the emails about a product. */
 export const SALES_CONTACT_INTRO =
-  "Si querés más información, tenés dudas técnicas o estás interesado en cotizar, podés contactarte con nuestro responsable de ventas:";
+  "Si querés más información, tenés consultas o estás interesado en cotizar, podés contactarte con nuestro responsable de ventas:";
 
 /** The sales contact as plain text, for the text version of the emails. */
 export function salesContactText(): string {
