@@ -1,9 +1,12 @@
 import { StatusCodes } from "http-status-codes";
 import { NextResponse } from "next/server";
-import { getProductoForForm, type ProductoCompleto } from "./contentful";
+import { getProductoForForm, type ProductoForForm } from "./contentful";
+
+export const PRODUCT_NOT_FOUND = "No encontramos el producto.";
+export const DATASHEET_NOT_FOUND = "No encontramos la ficha técnica de este producto.";
 
 type ProductLookup =
-  | { found: true; producto: ProductoCompleto }
+  | { found: true; producto: ProductoForForm }
   | { found: false; response: NextResponse };
 
 /**

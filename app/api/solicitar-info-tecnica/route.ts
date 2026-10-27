@@ -7,7 +7,7 @@ import {
 } from "@/lib/email/mails/technical-info";
 import { emailProduct } from "@/lib/email/product";
 import { sendClientConfirmation, sendTeamEmail } from "@/lib/email/send";
-import { findProductForForm } from "@/lib/form-product";
+import { PRODUCT_NOT_FOUND, findProductForForm } from "@/lib/form-product";
 import { syncLeadToSpreadsheet } from "@/lib/leads-sheet";
 import { parseFormBody, technicalInfoSchema } from "@/lib/validation";
 
@@ -21,10 +21,7 @@ export async function POST(request: Request) {
 
     // The product comes from Contentful, never from the request: the form only
     // says which product it is.
-    const lookup = await findProductForForm(
-      productoSlug,
-      "No encontramos el producto. Por favor intente nuevamente."
-    );
+    const lookup = await findProductForForm(productoSlug, PRODUCT_NOT_FOUND);
     if (!lookup.found) {
       return lookup.response;
     }

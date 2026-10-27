@@ -14,11 +14,15 @@ const MAX_LENGTH = {
   slug: 200,
 } as const;
 
+export const ERROR_REQUIRED = "Todos los campos son requeridos";
+export const ERROR_INVALID_EMAIL = "El email no es válido";
+export const ERROR_TOO_LONG = "Alguno de los campos supera el largo permitido";
+
 const text = (max: number) => z.string().trim().min(1).max(max);
 
 // zod's email check rejects spaces, commas and angle brackets, so a value like
 // "a@b.com,victim@x.com" cannot turn the form into a mail relay.
-const email = z.string().trim().max(MAX_LENGTH.email).email();
+const email = z.string().trim().min(1).max(MAX_LENGTH.email).email();
 
 export const contactSchema = z.object({
   nombre: text(MAX_LENGTH.name),
@@ -54,8 +58,8 @@ const badRequest = (error: string) =>
 
 /**
  * Reads and validates the JSON body of a form. On failure it returns the 400
- * response to send back: a missing or mistyped field is "required", a bad
- * address is "not valid" and an oversized field is "too long".
+ * response to send back: a missing, empty or mistyped field is "required", an
+ * oversized one is "too long" and a bad address is "not valid".
  */
 export async function parseFormBody<T extends z.ZodTypeAny>(
   request: Request,
@@ -65,7 +69,7 @@ export async function parseFormBody<T extends z.ZodTypeAny>(
   try {
     body = await request.json();
   } catch {
-    return { success: false, response: badRequest("Todos los campos son requeridos") };
+    return { success: false, response: badRequest(ERROR_REQUIRED) };
   }
 
   const result = schema.safeParse(body);
@@ -73,17 +77,14 @@ export async function parseFormBody<T extends z.ZodTypeAny>(
     return { success: true, data: result.data };
   }
 
-  const { issues } = result.error;
-  const badEmail = issues.some(
-    (issue) => issue.path[0] === "email" && issue.code === "invalid_string"
-  );
-  const tooLong = issues.some((issue) => issue.code === "too_big");
-
-  let error = "Todos los campos son requeridos";
-  if (badEmail) {
-    error = "El email no es válido";
-  } else if (tooLong) {
-    error = "Alguno de los campos supera el largo permitido";
+  // A field can break several rules at once (an empty email is also not an
+  // email): the most basic problem is the one worth reporting.
+  const codes = result.error.issues.map((issue) => issue.code);
+  let error = ERROR_INVALID_EMAIL;
+  if (codes.includes("invalid_type") || codes.includes("too_small")) {
+    error = ERROR_REQUIRED;
+  } else if (codes.includes("too_big")) {
+    error = ERROR_TOO_LONG;
   }
   return { success: false, response: badRequest(error) };
 }

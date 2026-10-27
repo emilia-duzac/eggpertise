@@ -1,11 +1,12 @@
 import { StatusCodes } from "http-status-codes";
 import { NextResponse } from "next/server";
+import { DEFAULT_DATASHEET_TITLE } from "@/lib/contentful";
 import { notificationDate } from "@/lib/email/date";
 import { toSafeUrl } from "@/lib/email/escape";
 import { fichaClientEmail, fichaTeamEmail } from "@/lib/email/mails/ficha";
 import { emailProduct } from "@/lib/email/product";
 import { sendClientEmail, sendTeamEmail } from "@/lib/email/send";
-import { findProductForForm } from "@/lib/form-product";
+import { DATASHEET_NOT_FOUND, findProductForForm } from "@/lib/form-product";
 import { syncLeadToSpreadsheet } from "@/lib/leads-sheet";
 import { fichaSchema, parseFormBody } from "@/lib/validation";
 
@@ -19,10 +20,7 @@ export async function POST(request: Request) {
 
     // The product, its datasheet and its supplier come from Contentful, never
     // from the request: the form only says which product it is.
-    const lookup = await findProductForForm(
-      productoSlug,
-      "No encontramos la ficha técnica de este producto. Por favor intente nuevamente."
-    );
+    const lookup = await findProductForForm(productoSlug, DATASHEET_NOT_FOUND);
     if (!lookup.found) {
       return lookup.response;
     }
@@ -30,7 +28,7 @@ export async function POST(request: Request) {
 
     if (!producto.ficha_tecnica) {
       return NextResponse.json(
-        { error: "No encontramos la ficha técnica de este producto. Por favor intente nuevamente." },
+        { error: DATASHEET_NOT_FOUND },
         { status: StatusCodes.NOT_FOUND }
       );
     }
@@ -43,7 +41,7 @@ export async function POST(request: Request) {
       phone: telefono,
       country: pais,
       product,
-      fichaName: producto.ficha_tecnica.title || "Ficha Técnica",
+      fichaName: producto.ficha_tecnica.title || DEFAULT_DATASHEET_TITLE,
       fichaUrl: toSafeUrl(producto.ficha_tecnica.url),
     };
 

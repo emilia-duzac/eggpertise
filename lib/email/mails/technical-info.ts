@@ -9,12 +9,14 @@ import {
   title,
 } from "../components";
 import {
+  CONFIRMATION_PREHEADER,
+  RESPONSE_PROMISE,
   SALES_CONTACT_INTRO,
   clientReplyTo,
   contactDrafts,
   salesContactText,
 } from "../contact";
-import { escapeHtml } from "../escape";
+import { escapeHtml, singleLine } from "../escape";
 import { renderEmail, renderPlainText } from "../layout";
 import { sealFor, type EmailMessage, type ProductContext } from "../types";
 
@@ -71,7 +73,7 @@ export function technicalInfoTeamEmail(
   });
 
   return {
-    subject: `Responder: info técnica de ${productName} · ${company}`.replace(/\s+/g, " "),
+    subject: singleLine(`Responder: info técnica de ${productName} · ${company}`),
     html,
     text,
     replyTo: email,
@@ -89,14 +91,14 @@ export function technicalInfoClientEmail(data: {
     "Recibiste este mail porque pediste información técnica en eggpertise.com.";
 
   const html = renderEmail({
-    preheader: "Nuestro equipo se contactará a la brevedad.",
+    preheader: CONFIRMATION_PREHEADER,
     footerReason,
     seal: sealFor(product),
     body:
       label("Información técnica") +
       title(heading) +
       paragraph(
-        `Gracias por escribirnos. Nuestro equipo ya recibió tu pedido sobre <b>${escapeHtml(product.name)}</b> y se estará contactando a la brevedad.`
+        `Gracias por escribirnos. Nuestro equipo ya recibió tu pedido sobre <b>${escapeHtml(product.name)}</b> y ${RESPONSE_PROMISE}`
       ) +
       paragraph(SALES_CONTACT_INTRO) +
       contactCard(contactDrafts.technicalInfo(product.name, company)),
@@ -105,7 +107,7 @@ export function technicalInfoClientEmail(data: {
   const text = renderPlainText({
     title: heading,
     paragraphs: [
-      `Gracias por escribirnos. Nuestro equipo ya recibió tu pedido sobre ${product.name} y se estará contactando a la brevedad.`,
+      `Gracias por escribirnos. Nuestro equipo ya recibió tu pedido sobre ${product.name} y ${RESPONSE_PROMISE}`,
       SALES_CONTACT_INTRO,
       salesContactText(),
     ],
@@ -113,7 +115,7 @@ export function technicalInfoClientEmail(data: {
   });
 
   return {
-    subject: `Recibimos tu pedido de información sobre ${product.name}`.replace(/\s+/g, " "),
+    subject: singleLine(`Recibimos tu pedido de información sobre ${product.name}`),
     html,
     text,
     replyTo: clientReplyTo(),

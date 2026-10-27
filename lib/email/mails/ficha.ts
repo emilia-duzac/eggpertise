@@ -16,7 +16,7 @@ import {
   contactDrafts,
   salesContactText,
 } from "../contact";
-import { escapeHtml } from "../escape";
+import { escapeHtml, singleLine } from "../escape";
 import { renderEmail, renderPlainText } from "../layout";
 import { sealFor, type EmailMessage, type ProductContext } from "../types";
 
@@ -119,7 +119,7 @@ export function fichaTeamEmail(data: FichaRequest, date: string): EmailMessage {
   });
 
   return {
-    subject: `Ficha enviada: ${product.name} · ${fullName}`.replace(/\s+/g, " "),
+    subject: singleLine(`Ficha enviada: ${product.name} · ${fullName}`),
     html,
     text,
     replyTo: email,

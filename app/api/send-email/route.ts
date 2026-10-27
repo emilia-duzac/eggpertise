@@ -1,5 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { NextResponse } from "next/server";
+import { CONTACT_FORM_SENDER } from "@/lib/email/contact";
 import { notificationDate } from "@/lib/email/date";
 import { contactClientEmail, contactTeamEmail } from "@/lib/email/mails/contact";
 import { sendClientConfirmation, sendTeamEmail } from "@/lib/email/send";
@@ -27,7 +28,7 @@ export async function POST(request: Request) {
     const contactRequest = { name: nombre, email, company: empresa, country: pais, message: mensaje };
     const data = await sendTeamEmail(
       contactTeamEmail(contactRequest, notificationDate()),
-      "EggPertise Contact Form"
+      CONTACT_FORM_SENDER
     );
 
     // Only after the team has been notified, so we never promise a reply that

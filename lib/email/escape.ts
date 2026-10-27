@@ -22,7 +22,7 @@ export function escapeHtml(value: string): string {
  */
 export function safeHref(url: string): string {
   const value = url.trim();
-  const absolute = value.startsWith("//") ? `https:${value}` : value;
+  const absolute = withScheme(value);
 
   if (/^(https?:|mailto:)/i.test(absolute)) {
     return escapeHtml(absolute);
@@ -39,10 +39,21 @@ export function safeHref(url: string): string {
  * `%2520`) and break the download.
  */
 export function toSafeUrl(url: string): string {
+  const absolute = withScheme(url.trim());
   try {
-    return encodeURI(decodeURI(url));
+    return encodeURI(decodeURI(absolute));
   } catch {
     // Malformed escape sequence: leave it for safeHref to judge.
-    return url;
+    return absolute;
   }
+}
+
+/** A protocol-relative URL (`//host/path`) is taken as https. */
+function withScheme(url: string): string {
+  return url.startsWith("//") ? `https:${url}` : url;
+}
+
+/** Collapses line breaks and repeated spaces: a subject must be one line. */
+export function singleLine(value: string): string {
+  return value.replace(/\s+/g, " ").trim();
 }

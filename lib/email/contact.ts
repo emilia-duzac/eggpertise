@@ -36,6 +36,17 @@ export function clientReplyTo(): string[] {
   return [SALES_CONTACT.email, teamInbox()];
 }
 
+/** Name shown as the sender of the team's contact form notifications. */
+export const CONTACT_FORM_SENDER = "EggPertise Contact Form";
+
+/**
+ * Ends the confirmation emails. No response time is promised because none has
+ * been agreed.
+ */
+export const RESPONSE_PROMISE = "se estará contactando a la brevedad.";
+
+export const CONFIRMATION_PREHEADER = `Nuestro equipo ${RESPONSE_PROMISE}`;
+
 /** Introduces the sales contact in the emails about a product. */
 export const SALES_CONTACT_INTRO =
   "Si querés más información, tenés consultas o estás interesado en cotizar, podés contactarte con nuestro responsable de ventas:";

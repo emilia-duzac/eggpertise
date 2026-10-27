@@ -9,11 +9,13 @@ import {
   title,
 } from "../components";
 import {
+  CONFIRMATION_PREHEADER,
+  RESPONSE_PROMISE,
   clientReplyTo,
   contactDrafts,
   salesContactText,
 } from "../contact";
-import { escapeHtml } from "../escape";
+import { escapeHtml, singleLine } from "../escape";
 import { renderEmail, renderPlainText } from "../layout";
 import type { EmailMessage } from "../types";
 
@@ -64,7 +66,7 @@ export function contactTeamEmail(data: ContactRequest, date: string): EmailMessa
 
   return {
     // A visitor-controlled name must not break the header with a line break.
-    subject: `Nueva consulta de ${name} - ${company}`.replace(/\s+/g, " "),
+    subject: singleLine(`Nueva consulta de ${name} - ${company}`),
     html,
     text,
     replyTo: email,
@@ -75,14 +77,14 @@ export function contactTeamEmail(data: ContactRequest, date: string): EmailMessa
 export function contactClientEmail(data: ContactRequest): EmailMessage {
   const { name, company } = data;
   const heading = "Recibimos tu consulta";
-  const received = `Hola ${name}, gracias por escribirnos. Nuestro equipo ya la recibió y se estará contactando a la brevedad.`;
+  const received = `Hola ${name}, gracias por escribirnos. Nuestro equipo ya la recibió y ${RESPONSE_PROMISE}`;
   const contactIntro =
     "Si es urgente o querés sumar información, podés contactarte directamente con nuestro responsable de ventas:";
   const footerReason =
     "Recibiste este mail porque nos escribiste desde eggpertise.com.";
 
   const html = renderEmail({
-    preheader: "Nuestro equipo se contactará a la brevedad.",
+    preheader: CONFIRMATION_PREHEADER,
     footerReason,
     body:
       label("Consulta recibida") +
@@ -103,7 +105,7 @@ export function contactClientEmail(data: ContactRequest): EmailMessage {
   });
 
   return {
-    subject: `Recibimos tu consulta, ${name}`.replace(/\s+/g, " "),
+    subject: singleLine(`Recibimos tu consulta, ${name}`),
     html,
     text,
     replyTo: clientReplyTo(),

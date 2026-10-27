@@ -1,4 +1,4 @@
-import type { ProductoCompleto } from "../contentful";
+import type { ProductoForForm } from "../contentful";
 import type { ProductContext } from "./types";
 
 // Manufacturers that are EggPertise's own line. Slugs are generated from the
@@ -21,7 +21,7 @@ function asEmailImage(url: string): string {
  * What the emails need to know about a product, taken from Contentful on the
  * server. It is never read from the request: the form only says which product.
  */
-export function emailProduct(producto: ProductoCompleto): ProductContext {
+export function emailProduct(producto: ProductoForForm): ProductContext {
   const { fabricante } = producto;
   const isOwnLine =
     !!fabricante && COMPOSTAJE_MANUFACTURERS.includes(fabricante.slug);

@@ -70,18 +70,18 @@ export function renderEmail(options: EmailOptions): string {
 <meta name="x-apple-disable-message-reformatting">
 <title>${COMPANY.name}</title>
 <style>
-  @media (max-width: 480px) {
+  @media (max-width: ${layout.mobileBreakpoint}px) {
     .card { padding: ${layout.cardPaddingMobile}px !important; }
-    .outer { padding: 24px 12px !important; }
+    .outer { padding: ${layout.pagePaddingMobile} !important; }
   }
 </style>
 </head>
 <body style="margin:0;padding:0;background:${colors.paper};">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;">${escapeHtml(preheader)}${"&#8204;&nbsp;".repeat(PREHEADER_PADDING_REPEATS)}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${colors.paper};"><tr><td align="center" class="outer" style="padding:24px 20px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${colors.paper};"><tr><td align="center" class="outer" style="padding:${layout.pagePadding};">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:${layout.maxWidth}px;">
     <tr><td style="padding:0 0 14px 0;">${image(`${EMAIL_ASSETS_URL}/logo.png`, COMPANY.name, imageSizes.logo)}</td></tr>
-    <tr><td style="height:3px;background:${colors.navy};font-size:0;line-height:0;">&nbsp;</td></tr>
+    <tr><td style="height:${layout.ruleHeight}px;background:${colors.navy};font-size:0;line-height:0;">&nbsp;</td></tr>
     <tr><td class="card" style="background:${colors.white};border:1px solid ${colors.line};border-top:0;padding:${layout.cardPadding}px;">${body}${seal ? sealHtml(seal) : ""}</td></tr>
     <tr><td style="padding:16px 0 0;font-family:${fontStack};font-size:${fontSizes.footer}px;line-height:1.6;color:${colors.muted};">${footer}</td></tr>
   </table>

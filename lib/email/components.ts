@@ -1,11 +1,21 @@
 import {
+  COMPANY,
   EMAIL_ASSETS_URL,
   SALES_CONTACT,
   mailtoLink,
   whatsappLink,
 } from "./contact";
 import { escapeHtml, safeHref } from "./escape";
-import { colors, fontSizes, fontStack, imageSizes, pill as pillSize } from "./theme";
+import {
+  buttonSize,
+  colors,
+  fontSizes,
+  fontStack,
+  imageSizes,
+  layout,
+  pill as pillSize,
+  radius,
+} from "./theme";
 
 /**
  * Building blocks for the emails. Every function returns an HTML string with
@@ -35,7 +45,7 @@ export function label(value: string): string {
 export function title(value: string): string {
   return (
     `<h1 style="margin:0 0 12px;font-family:${fontStack};font-weight:900;font-size:${fontSizes.title}px;line-height:1.2;letter-spacing:-0.02em;color:${colors.navy};">${escapeHtml(value)}</h1>` +
-    `<div style="width:76px;height:4px;background:${colors.sky};margin:0 0 20px;font-size:0;line-height:0;">&nbsp;</div>`
+    `<div style="width:${layout.signalBar.width}px;height:${layout.signalBar.height}px;background:${colors.sky};margin:0 0 20px;font-size:0;line-height:0;">&nbsp;</div>`
   );
 }
 
@@ -55,8 +65,8 @@ export function link(value: string | Raw, href: string): string {
 export function button(labelText: string, href: string): string {
   return (
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 20px;"><tr>` +
-    `<td align="center" style="background:${colors.navy};border-radius:999px;">` +
-    `<a href="${safeHref(href)}" target="_blank" rel="noopener" style="display:block;padding:14px 30px;border-radius:999px;font-family:${fontStack};font-weight:700;font-size:${fontSizes.body}px;text-align:center;color:${colors.white};text-decoration:none;">${escapeHtml(labelText)}</a>` +
+    `<td align="center" style="background:${colors.navy};border-radius:${radius.pill}px;">` +
+    `<a href="${safeHref(href)}" target="_blank" rel="noopener" style="display:block;padding:${buttonSize.paddingY}px ${buttonSize.paddingX}px;border-radius:${radius.pill}px;font-family:${fontStack};font-weight:700;font-size:${fontSizes.body}px;text-align:center;color:${colors.white};text-decoration:none;">${escapeHtml(labelText)}</a>` +
     `</td></tr></table>`
   );
 }
@@ -116,7 +126,7 @@ function pill(options: {
   background: string;
   border: string;
 }): string {
-  return `<a href="${safeHref(options.href)}" target="_blank" rel="noopener" style="display:inline-block;box-sizing:border-box;min-width:${pillSize.minWidth}px;text-decoration:none;white-space:nowrap;background:${options.background};border:1.5px solid ${options.border};border-radius:999px;padding:7px 18px 7px 12px;font-family:${fontStack};font-weight:700;font-size:${pillSize.fontSize}px;line-height:22px;color:${colors.navy2};">${icon(options.icon)}${escapeHtml(options.text)}</a>`;
+  return `<a href="${safeHref(options.href)}" target="_blank" rel="noopener" style="display:inline-block;box-sizing:border-box;min-width:${pillSize.minWidth}px;text-decoration:none;white-space:nowrap;background:${options.background};border:${pillSize.borderWidth}px solid ${options.border};border-radius:${radius.pill}px;padding:${pillSize.padding};font-family:${fontStack};font-weight:700;font-size:${pillSize.fontSize}px;line-height:${pillSize.lineHeight}px;color:${colors.navy2};">${icon(options.icon)}${escapeHtml(options.text)}</a>`;
 }
 
 /**
@@ -125,10 +135,10 @@ function pill(options: {
  */
 export function contactCard(draft: { subject: string; message: string }): string {
   return (
-    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;background:${colors.paper};border:1px solid ${colors.line};border-radius:20px;">` +
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;background:${colors.paper};border:1px solid ${colors.line};border-radius:${radius.card}px;">` +
     `<tr><td style="padding:18px 20px 6px;">` +
-    `<div style="font-family:${fontStack};font-weight:900;font-size:17px;color:${colors.navy};">${escapeHtml(SALES_CONTACT.name)}</div>` +
-    `<div style="font-family:${fontStack};font-size:${fontSizes.secondary}px;color:${colors.muted};">${escapeHtml(SALES_CONTACT.role)} · EggPertise</div>` +
+    `<div style="font-family:${fontStack};font-weight:900;font-size:${fontSizes.contactName}px;color:${colors.navy};">${escapeHtml(SALES_CONTACT.name)}</div>` +
+    `<div style="font-family:${fontStack};font-size:${fontSizes.secondary}px;color:${colors.muted};">${escapeHtml(SALES_CONTACT.role)} · ${COMPANY.name}</div>` +
     `</td></tr>` +
     `<tr><td style="padding:8px 20px 0;">${pill({
       icon: "whatsapp",

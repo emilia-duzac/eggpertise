@@ -33,6 +33,7 @@ export const fontSizes = {
   data: 15,
   note: 13,
   secondary: 14,
+  contactName: 17,
   label: 11,
   footer: 12,
 } as const;
@@ -43,6 +44,23 @@ export const layout = {
   logoHeight: 42,
   cardPadding: 32,
   cardPaddingMobile: 20,
+  pagePadding: "24px 20px",
+  pagePaddingMobile: "24px 12px",
+  mobileBreakpoint: 480, // px: below this width the mobile paddings apply
+  ruleHeight: 3, // the rule under the logo
+  signalBar: { width: 76, height: 4 }, // the bar under the title
+} as const;
+
+// Corner radii: the Brand Book's closed scale.
+export const radius = {
+  pill: 999,
+  card: 20,
+} as const;
+
+// The call to action button.
+export const buttonSize = {
+  paddingY: 14,
+  paddingX: 30,
 } as const;
 
 /**
@@ -61,6 +79,9 @@ export const imageSizes = {
 export const pill = {
   minWidth: 268,
   fontSize: 14,
+  lineHeight: 22,
+  borderWidth: 1.5,
+  padding: "7px 18px 7px 12px",
 } as const;
 
 // Invisible characters after the preheader, so the mail client does not
