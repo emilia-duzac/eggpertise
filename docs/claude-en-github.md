@@ -19,7 +19,6 @@ Dos workflows en `.github/workflows/` permiten usar Claude desde los PR y los is
 
 ## Cosas no obvias
 
-- **`@claude` solo funciona cuando el workflow está en `main`.** Los eventos de comentarios (`issue_comment` y similares) usan el workflow de la rama por defecto, que acá es `main`. Hasta que esto llegue a `main`, mencionar a Claude en un PR no hace nada. La revisión automática, en cambio, corre desde el propio PR.
 - **El repo es público.** Los PR de forks no reciben secretos, por eso la revisión los saltea. `@claude` solo responde a quienes tienen permiso de escritura.
 - **Cada ejecución consume el plan de la cuenta de Claude del token**, y la revisión corre en cada push al PR. Si hace falta gastar menos, quitar `synchronize` de `types:` en `claude-code-review.yml`.
 - **Claude lee el `CLAUDE.md` del repo** y sigue sus reglas (no tocar `ignoreBuildErrors`, ramas y PR a `develop`, etc.).
