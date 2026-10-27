@@ -1,6 +1,13 @@
 import { COMPANY, EMAIL_ASSETS_URL } from "./contact";
 import { escapeHtml, safeHref } from "./escape";
-import { colors, fontSizes, fontStack, layout } from "./theme";
+import {
+  PREHEADER_PADDING_REPEATS,
+  colors,
+  fontSizes,
+  fontStack,
+  imageSizes,
+  layout,
+} from "./theme";
 
 /**
  * Seal at the bottom right of the product emails.
@@ -23,11 +30,6 @@ export interface EmailOptions {
   internal?: boolean;
 }
 
-// Sizes of the PNGs in public/brand/email, shown at a third of their pixels.
-const LOGO = { width: 109, height: layout.logoHeight };
-const SEAL_LOGO = { width: 78, height: 30 };
-const COMPOSTAJE_LOGO = { width: 93, height: 40 };
-
 const image = (
   src: string,
   alt: string,
@@ -38,11 +40,11 @@ const image = (
 function sealHtml(seal: Seal): string {
   const cells =
     seal.kind === "compostaje"
-      ? `<td valign="middle">${image(`${EMAIL_ASSETS_URL}/compostaje.png`, "EggPertise Compostaje", COMPOSTAJE_LOGO)}</td>`
-      : `<td valign="middle" style="padding-right:14px;">${image(`${EMAIL_ASSETS_URL}/logo.png`, "EggPertise", SEAL_LOGO)}</td>` +
+      ? `<td valign="middle">${image(`${EMAIL_ASSETS_URL}/compostaje.png`, "EggPertise Compostaje", imageSizes.compostajeLogo)}</td>`
+      : `<td valign="middle" style="padding-right:14px;">${image(`${EMAIL_ASSETS_URL}/logo.png`, "EggPertise", imageSizes.sealLogo)}</td>` +
         `<td valign="middle" style="border-left:1px solid ${colors.line};padding-left:14px;">` +
         // The supplier's logo has an unknown ratio: fix the width only.
-        `<img src="${safeHref(seal.logoUrl)}" alt="${escapeHtml(seal.name)}" width="96" style="display:block;border:0;width:96px;height:auto;">` +
+        `<img src="${safeHref(seal.logoUrl)}" alt="${escapeHtml(seal.name)}" width="${imageSizes.supplierLogoWidth}" style="display:block;border:0;width:${imageSizes.supplierLogoWidth}px;height:auto;">` +
         `</td>`;
 
   return (
@@ -75,10 +77,10 @@ export function renderEmail(options: EmailOptions): string {
 </style>
 </head>
 <body style="margin:0;padding:0;background:${colors.paper};">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;">${escapeHtml(preheader)}${"&#8204;&nbsp;".repeat(60)}</div>
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;">${escapeHtml(preheader)}${"&#8204;&nbsp;".repeat(PREHEADER_PADDING_REPEATS)}</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${colors.paper};"><tr><td align="center" class="outer" style="padding:24px 20px;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:${layout.maxWidth}px;">
-    <tr><td style="padding:0 0 14px 0;">${image(`${EMAIL_ASSETS_URL}/logo.png`, COMPANY.name, LOGO)}</td></tr>
+    <tr><td style="padding:0 0 14px 0;">${image(`${EMAIL_ASSETS_URL}/logo.png`, COMPANY.name, imageSizes.logo)}</td></tr>
     <tr><td style="height:3px;background:${colors.navy};font-size:0;line-height:0;">&nbsp;</td></tr>
     <tr><td class="card" style="background:${colors.white};border:1px solid ${colors.line};border-top:0;padding:${layout.cardPadding}px;">${body}${seal ? sealHtml(seal) : ""}</td></tr>
     <tr><td style="padding:16px 0 0;font-family:${fontStack};font-size:${fontSizes.footer}px;line-height:1.6;color:${colors.muted};">${footer}</td></tr>

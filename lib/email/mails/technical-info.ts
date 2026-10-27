@@ -10,9 +10,11 @@ import {
   title,
 } from "../components";
 import {
-  SALES_CONTACT,
+  CLIENT_SIGNATURE,
+  SALES_CONTACT_INTRO,
   clientReplyTo,
   contactDrafts,
+  salesContactText,
 } from "../contact";
 import { escapeHtml } from "../escape";
 import { renderEmail, renderPlainText } from "../layout";
@@ -23,7 +25,7 @@ export interface TechnicalInfoRequest {
   phone: string;
   country: string;
   company: string;
-  product: string;
+  productName: string;
 }
 
 /**
@@ -34,19 +36,19 @@ export function technicalInfoTeamEmail(
   data: TechnicalInfoRequest,
   date: string
 ): EmailMessage {
-  const { email, phone, country, company, product } = data;
+  const { email, phone, country, company, productName } = data;
   const heading = "Nueva solicitud de información técnica";
   const footerReason = `Aviso automático desde el modal de producto de eggpertise.com · ${date}`;
 
   const html = renderEmail({
-    preheader: `${company} pidió información sobre ${product}.`,
+    preheader: `${company} pidió información sobre ${productName}.`,
     footerReason,
     internal: true,
     body:
       label("Aviso interno · Solicitud Info Técnica") +
       title(heading) +
       dataTable([
-        [{ label: "Producto", value: product }],
+        [{ label: "Producto", value: productName }],
         [
           { label: "Empresa", value: company },
           { label: "País", value: country },
@@ -64,14 +66,14 @@ export function technicalInfoTeamEmail(
   const text = renderPlainText({
     title: heading,
     paragraphs: [
-      `Producto: ${product}\nEmpresa: ${company}\nPaís: ${country}\nEmail: ${email}\nTeléfono: ${phone}`,
+      `Producto: ${productName}\nEmpresa: ${company}\nPaís: ${country}\nEmail: ${email}\nTeléfono: ${phone}`,
     ],
     footerReason,
     internal: true,
   });
 
   return {
-    subject: `Nueva solicitud de información técnica: ${product}`.replace(/\s+/g, " "),
+    subject: `Nueva solicitud de información técnica: ${productName}`.replace(/\s+/g, " "),
     html,
     text,
     replyTo: email,
@@ -85,8 +87,6 @@ export function technicalInfoClientEmail(data: {
 }): EmailMessage {
   const { company, product } = data;
   const heading = "Recibimos tu pedido de información técnica";
-  const contactIntro =
-    "Si querés más información, tenés dudas técnicas o estás interesado en cotizar, podés contactarte con nuestro responsable de ventas:";
   const footerReason =
     "Recibiste este mail porque pediste información técnica en eggpertise.com.";
 
@@ -100,7 +100,7 @@ export function technicalInfoClientEmail(data: {
       paragraph(
         `Gracias por escribirnos. Nuestro equipo ya recibió tu pedido sobre <b>${escapeHtml(product.name)}</b> y se estará contactando a la brevedad.`
       ) +
-      paragraph(escapeHtml(contactIntro)) +
+      paragraph(SALES_CONTACT_INTRO) +
       contactCard(contactDrafts.technicalInfo(product.name, company)) +
       signature(),
   });
@@ -109,9 +109,9 @@ export function technicalInfoClientEmail(data: {
     title: heading,
     paragraphs: [
       `Gracias por escribirnos. Nuestro equipo ya recibió tu pedido sobre ${product.name} y se estará contactando a la brevedad.`,
-      contactIntro,
-      `${SALES_CONTACT.name} · ${SALES_CONTACT.role}\nWhatsApp: ${SALES_CONTACT.phone}\nEmail: ${SALES_CONTACT.email}`,
-      "Gracias por tu interés en EggPertise.",
+      SALES_CONTACT_INTRO,
+      salesContactText(),
+      CLIENT_SIGNATURE,
     ],
     footerReason,
   });

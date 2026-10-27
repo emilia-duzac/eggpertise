@@ -11,7 +11,13 @@ import {
   signature,
   title,
 } from "../components";
-import { SALES_CONTACT, clientReplyTo, contactDrafts } from "../contact";
+import {
+  CLIENT_SIGNATURE,
+  SALES_CONTACT_INTRO,
+  clientReplyTo,
+  contactDrafts,
+  salesContactText,
+} from "../contact";
 import { escapeHtml } from "../escape";
 import { renderEmail, renderPlainText } from "../layout";
 import { sealFor, type EmailMessage, type ProductContext } from "../types";
@@ -32,8 +38,6 @@ export interface FichaRequest {
 export function fichaClientEmail(data: FichaRequest): EmailMessage {
   const { firstName, product, fichaUrl } = data;
   const heading = `Hola ${firstName}, esta es la ficha técnica que solicitaste`;
-  const contactIntro =
-    "Si querés más información, tenés dudas técnicas o estás interesado en cotizar, podés contactarte con nuestro responsable de ventas:";
   const footerReason =
     "Recibiste este mail porque pediste una ficha técnica en eggpertise.com.";
   const preheader =
@@ -51,7 +55,7 @@ export function fichaClientEmail(data: FichaRequest): EmailMessage {
       note(
         `También podés acceder desde el navegador copiando el enlace: ${link(fichaUrl, fichaUrl)}`
       ) +
-      paragraph(contactIntro) +
+      paragraph(SALES_CONTACT_INTRO) +
       contactCard(contactDrafts.ficha(product.name)) +
       signature(),
   });
@@ -60,9 +64,9 @@ export function fichaClientEmail(data: FichaRequest): EmailMessage {
     title: heading,
     paragraphs: [
       `Gracias por tu interés en ${product.name}. Descargá la ficha técnica acá: ${fichaUrl}`,
-      contactIntro,
-      `${SALES_CONTACT.name} · ${SALES_CONTACT.role}\nWhatsApp: ${SALES_CONTACT.phone}\nEmail: ${SALES_CONTACT.email}`,
-      "Gracias por tu interés en EggPertise.",
+      SALES_CONTACT_INTRO,
+      salesContactText(),
+      CLIENT_SIGNATURE,
     ],
     footerReason,
   });

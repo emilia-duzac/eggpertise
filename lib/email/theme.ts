@@ -44,3 +44,25 @@ export const layout = {
   cardPadding: 32,
   cardPaddingMobile: 20,
 } as const;
+
+/**
+ * Sizes at which the images are shown, in px. The PNGs in public/brand/email
+ * are exported at three times these values (see scripts/build-email-assets.cjs).
+ */
+export const imageSizes = {
+  logo: { width: 109, height: layout.logoHeight },
+  sealLogo: { width: 78, height: 30 },
+  compostajeLogo: { width: 93, height: 40 },
+  supplierLogoWidth: 96, // the supplier's ratio is unknown: only the width is fixed
+  icon: 20,
+} as const;
+
+// Pill buttons of the contact card.
+export const pill = {
+  minWidth: 268,
+  fontSize: 14,
+} as const;
+
+// Invisible characters after the preheader, so the mail client does not
+// continue it with the first words of the body.
+export const PREHEADER_PADDING_REPEATS = 60;

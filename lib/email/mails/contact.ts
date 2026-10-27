@@ -11,9 +11,10 @@ import {
   title,
 } from "../components";
 import {
-  SALES_CONTACT,
+  CLIENT_SIGNATURE,
   clientReplyTo,
   contactDrafts,
+  salesContactText,
 } from "../contact";
 import { escapeHtml } from "../escape";
 import { renderEmail, renderPlainText } from "../layout";
@@ -104,8 +105,8 @@ export function contactClientEmail(data: ContactRequest): EmailMessage {
     paragraphs: [
       received,
       contactIntro,
-      `${SALES_CONTACT.name} · ${SALES_CONTACT.role}\nWhatsApp: ${SALES_CONTACT.phone}\nEmail: ${SALES_CONTACT.email}`,
-      "Gracias por tu interés en EggPertise.",
+      salesContactText(),
+      CLIENT_SIGNATURE,
     ],
     footerReason,
   });

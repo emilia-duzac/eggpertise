@@ -1,11 +1,12 @@
 import {
+  CLIENT_SIGNATURE,
   EMAIL_ASSETS_URL,
   SALES_CONTACT,
   mailtoLink,
   whatsappLink,
 } from "./contact";
 import { escapeHtml, safeHref } from "./escape";
-import { colors, fontSizes, fontStack } from "./theme";
+import { colors, fontSizes, fontStack, imageSizes, pill as pillSize } from "./theme";
 
 /**
  * Building blocks for the emails. Every function returns an HTML string with
@@ -62,7 +63,7 @@ export function button(labelText: string, href: string): string {
 }
 
 /** Closing line of the emails that reach the client. */
-export function signature(value = "Gracias por tu interés en EggPertise."): string {
+export function signature(value = CLIENT_SIGNATURE): string {
   return `<p style="margin:24px 0 0;font-family:${fontStack};font-size:${fontSizes.signature}px;line-height:1.6;color:${colors.ink};">${escapeHtml(value)}</p>`;
 }
 
@@ -103,7 +104,7 @@ export function dataTable(rows: DataCell[][]): string {
 
 /** Icon shown inline before a value. Displayed at 20px, exported at 60px. */
 export function icon(name: "whatsapp" | "gmail"): string {
-  return `<img src="${EMAIL_ASSETS_URL}/${name}.png" width="20" height="20" alt="" style="vertical-align:-5px;margin-right:8px;border:0;">`;
+  return `<img src="${EMAIL_ASSETS_URL}/${name}.png" width="${imageSizes.icon}" height="${imageSizes.icon}" alt="" style="vertical-align:-5px;margin-right:8px;border:0;">`;
 }
 
 function pill(options: {
@@ -113,7 +114,7 @@ function pill(options: {
   background: string;
   border: string;
 }): string {
-  return `<a href="${safeHref(options.href)}" target="_blank" rel="noopener" style="display:inline-block;box-sizing:border-box;min-width:268px;text-decoration:none;white-space:nowrap;background:${options.background};border:1.5px solid ${options.border};border-radius:999px;padding:7px 18px 7px 12px;font-family:${fontStack};font-weight:700;font-size:14px;line-height:22px;color:${colors.navy2};">${icon(options.icon)}${escapeHtml(options.text)}</a>`;
+  return `<a href="${safeHref(options.href)}" target="_blank" rel="noopener" style="display:inline-block;box-sizing:border-box;min-width:${pillSize.minWidth}px;text-decoration:none;white-space:nowrap;background:${options.background};border:1.5px solid ${options.border};border-radius:999px;padding:7px 18px 7px 12px;font-family:${fontStack};font-weight:700;font-size:${pillSize.fontSize}px;line-height:22px;color:${colors.navy2};">${icon(options.icon)}${escapeHtml(options.text)}</a>`;
 }
 
 /**

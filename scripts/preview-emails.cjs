@@ -92,7 +92,7 @@ const mails = [
       phone: lead.phone,
       country: lead.country,
       company: "Granja Sur",
-      product: p.name,
+      productName: p.name,
     }, date) },
 ];
 
