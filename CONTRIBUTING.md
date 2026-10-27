@@ -10,13 +10,23 @@ npm run dev
 
 ## Ramas
 
-Hasta ahora se commiteaba directo a `main`. Para trabajar con más gente se acuerda:
+El flujo es:
+
+```
+rama de trabajo ──PR──► develop ──PR──► main
+                      (se prueba)      (producción)
+```
 
 - Una rama por cambio, con prefijo: `feat/*`, `fix/*`, `refactor/*`, `docs/*`, `chore/*`. Ejemplos: `feat/agregar-seccion-prensa`, `fix/formulario-contacto`, `docs/actualizar-readme`.
-- Se integra a `main` por Pull Request. `main` es lo que Vercel publica en producción (PENDIENTE: confirmar al tener acceso a Vercel), así que **no se pushea directo**.
+- Los cambios entran a **`develop`** por Pull Request. Vercel genera un preview de la rama y de `develop`, que sirve para probar antes de pasar a producción.
+- De `develop` a **`main`** también va por Pull Request. `main` es lo que Vercel publica en producción (`www.eggpertise.com`), así que **no se pushea directo**.
 - Se borra la rama remota después de mergear.
 
 No hay CI que lo verifique. Si se quiere forzar, se puede agregar una *branch protection rule* en GitHub (*Settings → Branches*).
+
+Dos cosas a tener en cuenta con Vercel (detalle en [`docs/deploy.md`](docs/deploy.md)):
+- Un preview no tiene las variables de Production: los formularios muestran un error y no tocan la planilla real. Es lo esperado.
+- Si el contenido de `main` es idéntico al de un commit ya construido, Vercel no genera un deploy nuevo de Production. En ese caso hay que hacer un *Redeploy* eligiendo Production.
 
 ## Commits
 
