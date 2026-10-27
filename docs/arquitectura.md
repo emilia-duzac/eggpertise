@@ -1,6 +1,6 @@
 # Arquitectura y decisiones
 
-**Última revisión:** 2026-10-20. Esto es lo que no se ve leyendo el código por
+**Última revisión:** 2026-10-27. Esto es lo que no se ve leyendo el código por
 arriba.
 
 ## Flujo de datos
@@ -47,6 +47,27 @@ Detalle de los leads y su planilla en [`leads.md`](leads.md).
 - El cliente de Resend se crea **al enviar**, no al cargar el módulo. Así el build no depende de `RESEND_API_KEY`.
 - **Remitente:** `mailFrom()` arma `noreply@<MAIL_DOMAIN>`. Si no hay variable, usa `eggpertise.com`. Hoy `MAIL_DOMAIN=mail.eggpertise.com`, porque el dominio raíz sigue registrado en la cuenta vieja de Resend (ver [`dns.md`](dns.md)).
 - **Destinatario de los avisos:** `CONTACT_EMAIL`, o `info@eggpertise.com` si no está definida. Una dirección mal formada hace fallar los tres formularios (`Invalid 'to' field`).
-- **Reply-To:** solo el formulario de contacto lo usa (con el mail de quien escribió). El mail de la ficha técnica que recibe el usuario no tiene, así que una respuesta no llega a nadie.
+- **Reply-To:** los mails al cliente (hoy, la ficha técnica) responden a Tomás Strenitz y a `CONTACT_EMAIL` (o `info@eggpertise.com`) juntos. Los avisos al equipo responden al email de quien llenó el formulario. Los datos de Tomás están en `lib/email/contact.ts`.
 - **Orden dentro de cada ruta:** primero se guarda el lead en la planilla y después se manda el mail. Un fallo del mail muestra un error al usuario pero no pierde el lead; si el usuario reintenta, puede quedar duplicado.
 - En la **ficha técnica** se mandan dos mails (aviso al equipo y ficha al usuario) y se intentan ambos aunque falle uno.
+
+### Diseño de los mails
+
+El diseño sigue el Brand Book de EggPertise. Todo está en `lib/email/`:
+
+| Archivo | Qué tiene |
+|---|---|
+| `theme.ts` | Colores, fuentes y tamaños. Es el único lugar donde se definen |
+| `escape.ts` | `escapeHtml` y `safeHref`. **Todo lo que escribe el visitante tiene que pasar por acá**, porque los mails son HTML |
+| `contact.ts` | Datos de la empresa y del contacto de ventas, enlaces de WhatsApp y mail, y los textos precargados |
+| `components.ts` | Piezas reutilizables: título, botón, tabla de datos, tarjeta de contacto |
+| `layout.ts` | Marco común (`renderEmail`) y versión en texto plano (`renderPlainText`) |
+| `mails/` | Un archivo por mail. Cada función devuelve `{ subject, html, text, replyTo }` |
+
+- **Texto plano:** cada mail manda también `text`. Mejora la entrega y cubre clientes que no muestran HTML.
+- **Estilos en línea y sin fuentes web:** Gmail y Outlook no cargan fuentes web ni SVG. La fuente es Lato con Calibri y Source Sans 3 de respaldo (Arial no está permitida por el Brand Book).
+- **Imágenes:** los mails cargan el logo y los íconos por URL absoluta desde `public/brand/email/` (PNG, al triple del tamaño con que se muestran). Si la rama todavía no está desplegada, esas imágenes no existen en producción. Para probar desde un preview de Vercel, definir `NEXT_PUBLIC_SITE_URL`.
+- **Regenerar las imágenes:** `npm i --no-save sharp && node scripts/build-email-assets.cjs`. Las fuentes están en `scripts/email-assets/`. `sharp` no es dependencia del proyecto.
+- **Vista previa:** `npm run email:preview` genera los mails con datos de ejemplo en `email-preview/` (ignorada por git) sin enviar nada. Abrir `email-preview/index.html`.
+- **Sello del proveedor:** la ficha lleva abajo a la derecha el logo de EggPertise junto al del proveedor, y en Compostaje solo el de Compostaje. La ruta de la ficha ya acepta `lineaProducto` y `proveedor` (nombre y `logoUrl` https), pero el modal todavía no los envía, así que hoy el mail sale sin sello.
+- **Outlook de escritorio** ignora los bordes redondeados: los botones se ven cuadrados ahí.

@@ -1,6 +1,6 @@
 # Leads: formularios, email y planilla
 
-**Última revisión:** 2026-10-20.
+**Última revisión:** 2026-10-27.
 
 Un *lead* es una persona que dejó sus datos en un formulario de la web.
 Cada lead se envía por **email** y además se copia a una **planilla de Google** para hacer seguimiento.
@@ -14,11 +14,22 @@ Formulario web
               └─► POST a LEADS_SHEET_ENDPOINT (Web App de Google Apps Script)
                     └─► el script agrega una fila en la hoja "Leads"
         2. Resend manda un email a CONTACT_EMAIL        (aviso al equipo)
+           y, en la ficha técnica, otro al cliente
 ```
 
 - La planilla es **"LEADS WEB EggPertise"** (pestañas `Leads`, `Dashboard`, `Config`), en el Shared Drive "Marketing". ID en [`accesos.md`](accesos.md).
 - El script está en [`docs/apps-script/lead-capture.gs`](apps-script/lead-capture.gs). Mapea los datos **por nombre de columna** (fila 1 de la hoja `Leads`) y completa solo `ID`, `Fecha` y `Fecha (API raw)`. Si una columna no existe, la ignora sin avisar.
 - Los tres formularios están conectados. Cada uno marca su origen en la columna `Fuente` (ver [`arquitectura.md`](arquitectura.md)).
+
+## Qué mail recibe cada quien
+
+| Formulario | Aviso al equipo (`CONTACT_EMAIL`) | Mail al cliente |
+|---|---|---|
+| Contacto | Sí. Al responder, va a quien escribió | No |
+| Info técnica | Sí. Al responder, va a quien escribió | No |
+| Ficha técnica | Sí. Al responder, va a quien pidió la ficha | Sí, con el enlace de descarga. Al responder, va a Tomás y a `info@` |
+
+El diseño de los mails y dónde editar sus textos están en [`arquitectura.md`](arquitectura.md#emails).
 
 ## Por qué puede fallar sin que nadie se entere
 

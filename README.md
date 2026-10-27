@@ -32,6 +32,7 @@ Creá un archivo `.env.local` en la raíz a partir de [`.env.example`](.env.exam
 |---|---|
 | `CONTENTFUL_SPACE_ID`, `CONTENTFUL_DELIVERY_TOKEN` | Leer el contenido. Sin ellas el sitio no carga datos |
 | `RESEND_API_KEY`, `CONTACT_EMAIL`, `MAIL_DOMAIN` (opcional) | Enviar los emails de los formularios. `MAIL_DOMAIN` cambia el dominio del remitente |
+| `NEXT_PUBLIC_SITE_URL` (opcional) | URL de donde los emails cargan el logo y los íconos. Si falta, `https://www.eggpertise.com` |
 | `LEADS_SHEET_ENDPOINT`, `LEADS_SHEET_TOKEN` | Copiar los leads a la planilla. Si falta el endpoint, se omite **sin avisar** |
 
 Dónde conseguir cada valor: [`docs/accesos.md`](docs/accesos.md). En producción las variables se cargan en Vercel (ver [`docs/deploy.md`](docs/deploy.md)).
@@ -48,6 +49,15 @@ npm run start
 ```
 
 La app queda en http://localhost:3000.
+
+## Vista previa de los emails
+
+```bash
+npm run email:preview
+open email-preview/index.html
+```
+
+Genera los emails con datos de ejemplo, sin enviar nada. Detalle en [`docs/arquitectura.md`](docs/arquitectura.md#emails).
 
 ## Lint y tipos
 
@@ -75,7 +85,8 @@ components/                     secciones de la home, modales, WhatsApp
 components/ui/                  componentes base (shadcn/ui)
 lib/contentful.ts               consultas GraphQL y orden de marcas/productos
 lib/leads-sheet.ts              envío de leads a la planilla
-lib/email-templates.tsx         plantillas de email
+lib/email/                      emails: tema, marco, componentes y un archivo por mail
+scripts/                        vista previa de los emails y generación de sus imágenes
 docs/                           documentación
 ```
 
