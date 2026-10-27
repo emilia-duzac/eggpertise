@@ -1,7 +1,12 @@
 import { StatusCodes } from "http-status-codes";
 import { NextResponse } from "next/server";
 import { getProductoBySlug } from "@/lib/contentful";
-import { technicalInfoTeamEmail } from "@/lib/email/mails/technical-info";
+import {
+  technicalInfoClientEmail,
+  technicalInfoTeamEmail,
+} from "@/lib/email/mails/technical-info";
+import { emailProduct } from "@/lib/email/product";
+import { sendClientConfirmation } from "@/lib/email/send";
 import { syncLeadToSpreadsheet } from "@/lib/leads-sheet";
 import { mailFrom, sendEmail } from "@/lib/resend";
 
@@ -72,6 +77,15 @@ export async function POST(request: Request) {
       html: teamEmail.html,
       text: teamEmail.text,
     });
+
+    // Only after the team has been notified, so we never promise a reply that
+    // nobody will see.
+    await sendClientConfirmation(email, () =>
+      technicalInfoClientEmail({
+        company: empresa,
+        product: emailProduct(producto),
+      })
+    );
 
     return NextResponse.json({ success: true }, { status: StatusCodes.OK });
   } catch (error) {
