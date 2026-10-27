@@ -5,7 +5,7 @@
  *   npm run email:preview
  *
  * The emails are TypeScript, so lib/email is compiled to a temporary folder
- * first. Images load from public/brand/email on disk.
+ * first (all but the files that need Resend or Contentful). Images load from public/brand/email on disk.
  */
 const { execSync } = require("child_process");
 const fs = require("fs");
@@ -26,14 +26,22 @@ const toLocal = (html) => html.split(FAKE_ORIGIN).join(PUBLIC_DIR);
 // Read by lib/email/contact.ts when it is loaded below.
 process.env.NEXT_PUBLIC_SITE_URL = FAKE_ORIGIN;
 
+// send.ts (Resend) and product.ts (Contentful) import from outside lib/email,
+// which would change the layout of the compiled folder. The previews do not
+// need them.
+const NEEDS_SERVICES = ["/send.ts", "/product.ts"];
+const sources = ["lib/email", "lib/email/mails"]
+  .flatMap((dir) => fs.readdirSync(path.join(ROOT, dir)).map((file) => `${dir}/${file}`))
+  .filter((file) => file.endsWith(".ts") && !NEEDS_SERVICES.some((name) => file.endsWith(name)));
+
 execSync(
-  `npx tsc lib/email/*.ts lib/email/mails/*.ts --outDir "${BUILD}" --module commonjs --target es2019 --moduleResolution node --skipLibCheck`,
+  `npx tsc ${sources.join(" ")} --outDir "${BUILD}" --module commonjs --target es2019 --moduleResolution node --skipLibCheck`,
   { cwd: ROOT, stdio: "inherit" }
 );
 
 const { fichaClientEmail, fichaTeamEmail } = require(path.join(BUILD, "mails/ficha.js"));
-const { contactTeamEmail } = require(path.join(BUILD, "mails/contact.js"));
-const { technicalInfoTeamEmail } = require(path.join(BUILD, "mails/technical-info.js"));
+const { contactTeamEmail, contactClientEmail } = require(path.join(BUILD, "mails/contact.js"));
+const { technicalInfoTeamEmail, technicalInfoClientEmail } = require(path.join(BUILD, "mails/technical-info.js"));
 
 const date = "27/10/2026, 14:32";
 const lead = {
@@ -52,6 +60,14 @@ const products = {
   compostaje: { name: "Planta de compostaje 4x280", line: "compostaje" },
 };
 
+const contactData = {
+  name: `${lead.firstName} ${lead.lastName}`,
+  email: lead.email,
+  company: "Granja Sur",
+  country: lead.country,
+  message: "Hola, quisiera cotizar un sistema de alimentación para tres galpones.\n¿Pueden enviarme información y plazos de entrega?",
+};
+
 const ficha = (product) => ({
   ...lead,
   product,
@@ -64,14 +80,12 @@ const mails = [
     build: (p) => fichaClientEmail(ficha(p)) },
   { id: "ficha-equipo", group: "Al equipo", name: "Solicitud de ficha", variants: true,
     build: (p) => fichaTeamEmail(ficha(p), date) },
+  { id: "consulta-cliente", group: "Al cliente", name: "Confirmación de consulta",
+    build: () => contactClientEmail(contactData) },
+  { id: "info-cliente", group: "Al cliente", name: "Confirmación de información técnica", variants: true,
+    build: (p) => technicalInfoClientEmail({ company: "Granja Sur", product: p }) },
   { id: "consulta-equipo", group: "Al equipo", name: "Nueva consulta",
-    build: () => contactTeamEmail({
-      name: `${lead.firstName} ${lead.lastName}`,
-      email: lead.email,
-      company: "Granja Sur",
-      country: lead.country,
-      message: "Hola, quisiera cotizar un sistema de alimentación para tres galpones.\n¿Pueden enviarme información y plazos de entrega?",
-    }, date) },
+    build: () => contactTeamEmail(contactData, date) },
   { id: "info-equipo", group: "Al equipo", name: "Solicitud de información técnica", variants: true,
     build: (p) => technicalInfoTeamEmail({
       email: lead.email,

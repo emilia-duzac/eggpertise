@@ -47,9 +47,10 @@ Detalle de los leads y su planilla en [`leads.md`](leads.md).
 - El cliente de Resend se crea **al enviar**, no al cargar el módulo. Así el build no depende de `RESEND_API_KEY`.
 - **Remitente:** `mailFrom()` arma `noreply@<MAIL_DOMAIN>`. Si no hay variable, usa `eggpertise.com`. Hoy `MAIL_DOMAIN=mail.eggpertise.com`, porque el dominio raíz sigue registrado en la cuenta vieja de Resend (ver [`dns.md`](dns.md)).
 - **Destinatario de los avisos:** `CONTACT_EMAIL`, o `info@eggpertise.com` si no está definida. Una dirección mal formada hace fallar los tres formularios (`Invalid 'to' field`).
-- **Reply-To:** los mails al cliente (hoy, la ficha técnica) responden a Tomás Strenitz y a `CONTACT_EMAIL` (o `info@eggpertise.com`) juntos. Los avisos al equipo responden al email de quien llenó el formulario. Los datos de Tomás están en `lib/email/contact.ts`.
+- **Reply-To:** los mails al cliente (ficha, y confirmaciones de contacto e info técnica) responden a Tomás Strenitz y a `CONTACT_EMAIL` (o `info@eggpertise.com`) juntos. Los avisos al equipo responden al email de quien llenó el formulario. Los datos de Tomás están en `lib/email/contact.ts`.
 - **Orden dentro de cada ruta:** primero se guarda el lead en la planilla y después se manda el mail. Un fallo del mail muestra un error al usuario pero no pierde el lead; si el usuario reintenta, puede quedar duplicado.
 - En la **ficha técnica** se mandan dos mails (aviso al equipo y ficha al usuario) y se intentan ambos aunque falle uno.
+- En **contacto** e **info técnica** se manda el aviso al equipo y, solo si salió bien, la confirmación al cliente. Si la confirmación falla, se loguea y se sigue.
 
 ### Diseño de los mails
 
@@ -62,6 +63,8 @@ El diseño sigue el Brand Book de EggPertise. Todo está en `lib/email/`:
 | `contact.ts` | Datos de la empresa y del contacto de ventas, enlaces de WhatsApp y mail, y los textos precargados |
 | `components.ts` | Piezas reutilizables: título, botón, tabla de datos, tarjeta de contacto |
 | `layout.ts` | Marco común (`renderEmail`) y versión en texto plano (`renderPlainText`) |
+| `product.ts` | Línea y proveedor de un producto, a partir de Contentful, para el sello |
+| `send.ts` | `sendClientConfirmation`: manda la confirmación al cliente y nunca lanza error |
 | `mails/` | Un archivo por mail. Cada función devuelve `{ subject, html, text, replyTo }` |
 
 - **Texto plano:** cada mail manda también `text`. Mejora la entrega y cubre clientes que no muestran HTML.

@@ -14,7 +14,7 @@ Formulario web
               └─► POST a LEADS_SHEET_ENDPOINT (Web App de Google Apps Script)
                     └─► el script agrega una fila en la hoja "Leads"
         2. Resend manda un email a CONTACT_EMAIL        (aviso al equipo)
-           y, en la ficha técnica, otro al cliente
+        3. Resend manda un email a quien llenó el formulario (confirmación o ficha)
 ```
 
 - La planilla es **"LEADS WEB EggPertise"** (pestañas `Leads`, `Dashboard`, `Config`), en el Shared Drive "Marketing". ID en [`accesos.md`](accesos.md).
@@ -25,9 +25,11 @@ Formulario web
 
 | Formulario | Aviso al equipo (`CONTACT_EMAIL`) | Mail al cliente |
 |---|---|---|
-| Contacto | Sí. Al responder, va a quien escribió | No |
-| Info técnica | Sí. Al responder, va a quien escribió | No |
-| Ficha técnica | Sí. Al responder, va a quien pidió la ficha | Sí, con el enlace de descarga. Al responder, va a Tomás y a `info@` |
+| Contacto | Sí. Al responder, va a quien escribió | Confirmación de la consulta. Al responder, va a Tomás y a `info@` |
+| Info técnica | Sí. Al responder, va a quien escribió | Confirmación del pedido. Al responder, va a Tomás y a `info@` |
+| Ficha técnica | Sí. Al responder, va a quien pidió la ficha | La ficha con el enlace de descarga. Al responder, va a Tomás y a `info@` |
+
+El mail al cliente se manda **después** del aviso al equipo, y las confirmaciones (contacto e info técnica) no rompen el formulario si fallan: se registra `Confirmation email failed for <email>` en el log y el usuario igual ve "enviado". Si falla el aviso al equipo, no se manda la confirmación, para no prometer una respuesta que nadie va a ver.
 
 El diseño de los mails y dónde editar sus textos están en [`arquitectura.md`](arquitectura.md#emails).
 
