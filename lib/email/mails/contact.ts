@@ -1,4 +1,21 @@
-import { dataTable, icon, label, link, quote, raw, title } from "../components";
+import {
+  contactCard,
+  dataTable,
+  icon,
+  label,
+  link,
+  paragraph,
+  quote,
+  raw,
+  signature,
+  title,
+} from "../components";
+import {
+  SALES_CONTACT,
+  clientReplyTo,
+  contactDrafts,
+} from "../contact";
+import { escapeHtml } from "../escape";
 import { renderEmail, renderPlainText } from "../layout";
 import type { EmailMessage } from "../types";
 
@@ -56,5 +73,47 @@ export function contactTeamEmail(data: ContactRequest, date: string): EmailMessa
     html,
     text,
     replyTo: email,
+  };
+}
+
+/** Sent to the person who used the contact form, to confirm it arrived. */
+export function contactClientEmail(data: ContactRequest): EmailMessage {
+  const { name, company } = data;
+  const heading = `Hola ${name}, recibimos tu consulta`;
+  const received =
+    "Gracias por escribirnos. Nuestro equipo ya recibió tu consulta y se estará contactando a la brevedad.";
+  const contactIntro =
+    "Si es urgente o querés sumar información, podés contactarte directamente con nuestro responsable de ventas:";
+  const footerReason =
+    "Recibiste este mail porque nos escribiste desde eggpertise.com.";
+
+  const html = renderEmail({
+    preheader: "Nuestro equipo se contactará a la brevedad.",
+    footerReason,
+    body:
+      label("Consulta recibida") +
+      title(heading) +
+      paragraph(escapeHtml(received)) +
+      paragraph(escapeHtml(contactIntro)) +
+      contactCard(contactDrafts.contact(name, company)) +
+      signature(),
+  });
+
+  const text = renderPlainText({
+    title: heading,
+    paragraphs: [
+      received,
+      contactIntro,
+      `${SALES_CONTACT.name} · ${SALES_CONTACT.role}\nWhatsApp: ${SALES_CONTACT.phone}\nEmail: ${SALES_CONTACT.email}`,
+      "Gracias por tu interés en EggPertise.",
+    ],
+    footerReason,
+  });
+
+  return {
+    subject: `Recibimos tu consulta, ${name}`.replace(/\s+/g, " "),
+    html,
+    text,
+    replyTo: clientReplyTo(),
   };
 }

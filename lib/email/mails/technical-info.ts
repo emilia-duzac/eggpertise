@@ -1,6 +1,22 @@
-import { dataTable, icon, label, link, raw, title } from "../components";
+import {
+  contactCard,
+  dataTable,
+  icon,
+  label,
+  link,
+  paragraph,
+  raw,
+  signature,
+  title,
+} from "../components";
+import {
+  SALES_CONTACT,
+  clientReplyTo,
+  contactDrafts,
+} from "../contact";
+import { escapeHtml } from "../escape";
 import { renderEmail, renderPlainText } from "../layout";
-import type { EmailMessage } from "../types";
+import { sealFor, type EmailMessage, type ProductContext } from "../types";
 
 export interface TechnicalInfoRequest {
   email: string;
@@ -59,5 +75,51 @@ export function technicalInfoTeamEmail(
     html,
     text,
     replyTo: email,
+  };
+}
+
+/** Sent to the person who asked for technical information, to confirm it arrived. */
+export function technicalInfoClientEmail(data: {
+  company: string;
+  product: ProductContext;
+}): EmailMessage {
+  const { company, product } = data;
+  const heading = "Recibimos tu pedido de información técnica";
+  const contactIntro =
+    "Si querés más información, tenés dudas técnicas o estás interesado en cotizar, podés contactarte con nuestro responsable de ventas:";
+  const footerReason =
+    "Recibiste este mail porque pediste información técnica en eggpertise.com.";
+
+  const html = renderEmail({
+    preheader: "Nuestro equipo se contactará a la brevedad.",
+    footerReason,
+    seal: sealFor(product),
+    body:
+      label("Información técnica") +
+      title(heading) +
+      paragraph(
+        `Gracias por escribirnos. Nuestro equipo ya recibió tu pedido sobre <b>${escapeHtml(product.name)}</b> y se estará contactando a la brevedad.`
+      ) +
+      paragraph(escapeHtml(contactIntro)) +
+      contactCard(contactDrafts.technicalInfo(product.name, company)) +
+      signature(),
+  });
+
+  const text = renderPlainText({
+    title: heading,
+    paragraphs: [
+      `Gracias por escribirnos. Nuestro equipo ya recibió tu pedido sobre ${product.name} y se estará contactando a la brevedad.`,
+      contactIntro,
+      `${SALES_CONTACT.name} · ${SALES_CONTACT.role}\nWhatsApp: ${SALES_CONTACT.phone}\nEmail: ${SALES_CONTACT.email}`,
+      "Gracias por tu interés en EggPertise.",
+    ],
+    footerReason,
+  });
+
+  return {
+    subject: `Recibimos tu pedido de información sobre ${product.name}`.replace(/\s+/g, " "),
+    html,
+    text,
+    replyTo: clientReplyTo(),
   };
 }
