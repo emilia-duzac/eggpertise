@@ -1,15 +1,12 @@
 import { NextResponse } from "next/server";
-import {
-  getFichaTecnicaNotificationTemplate,
-  getFichaTecnicaUserTemplate,
-} from "@/lib/email-templates";
+import { fichaClientEmail, fichaTeamEmail } from "@/lib/email/mails/ficha";
 import { syncLeadToSpreadsheet } from "@/lib/leads-sheet";
 import { mailFrom, sendEmail } from "@/lib/resend";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { nombre, apellido, email, telefono, pais, productoNombre, fichaTecnicaUrl, fichaTecnicaNombre } = body;
+    const { nombre, apellido, email, telefono, pais, productoNombre, fichaTecnicaUrl, fichaTecnicaNombre, lineaProducto, proveedor } = body;
 
     // Validate required fields
     if (!nombre || !apellido || !email || !telefono || !pais || !productoNombre || !fichaTecnicaUrl || !fichaTecnicaNombre) {
@@ -28,17 +25,23 @@ export async function POST(request: Request) {
       );
     }
 
-    const templateData = {
-      nombre,
-      apellido,
+    const fichaRequest = {
+      firstName: nombre,
+      lastName: apellido,
       email,
-      telefono,
-      pais,
-      productoNombre,
-      fichaTecnicaUrl: encodeURI(fichaTecnicaUrl),
-      fichaTecnicaNombre,
+      phone: telefono,
+      country: pais,
+      product: {
+        name: productoNombre,
+        line: lineaProducto === "compostaje" ? ("compostaje" as const) : ("other" as const),
+        supplier:
+          proveedor?.nombre && /^https:\/\//.test(proveedor.logoUrl ?? "")
+            ? { name: proveedor.nombre, logoUrl: proveedor.logoUrl }
+            : undefined,
+      },
+      fichaName: fichaTecnicaNombre,
+      fichaUrl: encodeURI(fichaTecnicaUrl),
     };
-
     // Recorded before the emails so the lead survives a failed send.
     await syncLeadToSpreadsheet({
       nombre: `${nombre} ${apellido}`,
@@ -49,6 +52,12 @@ export async function POST(request: Request) {
       fuente: "Descarga Ficha Técnica",
     });
 
+    const currentDate = new Date().toLocaleString("es-AR", {
+      timeZone: "America/Argentina/Buenos_Aires",
+    });
+    const teamEmail = fichaTeamEmail(fichaRequest, currentDate);
+    const clientEmail = fichaClientEmail(fichaRequest);
+
     // Both are attempted even if one fails: a rejected admin notification
     // must not stop the user from getting the ficha técnica they asked for.
     const results = await Promise.allSettled([
@@ -56,15 +65,19 @@ export async function POST(request: Request) {
       sendEmail({
         from: mailFrom(),
         to: [process.env.CONTACT_EMAIL || "info@eggpertise.com"],
-        subject: `Nueva solicitud de ficha técnica: ${productoNombre}`,
-        html: getFichaTecnicaNotificationTemplate(templateData),
+        replyTo: teamEmail.replyTo,
+        subject: teamEmail.subject,
+        html: teamEmail.html,
+        text: teamEmail.text,
       }),
       // Ficha técnica to user
       sendEmail({
         from: mailFrom(),
         to: [email],
-        subject: `Ficha Técnica - ${productoNombre}`,
-        html: getFichaTecnicaUserTemplate(templateData),
+        replyTo: clientEmail.replyTo,
+        subject: clientEmail.subject,
+        html: clientEmail.html,
+        text: clientEmail.text,
       }),
     ]);
 
