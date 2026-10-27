@@ -132,6 +132,7 @@ const ALL_PRODUCTOS_COMPLETE_QUERY = `
         fabricante {
           sys { id }
           nombre
+          logo { url }
         }
       }
     }
@@ -266,6 +267,7 @@ interface ProductoCompleteGraphQLResponse {
   fabricante?: {
     sys: { id: string };
     nombre: string;
+    logo?: { url: string } | null;
   } | null;
 }
 
@@ -345,6 +347,7 @@ export interface ProductoCompleto {
     id: string;
     slug: string;
     nombre: string;
+    logo: string | null;
   } | null;
 }
 
@@ -494,6 +497,7 @@ function parseProductoCompletoFromGraphQL(
           id: item.fabricante.sys.id,
           slug: generateSlug(item.fabricante.nombre),
           nombre: item.fabricante.nombre,
+          logo: item.fabricante.logo?.url ?? null,
         }
       : null,
   };
