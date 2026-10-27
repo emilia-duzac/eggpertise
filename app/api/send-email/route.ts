@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getContactFormEmailTemplate } from "@/lib/email-templates";
+import { contactTeamEmail } from "@/lib/email/mails/contact";
 import { syncLeadToSpreadsheet } from "@/lib/leads-sheet";
 import { mailFrom, sendEmail } from "@/lib/resend";
 
@@ -35,12 +35,21 @@ export async function POST(request: Request) {
       fuente: "Formulario Web",
     });
 
+    const currentDate = new Date().toLocaleString("es-AR", {
+      timeZone: "America/Argentina/Buenos_Aires",
+    });
+    const teamEmail = contactTeamEmail(
+      { name: nombre, email, company: empresa, country: pais, message: mensaje },
+      currentDate
+    );
+
     const data = await sendEmail({
       from: mailFrom("EggPertise Contact Form"),
       to: [process.env.CONTACT_EMAIL || "info@eggpertise.com"],
-      replyTo: email,
-      subject: `Nueva consulta de ${nombre} - ${empresa}`,
-      html: getContactFormEmailTemplate({ nombre, email, empresa, pais, mensaje }),
+      replyTo: teamEmail.replyTo,
+      subject: teamEmail.subject,
+      html: teamEmail.html,
+      text: teamEmail.text,
     });
 
     return NextResponse.json(
