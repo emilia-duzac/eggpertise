@@ -17,14 +17,11 @@ const ROOT = path.join(__dirname, "..");
 const OUTPUT = path.join(ROOT, "email-preview");
 const BUILD = fs.mkdtempSync(path.join(os.tmpdir(), "email-preview-"));
 
-// The emails only accept http(s) image URLs, so they are built against a
-// placeholder origin that is swapped for the local public/ folder when writing.
+// The emails only accept http(s) image URLs, so the sample supplier logo uses a
+// placeholder origin. When writing, it and the site's own origin are swapped
+// for the local public/ folder, so the images load from disk.
 const FAKE_ORIGIN = "https://email-preview.invalid";
 const PUBLIC_DIR = pathToFileURL(path.join(ROOT, "public")).href;
-const toLocal = (html) => html.split(FAKE_ORIGIN).join(PUBLIC_DIR);
-
-// Read by lib/email/contact.ts when it is loaded below.
-process.env.NEXT_PUBLIC_SITE_URL = FAKE_ORIGIN;
 
 // send.ts (Resend) and product.ts (Contentful) import from outside lib/email,
 // which would change the layout of the compiled folder. The previews do not
@@ -38,6 +35,12 @@ execSync(
   `npx tsc ${sources.join(" ")} --outDir "${BUILD}" --module commonjs --target es2019 --moduleResolution node --skipLibCheck`,
   { cwd: ROOT, stdio: "inherit" }
 );
+
+const { SITE_URL } = require(path.join(BUILD, "contact.js"));
+const toLocal = (html) =>
+  html
+    .split(`${SITE_URL}/brand/email`).join(`${PUBLIC_DIR}/brand/email`)
+    .split(FAKE_ORIGIN).join(PUBLIC_DIR);
 
 const { fichaClientEmail, fichaTeamEmail } = require(path.join(BUILD, "mails/ficha.js"));
 const { contactTeamEmail, contactClientEmail } = require(path.join(BUILD, "mails/contact.js"));

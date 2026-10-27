@@ -4,10 +4,7 @@
  * secrets.
  */
 
-// Overridable so images also load from a preview deploy; production otherwise.
-export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL || "https://www.eggpertise.com"
-).replace(/\/$/, "");
+export const SITE_URL = "https://www.eggpertise.com";
 
 // Images in emails need an absolute URL. They live in public/brand/email.
 export const EMAIL_ASSETS_URL = `${SITE_URL}/brand/email`;
