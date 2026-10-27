@@ -37,7 +37,8 @@ export interface FichaRequest {
 /** Sent to the client who asked for a datasheet. */
 export function fichaClientEmail(data: FichaRequest): EmailMessage {
   const { firstName, product, fichaUrl } = data;
-  const heading = `Hola ${firstName}, esta es la ficha técnica que solicitaste`;
+  const heading = `Gracias por tu interés en ${product.name}`;
+  const greeting = `Hola ${firstName}, ya podés descargar la ficha técnica que solicitaste.`;
   const footerReason =
     "Recibiste este mail porque pediste una ficha técnica en eggpertise.com.";
   const preheader =
@@ -50,8 +51,8 @@ export function fichaClientEmail(data: FichaRequest): EmailMessage {
     body:
       label("Ficha técnica") +
       title(heading) +
-      paragraph(`Gracias por tu interés en <b>${escapeHtml(product.name)}</b>.`) +
-      button("Descargar", fichaUrl) +
+      paragraph(escapeHtml(greeting)) +
+      button("Descargar ficha técnica", fichaUrl) +
       note(
         `También podés acceder desde el navegador copiando el enlace: ${link(fichaUrl, fichaUrl)}`
       ) +
@@ -63,7 +64,7 @@ export function fichaClientEmail(data: FichaRequest): EmailMessage {
   const text = renderPlainText({
     title: heading,
     paragraphs: [
-      `Gracias por tu interés en ${product.name}. Descargá la ficha técnica acá: ${fichaUrl}`,
+      `${greeting}\n${fichaUrl}`,
       SALES_CONTACT_INTRO,
       salesContactText(),
       CLIENT_SIGNATURE,

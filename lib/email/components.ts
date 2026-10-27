@@ -52,12 +52,12 @@ export function link(value: string | Raw, href: string): string {
   return `<a href="${safeHref(href)}" target="_blank" rel="noopener" style="color:${colors.navy2};text-decoration:underline;">${text(value)}</a>`;
 }
 
-/** The one call to action of the email: navy pill with white text. */
+/** The one call to action of the email: navy pill, as wide as the content. */
 export function button(labelText: string, href: string): string {
   return (
-    `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 20px;"><tr>` +
-    `<td style="background:${colors.navy};border-radius:999px;">` +
-    `<a href="${safeHref(href)}" target="_blank" rel="noopener" style="display:inline-block;padding:14px 30px;border-radius:999px;font-family:${fontStack};font-weight:700;font-size:${fontSizes.body}px;color:${colors.white};text-decoration:none;">${escapeHtml(labelText)}</a>` +
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 20px;"><tr>` +
+    `<td align="center" style="background:${colors.navy};border-radius:999px;">` +
+    `<a href="${safeHref(href)}" target="_blank" rel="noopener" style="display:block;padding:14px 30px;border-radius:999px;font-family:${fontStack};font-weight:700;font-size:${fontSizes.body}px;text-align:center;color:${colors.white};text-decoration:none;">${escapeHtml(labelText)}</a>` +
     `</td></tr></table>`
   );
 }

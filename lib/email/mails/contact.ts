@@ -80,9 +80,8 @@ export function contactTeamEmail(data: ContactRequest, date: string): EmailMessa
 /** Sent to the person who used the contact form, to confirm it arrived. */
 export function contactClientEmail(data: ContactRequest): EmailMessage {
   const { name, company } = data;
-  const heading = `Hola ${name}, recibimos tu consulta`;
-  const received =
-    "Gracias por escribirnos. Nuestro equipo ya recibió tu consulta y se estará contactando a la brevedad.";
+  const heading = "Recibimos tu consulta";
+  const received = `Hola ${name}, gracias por escribirnos. Nuestro equipo ya la recibió y se estará contactando a la brevedad.`;
   const contactIntro =
     "Si es urgente o querés sumar información, podés contactarte directamente con nuestro responsable de ventas:";
   const footerReason =
