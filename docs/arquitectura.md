@@ -58,13 +58,14 @@ El diseño sigue el Brand Book de EggPertise. Todo está en `lib/email/`:
 
 | Archivo | Qué tiene |
 |---|---|
-| `theme.ts` | Colores, fuentes y tamaños. Es el único lugar donde se definen |
-| `escape.ts` | `escapeHtml` y `safeHref`. **Todo lo que escribe el visitante tiene que pasar por acá**, porque los mails son HTML |
+| `theme.ts` | Colores, fuentes, tamaños de texto, de imágenes y de las pastillas. Es el único lugar donde se definen |
+| `escape.ts` | `escapeHtml`, `safeHref` y `toSafeUrl`. **Todo lo que escribe el visitante tiene que pasar por acá**, porque los mails son HTML |
 | `contact.ts` | Datos de la empresa y del contacto de ventas, enlaces de WhatsApp y mail, y los textos precargados |
 | `components.ts` | Piezas reutilizables: título, botón, tabla de datos, tarjeta de contacto |
 | `layout.ts` | Marco común (`renderEmail`) y versión en texto plano (`renderPlainText`) |
 | `product.ts` | Línea y proveedor de un producto, a partir de Contentful, para el sello |
-| `send.ts` | `sendClientConfirmation`: manda la confirmación al cliente y nunca lanza error |
+| `send.ts` | `sendTeamEmail`, `sendClientEmail` y `sendClientConfirmation` (esta nunca lanza error) |
+| `date.ts` | Fecha y hora de los avisos al equipo, en horario de Argentina |
 | `mails/` | Un archivo por mail. Cada función devuelve `{ subject, html, text, replyTo }` |
 
 - **Texto plano:** cada mail manda también `text`. Mejora la entrega y cubre clientes que no muestran HTML.
@@ -74,4 +75,7 @@ El diseño sigue el Brand Book de EggPertise. Todo está en `lib/email/`:
 - **Vista previa:** `npm run email:preview` genera los mails con datos de ejemplo en `email-preview/` (ignorada por git) sin enviar nada. Abrir `email-preview/index.html`.
 - **Sello del proveedor:** la ficha lleva abajo a la derecha el logo de EggPertise junto al del proveedor, y en Compostaje solo el de Compostaje. `lib/email/product.ts` lo deduce del producto: si el fabricante es `eggpertise-compostaje` o `tratamiento-de-estiercol-eggpertise` es línea propia; si no, se usa el logo del fabricante en Contentful (pedido como PNG de 288 px con `fm=png`, porque Gmail no muestra SVG ni WebP). Un fabricante sin logo deja el mail sin sello.
 - **Los formularios mandan solo el producto:** los modales de ficha y de info técnica envían `productoSlug`, y la ruta busca en Contentful el nombre, la ficha, el proveedor y la línea. Nada de eso viaja desde el navegador, así que nadie puede armar un mail oficial con un logo, un nombre o un enlace de descarga inventados. Si el producto no se encuentra (o Contentful no responde), la ruta devuelve 404 antes de guardar el lead, y el usuario ve un error para reintentar.
+- **Validación de los formularios:** `lib/validation.ts` valida el cuerpo de cada ruta con `zod` (tipos, largos máximos y dirección de email). El email se valida con la regla de `zod`, que rechaza espacios, comas y `<>`: sin eso, un valor como `a@b.com,otra@x.com` convertiría el formulario en un relay de mails. Un campo que falta o es de otro tipo da 400 "Todos los campos son requeridos"; un email inválido, "El email no es válido"; un campo demasiado largo, "Alguno de los campos supera el largo permitido".
+- **Búsqueda del producto:** `getProductoForForm` (`lib/contentful.ts`) guarda el resultado 5 minutos (`unstable_cache`), así no se baja el catálogo entero en cada envío. A diferencia de `getProductoBySlug`, lanza error si Contentful falla, para distinguir "el producto no existe" (404) de "Contentful no responde" (503). Los errores no se guardan en la caché.
+- **Pendiente: límite de envíos.** Los formularios no tienen límite por IP, captcha ni campo trampa, y cada uno manda un mail a la dirección que escribe el visitante. Conviene agregar una regla de rate limit en el firewall de Vercel o un captcha.
 - **Outlook de escritorio** ignora los bordes redondeados: los botones se ven cuadrados ahí.

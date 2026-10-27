@@ -29,7 +29,8 @@ Formulario web
 | Info técnica | Sí. Al responder, va a quien escribió | Confirmación del pedido. Al responder, va a Tomás y a `info@` |
 | Ficha técnica | Sí. Al responder, va a quien pidió la ficha | La ficha con el enlace de descarga. Al responder, va a Tomás y a `info@` |
 
-El mail al cliente se manda **después** del aviso al equipo, y las confirmaciones (contacto e info técnica) no rompen el formulario si fallan: se registra `Confirmation email failed for <email>` en el log y el usuario igual ve "enviado". Si falla el aviso al equipo, no se manda la confirmación, para no prometer una respuesta que nadie va a ver.
+- **Contacto e info técnica:** el mail al cliente se manda **después** del aviso al equipo, y solo si ese salió bien, para no prometer una respuesta que nadie va a ver. Si la confirmación falla, se registra `Confirmation email failed for a @<dominio> address` en el log y el usuario igual ve "enviado".
+- **Ficha técnica:** el aviso al equipo y la ficha al cliente se mandan **en paralelo** y se intentan los dos. El usuario ve un error solo si falla **su** mail. Si falla solo el aviso al equipo, se registra `Team notification for a ficha request failed` y el usuario ve "enviado": ya tiene la ficha, y un error lo llevaría a reintentar y duplicar el lead.
 
 El diseño de los mails y dónde editar sus textos están en [`arquitectura.md`](arquitectura.md#emails).
 
