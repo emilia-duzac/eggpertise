@@ -16,13 +16,13 @@ import { Download, Loader2, CheckCircle, Mail } from "lucide-react";
 
 interface FichaTecnicaModalProps {
   productoNombre: string;
-  fichaTecnicaUrl: string;
+  productoSlug: string;
   fichaTecnicaNombre: string;
 }
 
 export function FichaTecnicaModal({
   productoNombre,
-  fichaTecnicaUrl,
+  productoSlug,
   fichaTecnicaNombre,
 }: FichaTecnicaModalProps) {
   const [open, setOpen] = useState(false);
@@ -52,9 +52,7 @@ export function FichaTecnicaModal({
           email,
           telefono,
           pais,
-          productoNombre,
-          fichaTecnicaUrl,
-          fichaTecnicaNombre,
+          productoSlug,
         }),
       });
 

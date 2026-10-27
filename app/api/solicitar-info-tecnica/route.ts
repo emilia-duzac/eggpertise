@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getProductoBySlug } from "@/lib/contentful";
 import { technicalInfoTeamEmail } from "@/lib/email/mails/technical-info";
 import { syncLeadToSpreadsheet } from "@/lib/leads-sheet";
 import { mailFrom, sendEmail } from "@/lib/resend";
@@ -6,9 +7,9 @@ import { mailFrom, sendEmail } from "@/lib/resend";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, telefono, pais, empresa, productoNombre } = body;
+    const { email, telefono, pais, empresa, productoSlug } = body;
 
-    if (!email || !telefono || !pais || !empresa || !productoNombre) {
+    if (!email || !telefono || !pais || !empresa || !productoSlug) {
       return NextResponse.json(
         { error: "Todos los campos son requeridos" },
         { status: 400 }
@@ -23,6 +24,20 @@ export async function POST(request: Request) {
       );
     }
 
+    // The product comes from Contentful, never from the request: the form only
+    // says which product it is.
+    const producto =
+      typeof productoSlug === "string"
+        ? await getProductoBySlug(productoSlug)
+        : null;
+
+    if (!producto) {
+      return NextResponse.json(
+        { error: "No encontramos el producto. Por favor intente nuevamente." },
+        { status: 404 }
+      );
+    }
+
     const currentDate = new Date().toLocaleString("es-AR", {
       timeZone: "America/Argentina/Buenos_Aires",
     });
@@ -33,7 +48,7 @@ export async function POST(request: Request) {
       empresa,
       pais,
       telefono,
-      mensaje: `Solicitud de información técnica sobre ${productoNombre}`,
+      mensaje: `Solicitud de información técnica sobre ${producto.nombre}`,
       fuente: "Solicitud Info Técnica",
     });
 
@@ -43,7 +58,7 @@ export async function POST(request: Request) {
         phone: telefono,
         country: pais,
         company: empresa,
-        product: productoNombre,
+        product: producto.nombre,
       },
       currentDate
     );

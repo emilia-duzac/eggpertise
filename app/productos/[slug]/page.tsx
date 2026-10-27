@@ -107,7 +107,7 @@ export default async function ProductPage({ params }: PageProps) {
                     {producto.ficha_tecnica ? (
                       <FichaTecnicaModal
                         productoNombre={producto.nombre}
-                        fichaTecnicaUrl={producto.ficha_tecnica.url}
+                        productoSlug={producto.slug}
                         fichaTecnicaNombre={
                           producto.ficha_tecnica.title || "Ficha Técnica"
                         }
@@ -115,6 +115,7 @@ export default async function ProductPage({ params }: PageProps) {
                     ) : (
                       <SolicitarInfoTecnicaModal
                         productoNombre={producto.nombre}
+                        productoSlug={producto.slug}
                       />
                     )}
                   </div>
