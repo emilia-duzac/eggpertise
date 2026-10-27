@@ -1,5 +1,6 @@
 // lib/contentful.ts
 import { Document } from "@contentful/rich-text-types";
+import { unstable_cache } from "next/cache";
 
 // Utility function to generate URL-friendly slugs from names
 export function generateSlug(name: string): string {
@@ -604,27 +605,48 @@ export async function getAllFabricanteSlugs(): Promise<string[]> {
   }
 }
 
+async function fetchProductoBySlug(
+  slug: string
+): Promise<ProductoCompleto | null> {
+  const response = await graphqlRequest(ALL_PRODUCTOS_COMPLETE_QUERY);
+  const productos = response.data.productoCollection
+    .items as ProductoCompleteGraphQLResponse[];
+
+  // Find producto by matching generated slug
+  const found = productos.find((item) => generateSlug(item.nombre) === slug);
+
+  if (!found) {
+    return null;
+  }
+
+  return parseProductoCompletoFromGraphQL(found);
+}
+
 export async function getProductoBySlug(
   slug: string
 ): Promise<ProductoCompleto | null> {
   try {
-    const response = await graphqlRequest(ALL_PRODUCTOS_COMPLETE_QUERY);
-    const productos = response.data.productoCollection
-      .items as ProductoCompleteGraphQLResponse[];
-
-    // Find producto by matching generated slug
-    const found = productos.find((item) => generateSlug(item.nombre) === slug);
-
-    if (!found) {
-      return null;
-    }
-
-    return parseProductoCompletoFromGraphQL(found);
+    return await fetchProductoBySlug(slug);
   } catch (error) {
     console.error("Error fetching producto by slug:", error);
     return null;
   }
 }
+
+// How long the forms reuse a product lookup, in seconds. Fetching the whole
+// catalog on every submission is slow and needless.
+const PRODUCT_LOOKUP_REVALIDATE_SECONDS = 300;
+
+/**
+ * Looks a product up for the forms. Unlike getProductoBySlug it throws when
+ * Contentful fails, so "the product does not exist" (null) can be told apart
+ * from "Contentful is down". Results are cached; errors are not.
+ */
+export const getProductoForForm = unstable_cache(
+  fetchProductoBySlug,
+  ["producto-for-form"],
+  { revalidate: PRODUCT_LOOKUP_REVALIDATE_SECONDS }
+);
 
 export async function getAllProductoSlugs(): Promise<string[]> {
   try {

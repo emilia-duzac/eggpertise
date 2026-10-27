@@ -1,31 +1,18 @@
 import { StatusCodes } from "http-status-codes";
 import { NextResponse } from "next/server";
+import { notificationDate } from "@/lib/email/date";
 import { contactClientEmail, contactTeamEmail } from "@/lib/email/mails/contact";
-import { sendClientConfirmation } from "@/lib/email/send";
+import { sendClientConfirmation, sendTeamEmail } from "@/lib/email/send";
 import { syncLeadToSpreadsheet } from "@/lib/leads-sheet";
-import { mailFrom, sendEmail } from "@/lib/resend";
+import { contactSchema, parseFormBody } from "@/lib/validation";
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { nombre, email, empresa, pais, mensaje } = body;
-
-    // Validate required fields
-    if (!nombre || !email || !empresa || !pais || !mensaje) {
-      return NextResponse.json(
-        { error: "Todos los campos son requeridos" },
-        { status: StatusCodes.BAD_REQUEST }
-      );
+    const parsed = await parseFormBody(request, contactSchema);
+    if (!parsed.success) {
+      return parsed.response;
     }
-
-    // Validate email format
-    const emailRegex = /\S+@\S+\.\S+/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: "El email no es válido" },
-        { status: StatusCodes.BAD_REQUEST }
-      );
-    }
+    const { nombre, email, empresa, pais, mensaje } = parsed.data;
 
     // Recorded before the email so the lead survives a failed send.
     await syncLeadToSpreadsheet({
@@ -37,28 +24,15 @@ export async function POST(request: Request) {
       fuente: "Formulario Web",
     });
 
-    const currentDate = new Date().toLocaleString("es-AR", {
-      timeZone: "America/Argentina/Buenos_Aires",
-    });
-    const teamEmail = contactTeamEmail(
-      { name: nombre, email, company: empresa, country: pais, message: mensaje },
-      currentDate
+    const contactRequest = { name: nombre, email, company: empresa, country: pais, message: mensaje };
+    const data = await sendTeamEmail(
+      contactTeamEmail(contactRequest, notificationDate()),
+      "EggPertise Contact Form"
     );
-
-    const data = await sendEmail({
-      from: mailFrom("EggPertise Contact Form"),
-      to: [process.env.CONTACT_EMAIL || "info@eggpertise.com"],
-      replyTo: teamEmail.replyTo,
-      subject: teamEmail.subject,
-      html: teamEmail.html,
-      text: teamEmail.text,
-    });
 
     // Only after the team has been notified, so we never promise a reply that
     // nobody will see.
-    await sendClientConfirmation(email, () =>
-      contactClientEmail({ name: nombre, email, company: empresa, country: pais, message: mensaje })
-    );
+    await sendClientConfirmation(email, () => contactClientEmail(contactRequest));
 
     return NextResponse.json(
       {
