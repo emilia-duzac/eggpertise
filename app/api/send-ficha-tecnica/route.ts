@@ -1,3 +1,4 @@
+import { StatusCodes } from "http-status-codes";
 import { NextResponse } from "next/server";
 import { getProductoBySlug } from "@/lib/contentful";
 import { fichaClientEmail, fichaTeamEmail } from "@/lib/email/mails/ficha";
@@ -14,7 +15,7 @@ export async function POST(request: Request) {
     if (!nombre || !apellido || !email || !telefono || !pais || !productoSlug) {
       return NextResponse.json(
         { error: "Todos los campos son requeridos" },
-        { status: 400 }
+        { status: StatusCodes.BAD_REQUEST }
       );
     }
 
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
     if (!emailRegex.test(email)) {
       return NextResponse.json(
         { error: "El email no es válido" },
-        { status: 400 }
+        { status: StatusCodes.BAD_REQUEST }
       );
     }
 
@@ -37,7 +38,7 @@ export async function POST(request: Request) {
     if (!producto?.ficha_tecnica) {
       return NextResponse.json(
         { error: "No encontramos la ficha técnica de este producto. Por favor intente nuevamente." },
-        { status: 404 }
+        { status: StatusCodes.NOT_FOUND }
       );
     }
 
@@ -104,7 +105,7 @@ export async function POST(request: Request) {
         success: true,
         message: "Ficha técnica enviada exitosamente",
       },
-      { status: 200 }
+      { status: StatusCodes.OK }
     );
   } catch (error) {
     console.error("Error sending ficha técnica:", error);
@@ -112,7 +113,7 @@ export async function POST(request: Request) {
       {
         error: "Error al enviar la ficha técnica. Por favor intente nuevamente.",
       },
-      { status: 500 }
+      { status: StatusCodes.INTERNAL_SERVER_ERROR }
     );
   }
 }

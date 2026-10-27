@@ -1,3 +1,4 @@
+import { StatusCodes } from "http-status-codes";
 import { NextResponse } from "next/server";
 import { getProductoBySlug } from "@/lib/contentful";
 import { technicalInfoTeamEmail } from "@/lib/email/mails/technical-info";
@@ -12,7 +13,7 @@ export async function POST(request: Request) {
     if (!email || !telefono || !pais || !empresa || !productoSlug) {
       return NextResponse.json(
         { error: "Todos los campos son requeridos" },
-        { status: 400 }
+        { status: StatusCodes.BAD_REQUEST }
       );
     }
 
@@ -20,7 +21,7 @@ export async function POST(request: Request) {
     if (!emailRegex.test(email)) {
       return NextResponse.json(
         { error: "El email no es válido" },
-        { status: 400 }
+        { status: StatusCodes.BAD_REQUEST }
       );
     }
 
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
     if (!producto) {
       return NextResponse.json(
         { error: "No encontramos el producto. Por favor intente nuevamente." },
-        { status: 404 }
+        { status: StatusCodes.NOT_FOUND }
       );
     }
 
@@ -72,12 +73,12 @@ export async function POST(request: Request) {
       text: teamEmail.text,
     });
 
-    return NextResponse.json({ success: true }, { status: 200 });
+    return NextResponse.json({ success: true }, { status: StatusCodes.OK });
   } catch (error) {
     console.error("Error sending solicitud info técnica:", error);
     return NextResponse.json(
       { error: "Error al enviar la solicitud. Por favor intente nuevamente." },
-      { status: 500 }
+      { status: StatusCodes.INTERNAL_SERVER_ERROR }
     );
   }
 }
