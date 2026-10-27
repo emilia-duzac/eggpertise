@@ -6,6 +6,7 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
+    "email:preview": "node scripts/preview-emails.cjs",
     "start": "next start"
   },
   "dependencies": {
