@@ -48,7 +48,7 @@ export function technicalInfoTeamEmail(
     body:
       label("Aviso interno · Requiere respuesta") +
       title(heading) +
-      statusNote(`<b>${status}</b>`, true) +
+      statusNote(raw(`<b>${escapeHtml(status)}</b>`), true) +
       dataTable([
         [{ label: "Producto", value: productName }],
         [
@@ -98,7 +98,9 @@ export function technicalInfoClientEmail(data: {
       label("Información técnica") +
       title(heading) +
       paragraph(
-        `Gracias por escribirnos. Nuestro equipo ya recibió tu pedido sobre <b>${escapeHtml(product.name)}</b> y ${RESPONSE_PROMISE}`
+        raw(
+          `Gracias por escribirnos. Nuestro equipo ya recibió tu pedido sobre <b>${escapeHtml(product.name)}</b> y ${RESPONSE_PROMISE}`
+        )
       ) +
       paragraph(SALES_CONTACT_INTRO) +
       contactCard(contactDrafts.technicalInfo(product.name, company)),

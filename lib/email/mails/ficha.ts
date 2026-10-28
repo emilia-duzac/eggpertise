@@ -49,10 +49,12 @@ export function fichaClientEmail(data: FichaRequest): EmailMessage {
     body:
       label("Ficha técnica") +
       title(heading) +
-      paragraph(escapeHtml(greeting)) +
+      paragraph(greeting) +
       button("Descargar ficha técnica", fichaUrl) +
       note(
-        `También podés acceder desde el navegador copiando el enlace: ${link(fichaUrl, fichaUrl)}`
+        raw(
+          `También podés acceder desde el navegador copiando el enlace: ${link(fichaUrl, fichaUrl)}`
+        )
       ) +
       paragraph(SALES_CONTACT_INTRO) +
       contactCard(contactDrafts.ficha(product.name)),
@@ -91,7 +93,7 @@ export function fichaTeamEmail(data: FichaRequest, date: string): EmailMessage {
     body:
       label("Aviso interno · Ficha enviada") +
       title(heading) +
-      statusNote(`<b>${status}</b>`) +
+      statusNote(raw(`<b>${escapeHtml(status)}</b>`)) +
       dataTable([
         [
           { label: "Producto", value: product.name },

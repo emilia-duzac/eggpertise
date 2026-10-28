@@ -15,7 +15,7 @@ import {
   contactDrafts,
   salesContactText,
 } from "../contact";
-import { escapeHtml, singleLine } from "../escape";
+import { singleLine } from "../escape";
 import { renderEmail, renderPlainText } from "../layout";
 import type { EmailMessage } from "../types";
 
@@ -89,8 +89,8 @@ export function contactClientEmail(data: ContactRequest): EmailMessage {
     body:
       label("Consulta recibida") +
       title(heading) +
-      paragraph(escapeHtml(received)) +
-      paragraph(escapeHtml(contactIntro)) +
+      paragraph(received) +
+      paragraph(contactIntro) +
       contactCard(contactDrafts.contact(name, company)),
   });
 

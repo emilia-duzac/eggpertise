@@ -21,9 +21,9 @@ import {
  * Building blocks for the emails. Every function returns an HTML string with
  * inline styles, which is the only thing mail clients reliably render.
  *
- * Text arguments are escaped here. The exceptions are `paragraph` and `note`,
- * which take markup so a caller can bold a word: escape anything a visitor
- * typed with `escapeHtml` before putting it in there.
+ * Text arguments are escaped here. To bold a word or add a link, pass `raw()`
+ * markup; escape anything a visitor typed with `escapeHtml` before putting it
+ * inside.
  */
 
 /** HTML that is already safe and must not be escaped again. */
@@ -49,12 +49,12 @@ export function title(value: string): string {
   );
 }
 
-export function paragraph(html: string): string {
-  return `<p style="margin:0 0 16px;font-family:${fontStack};font-size:${fontSizes.body}px;line-height:1.6;color:${colors.ink};">${html}</p>`;
+export function paragraph(value: string | Raw): string {
+  return `<p style="margin:0 0 16px;font-family:${fontStack};font-size:${fontSizes.body}px;line-height:1.6;color:${colors.ink};">${text(value)}</p>`;
 }
 
-export function note(html: string): string {
-  return `<p style="margin:0 0 16px;font-family:${fontStack};font-size:${fontSizes.note}px;line-height:1.6;color:${colors.muted};">${html}</p>`;
+export function note(value: string | Raw): string {
+  return `<p style="margin:0 0 16px;font-family:${fontStack};font-size:${fontSizes.note}px;line-height:1.6;color:${colors.muted};">${text(value)}</p>`;
 }
 
 export function link(value: string | Raw, href: string): string {
@@ -78,10 +78,10 @@ export function quote(value: string): string {
 
 /**
  * Says where a request stands. Work still to do gets the rule in the secondary
- * blue; something already done gets the light one. Takes markup, like paragraph.
+ * blue; something already done gets the light one.
  */
-export function statusNote(html: string, pending = false): string {
-  return `<div style="margin:0 0 20px;padding:2px 0 2px 16px;border-left:3px solid ${pending ? colors.navy2 : colors.sky};font-family:${fontStack};font-size:${fontSizes.body}px;line-height:1.6;color:${colors.ink};">${html}</div>`;
+export function statusNote(value: string | Raw, pending = false): string {
+  return `<div style="margin:0 0 20px;padding:2px 0 2px 16px;border-left:3px solid ${pending ? colors.navy2 : colors.sky};font-family:${fontStack};font-size:${fontSizes.body}px;line-height:1.6;color:${colors.ink};">${text(value)}</div>`;
 }
 
 export type DataCell = { label: string; value: string | Raw };
