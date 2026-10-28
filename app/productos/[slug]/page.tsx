@@ -11,6 +11,7 @@ import { MessageCircle, CheckCircle2 } from "lucide-react";
 import { FichaTecnicaModal } from "@/components/ficha-tecnica-modal";
 import { SolicitarInfoTecnicaModal } from "@/components/solicitar-info-tecnica-modal";
 import {
+  DEFAULT_DATASHEET_TITLE,
   getProductoBySlug,
   getAllProductoSlugs,
   getProductosByFabricante,
@@ -107,14 +108,15 @@ export default async function ProductPage({ params }: PageProps) {
                     {producto.ficha_tecnica ? (
                       <FichaTecnicaModal
                         productoNombre={producto.nombre}
-                        fichaTecnicaUrl={producto.ficha_tecnica.url}
+                        productoSlug={producto.slug}
                         fichaTecnicaNombre={
-                          producto.ficha_tecnica.title || "Ficha Técnica"
+                          producto.ficha_tecnica.title || DEFAULT_DATASHEET_TITLE
                         }
                       />
                     ) : (
                       <SolicitarInfoTecnicaModal
                         productoNombre={producto.nombre}
+                        productoSlug={producto.slug}
                       />
                     )}
                   </div>

@@ -1,5 +1,6 @@
 // lib/contentful.ts
 import { Document } from "@contentful/rich-text-types";
+import { unstable_cache } from "next/cache";
 
 // Utility function to generate URL-friendly slugs from names
 export function generateSlug(name: string): string {
@@ -132,6 +133,28 @@ const ALL_PRODUCTOS_COMPLETE_QUERY = `
         fabricante {
           sys { id }
           nombre
+          logo { url }
+        }
+      }
+    }
+  }
+`;
+
+// GraphQL query for the forms: only what an email needs about a product, so the
+// lookup stays small and cheap to cache.
+const PRODUCTOS_FOR_FORMS_QUERY = `
+  query GetProductosForForms {
+    productoCollection(limit: 100) {
+      items {
+        nombre
+        fichaTecnica {
+          url
+          title
+        }
+        fabricante {
+          sys { id }
+          nombre
+          logo { url }
         }
       }
     }
@@ -266,6 +289,7 @@ interface ProductoCompleteGraphQLResponse {
   fabricante?: {
     sys: { id: string };
     nombre: string;
+    logo?: { url: string } | null;
   } | null;
 }
 
@@ -345,6 +369,7 @@ export interface ProductoCompleto {
     id: string;
     slug: string;
     nombre: string;
+    logo: string | null;
   } | null;
 }
 
@@ -494,6 +519,7 @@ function parseProductoCompletoFromGraphQL(
           id: item.fabricante.sys.id,
           slug: generateSlug(item.fabricante.nombre),
           nombre: item.fabricante.nombre,
+          logo: item.fabricante.logo?.url ?? null,
         }
       : null,
   };
@@ -620,6 +646,71 @@ export async function getProductoBySlug(
     console.error("Error fetching producto by slug:", error);
     return null;
   }
+}
+
+/** Name given to a datasheet that has no title in Contentful. */
+export const DEFAULT_DATASHEET_TITLE = "Ficha Técnica";
+
+/** What the forms need about a product: its name, datasheet and manufacturer. */
+export type ProductoForForm = Pick<
+  ProductoCompleto,
+  "slug" | "nombre" | "ficha_tecnica" | "fabricante"
+>;
+
+interface ProductoForFormGraphQLResponse {
+  nombre: string;
+  fichaTecnica?: { url: string; title: string } | null;
+  fabricante?: {
+    sys: { id: string };
+    nombre: string;
+    logo?: { url: string } | null;
+  } | null;
+}
+
+async function fetchProductosForForms(): Promise<ProductoForForm[]> {
+  const response = await graphqlRequest(PRODUCTOS_FOR_FORMS_QUERY);
+  const items = response.data.productoCollection
+    .items as ProductoForFormGraphQLResponse[];
+
+  return items.map((item) => ({
+    slug: generateSlug(item.nombre),
+    nombre: item.nombre,
+    ficha_tecnica: item.fichaTecnica
+      ? { url: item.fichaTecnica.url, title: item.fichaTecnica.title }
+      : undefined,
+    fabricante: item.fabricante
+      ? {
+          id: item.fabricante.sys.id,
+          slug: generateSlug(item.fabricante.nombre),
+          nombre: item.fabricante.nombre,
+          logo: item.fabricante.logo?.url ?? null,
+        }
+      : null,
+  }));
+}
+
+// How long the forms reuse the product list, in seconds.
+const FORM_PRODUCTS_REVALIDATE_SECONDS = 300;
+
+// One entry for the whole list, not one per slug: the slug comes from the
+// visitor, so keying the cache on it would let anyone force a fresh fetch (and a
+// new cache entry) with made-up slugs. Errors are not cached.
+const getProductosForForms = unstable_cache(
+  fetchProductosForForms,
+  ["productos-for-forms"],
+  { revalidate: FORM_PRODUCTS_REVALIDATE_SECONDS }
+);
+
+/**
+ * Looks a product up for the forms. Unlike getProductoBySlug it throws when
+ * Contentful fails, so "the product does not exist" (null) can be told apart
+ * from "Contentful is down".
+ */
+export async function getProductoForForm(
+  slug: string
+): Promise<ProductoForForm | null> {
+  const productos = await getProductosForForms();
+  return productos.find((producto) => producto.slug === slug) ?? null;
 }
 
 export async function getAllProductoSlugs(): Promise<string[]> {

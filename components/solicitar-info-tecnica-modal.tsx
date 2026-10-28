@@ -16,10 +16,12 @@ import { FileQuestion, Loader2, CheckCircle, Mail } from "lucide-react";
 
 interface SolicitarInfoTecnicaModalProps {
   productoNombre: string;
+  productoSlug: string;
 }
 
 export function SolicitarInfoTecnicaModal({
   productoNombre,
+  productoSlug,
 }: SolicitarInfoTecnicaModalProps) {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
@@ -39,7 +41,7 @@ export function SolicitarInfoTecnicaModal({
       const response = await fetch("/api/solicitar-info-tecnica", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, telefono, pais, empresa, productoNombre }),
+        body: JSON.stringify({ email, telefono, pais, empresa, productoSlug }),
       });
 
       const data = await response.json();

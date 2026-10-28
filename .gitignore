@@ -40,3 +40,6 @@ next-env.d.ts
 
 # keep the documented template tracked
 !.env.example
+
+# vista previa de los mails (npm run email:preview)
+/email-preview/
