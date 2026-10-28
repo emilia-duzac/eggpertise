@@ -49,6 +49,15 @@ npm run start
 
 La app queda en http://localhost:3000.
 
+## Vista previa de los emails
+
+```bash
+npm run email:preview
+open email-preview/index.html
+```
+
+Genera los emails con datos de ejemplo, sin enviar nada. Detalle en [`docs/arquitectura.md`](docs/arquitectura.md#emails).
+
 ## Lint y tipos
 
 ```bash
@@ -75,7 +84,8 @@ components/                     secciones de la home, modales, WhatsApp
 components/ui/                  componentes base (shadcn/ui)
 lib/contentful.ts               consultas GraphQL y orden de marcas/productos
 lib/leads-sheet.ts              envío de leads a la planilla
-lib/email-templates.tsx         plantillas de email
+lib/email/                      emails: tema, marco, componentes y un archivo por mail
+scripts/                        vista previa de los emails y generación de sus imágenes
 docs/                           documentación
 ```
 

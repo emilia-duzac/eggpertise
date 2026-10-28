@@ -1,6 +1,6 @@
 # Arquitectura y decisiones
 
-**Última revisión:** 2026-10-20. Esto es lo que no se ve leyendo el código por
+**Última revisión:** 2026-10-27. Esto es lo que no se ve leyendo el código por
 arriba.
 
 ## Flujo de datos
@@ -47,6 +47,35 @@ Detalle de los leads y su planilla en [`leads.md`](leads.md).
 - El cliente de Resend se crea **al enviar**, no al cargar el módulo. Así el build no depende de `RESEND_API_KEY`.
 - **Remitente:** `mailFrom()` arma `noreply@<MAIL_DOMAIN>`. Si no hay variable, usa `eggpertise.com`. Hoy `MAIL_DOMAIN=mail.eggpertise.com`, porque el dominio raíz sigue registrado en la cuenta vieja de Resend (ver [`dns.md`](dns.md)).
 - **Destinatario de los avisos:** `CONTACT_EMAIL`, o `info@eggpertise.com` si no está definida. Una dirección mal formada hace fallar los tres formularios (`Invalid 'to' field`).
-- **Reply-To:** solo el formulario de contacto lo usa (con el mail de quien escribió). El mail de la ficha técnica que recibe el usuario no tiene, así que una respuesta no llega a nadie.
+- **Reply-To:** los mails al cliente (ficha, y confirmaciones de contacto e info técnica) responden a Tomás Strenitz y a `CONTACT_EMAIL` (o `info@eggpertise.com`) juntos. Los avisos al equipo responden al email de quien llenó el formulario. Los datos de Tomás están en `lib/email/contact.ts`.
 - **Orden dentro de cada ruta:** primero se guarda el lead en la planilla y después se manda el mail. Un fallo del mail muestra un error al usuario pero no pierde el lead; si el usuario reintenta, puede quedar duplicado.
 - En la **ficha técnica** se mandan dos mails (aviso al equipo y ficha al usuario) y se intentan ambos aunque falle uno.
+- En **contacto** e **info técnica** se manda el aviso al equipo y, solo si salió bien, la confirmación al cliente. Si la confirmación falla, se loguea y se sigue.
+
+### Diseño de los mails
+
+El diseño sigue el Brand Book de EggPertise. Todo está en `lib/email/`:
+
+| Archivo | Qué tiene |
+|---|---|
+| `theme.ts` | Colores, fuentes, tamaños, espacios, radios y medidas de imágenes, botón y pastillas. Es el único lugar donde se definen |
+| `escape.ts` | `escapeHtml`, `safeHref` y `toSafeUrl`. **Todo lo que escribe el visitante tiene que pasar por acá**, porque los mails son HTML |
+| `contact.ts` | Datos de la empresa y del contacto de ventas, enlaces de WhatsApp y mail, y los textos precargados |
+| `components.ts` | Piezas reutilizables: título, botón, tabla de datos, tarjeta de contacto |
+| `layout.ts` | Marco común (`renderEmail`) y versión en texto plano (`renderPlainText`) |
+| `product.ts` | Línea y proveedor de un producto, a partir de Contentful, para el sello |
+| `send.ts` | `sendTeamEmail`, `sendClientEmail` y `sendClientConfirmation` (esta nunca lanza error) |
+| `date.ts` | Fecha y hora de los avisos al equipo, en horario de Argentina |
+| `mails/` | Un archivo por mail. Cada función devuelve `{ subject, html, text, replyTo }` |
+
+- **Texto plano:** cada mail manda también `text`. Mejora la entrega y cubre clientes que no muestran HTML.
+- **Estilos en línea y sin fuentes web:** Gmail y Outlook no cargan fuentes web ni SVG. La fuente es Lato con Calibri y Source Sans 3 de respaldo (Arial no está permitida por el Brand Book).
+- **Imágenes:** los mails cargan el logo y los íconos por URL absoluta desde `public/brand/email/` (PNG, al triple del tamaño con que se muestran). La URL base es siempre `https://www.eggpertise.com` (`SITE_URL` en `lib/email/contact.ts`): hasta que los PNG estén desplegados en producción, un mail real muestra las imágenes rotas. Para revisar el diseño antes, usar `npm run email:preview`, que las lee del disco.
+- **Regenerar las imágenes:** `npm i --no-save sharp && node scripts/build-email-assets.cjs`. Las fuentes están en `scripts/email-assets/`. `sharp` no es dependencia del proyecto.
+- **Vista previa:** `npm run email:preview` genera los mails con datos de ejemplo en `email-preview/` (ignorada por git) sin enviar nada. Abrir `email-preview/index.html`.
+- **Sello del proveedor:** la ficha lleva abajo a la derecha el logo de EggPertise junto al del proveedor, y en Compostaje solo el de Compostaje. `lib/email/product.ts` lo deduce del producto: si el fabricante es `eggpertise-compostaje` o `tratamiento-de-estiercol-eggpertise` es línea propia; si no, se usa el logo del fabricante en Contentful (pedido como PNG de 288 px con `fm=png`, porque Gmail no muestra SVG ni WebP). Un fabricante sin logo deja el mail sin sello.
+- **Los formularios mandan solo el producto:** los modales de ficha y de info técnica envían `productoSlug`, y la ruta busca en Contentful el nombre, la ficha, el proveedor y la línea. Nada de eso viaja desde el navegador, así que nadie puede armar un mail oficial con un logo, un nombre o un enlace de descarga inventados. Si el producto no existe, la ruta devuelve 404; si Contentful no responde, 503. En los dos casos responde antes de guardar el lead.
+- **Validación de los formularios:** `lib/validation.ts` valida el cuerpo de cada ruta con `zod` (tipos, largos máximos y dirección de email). El email se valida con la regla de `zod`, que rechaza espacios, comas y `<>`: sin eso, un valor como `a@b.com,otra@x.com` convertiría el formulario en un relay de mails. Un campo que falta o es de otro tipo da 400 "Todos los campos son requeridos"; un email inválido, "El email no es válido"; un campo demasiado largo, "Alguno de los campos supera el largo permitido".
+- **Búsqueda del producto:** `getProductoForForm` (`lib/contentful.ts`) usa una consulta liviana (nombre, ficha y fabricante) y guarda la lista entera 5 minutos con **una sola clave** (`unstable_cache`). La clave no incluye el slug, que lo manda el visitante: si no, cualquiera podría forzar una consulta nueva y una entrada nueva en la caché con slugs inventados. A diferencia de `getProductoBySlug`, lanza error si Contentful falla, para distinguir "el producto no existe" (404) de "Contentful no responde" (503). Los errores no se guardan en la caché.
+- **Pendiente: límite de envíos.** Los formularios no tienen límite por IP, captcha ni campo trampa, y cada uno manda un mail a la dirección que escribe el visitante. Conviene agregar una regla de rate limit en el firewall de Vercel o un captcha.
+- **Outlook de escritorio** ignora los bordes redondeados: los botones se ven cuadrados ahí.
