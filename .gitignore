@@ -43,3 +43,6 @@ next-env.d.ts
 
 # vista previa de los mails (npm run email:preview)
 /email-preview/
+
+# andamiaje temporal de SDD (investigación, especificación y plan de cada cambio)
+/docs/plans/

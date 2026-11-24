@@ -113,7 +113,9 @@ docs/                           documentación
 | [`docs/contenido.md`](docs/contenido.md) | Modelo de Contentful y carga de contenido |
 | [`docs/leads.md`](docs/leads.md) | Cómo viaja un lead y cómo diagnosticar si dejan de llegar |
 | [`docs/arquitectura.md`](docs/arquitectura.md) | Decisiones y cosas no obvias del código |
-| [`CLAUDE.md`](CLAUDE.md) | Reglas cortas para agentes de código |
+| [`docs/convenciones.md`](docs/convenciones.md) | Buenas prácticas de código, diseño, accesibilidad y traducción |
+| [`docs/mapa-del-codigo.md`](docs/mapa-del-codigo.md) | Dónde se resuelve cada pedido y mapa del código |
+| [`CLAUDE.md`](CLAUDE.md) | Reglas para agentes de código; los procesos están en `.claude/skills/` |
 
 `docs/superpowers/` contiene un spec y un plan de i18n (español/portugués) que
 **no se implementaron**; ver [`docs/arquitectura.md`](docs/arquitectura.md).
