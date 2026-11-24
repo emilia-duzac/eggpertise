@@ -50,6 +50,15 @@ npm run start
 
 La app queda en http://localhost:3000.
 
+## Vista previa de los emails
+
+```bash
+npm run email:preview
+open email-preview/index.html
+```
+
+Genera los emails con datos de ejemplo, sin enviar nada. Detalle en [`docs/arquitectura.md`](docs/arquitectura.md#emails).
+
 ## Lint y tipos
 
 ```bash
@@ -76,7 +85,8 @@ components/                     secciones de la home, modales, WhatsApp
 components/ui/                  componentes base (shadcn/ui)
 lib/contentful.ts               consultas GraphQL y orden de marcas/productos
 lib/leads-sheet.ts              envío de leads a la planilla
-lib/email-templates.tsx         plantillas de email
+lib/email/                      emails: tema, marco, componentes y un archivo por mail
+scripts/                        vista previa de los emails y generación de sus imágenes
 docs/                           documentación
 ```
 
@@ -104,7 +114,9 @@ docs/                           documentación
 | [`docs/contenido.md`](docs/contenido.md) | Modelo de Contentful y carga de contenido |
 | [`docs/leads.md`](docs/leads.md) | Cómo viaja un lead y cómo diagnosticar si dejan de llegar |
 | [`docs/arquitectura.md`](docs/arquitectura.md) | Decisiones y cosas no obvias del código |
-| [`CLAUDE.md`](CLAUDE.md) | Reglas cortas para agentes de código |
+| [`docs/convenciones.md`](docs/convenciones.md) | Buenas prácticas de código, diseño, accesibilidad y traducción |
+| [`docs/mapa-del-codigo.md`](docs/mapa-del-codigo.md) | Dónde se resuelve cada pedido y mapa del código |
+| [`CLAUDE.md`](CLAUDE.md) | Reglas para agentes de código; los procesos están en `.claude/skills/` |
 
 `docs/superpowers/` contiene un spec y un plan de i18n (español/portugués) que
 **no se implementaron**; ver [`docs/arquitectura.md`](docs/arquitectura.md).

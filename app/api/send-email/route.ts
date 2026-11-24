@@ -1,29 +1,19 @@
+import { StatusCodes } from "http-status-codes";
 import { NextResponse } from "next/server";
-import { getContactFormEmailTemplate } from "@/lib/email-templates";
+import { CONTACT_FORM_SENDER } from "@/lib/email/contact";
+import { notificationDate } from "@/lib/email/date";
+import { contactClientEmail, contactTeamEmail } from "@/lib/email/mails/contact";
+import { sendClientConfirmation, sendTeamEmail } from "@/lib/email/send";
 import { syncLeadToSpreadsheet } from "@/lib/leads-sheet";
-import { mailFrom, sendEmail } from "@/lib/resend";
+import { contactSchema, parseFormBody } from "@/lib/validation";
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { nombre, email, empresa, pais, mensaje } = body;
-
-    // Validate required fields
-    if (!nombre || !email || !empresa || !pais || !mensaje) {
-      return NextResponse.json(
-        { error: "Todos los campos son requeridos" },
-        { status: 400 }
-      );
+    const parsed = await parseFormBody(request, contactSchema);
+    if (!parsed.success) {
+      return parsed.response;
     }
-
-    // Validate email format
-    const emailRegex = /\S+@\S+\.\S+/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: "El email no es válido" },
-        { status: 400 }
-      );
-    }
+    const { nombre, email, empresa, pais, mensaje } = parsed.data;
 
     // Recorded before the email so the lead survives a failed send.
     await syncLeadToSpreadsheet({
@@ -35,13 +25,15 @@ export async function POST(request: Request) {
       fuente: "Formulario Web",
     });
 
-    const data = await sendEmail({
-      from: mailFrom("EggPertise Contact Form"),
-      to: [process.env.CONTACT_EMAIL || "info@eggpertise.com"],
-      replyTo: email,
-      subject: `Nueva consulta de ${nombre} - ${empresa}`,
-      html: getContactFormEmailTemplate({ nombre, email, empresa, pais, mensaje }),
-    });
+    const contactRequest = { name: nombre, email, company: empresa, country: pais, message: mensaje };
+    const data = await sendTeamEmail(
+      contactTeamEmail(contactRequest, notificationDate()),
+      CONTACT_FORM_SENDER
+    );
+
+    // Only after the team has been notified, so we never promise a reply that
+    // nobody will see.
+    await sendClientConfirmation(email, () => contactClientEmail(contactRequest));
 
     return NextResponse.json(
       {
@@ -49,7 +41,7 @@ export async function POST(request: Request) {
         message: "Email enviado exitosamente",
         data,
       },
-      { status: 200 }
+      { status: StatusCodes.OK }
     );
   } catch (error) {
     console.error("Error sending email:", error);
@@ -57,7 +49,7 @@ export async function POST(request: Request) {
       {
         error: "Error al enviar el email. Por favor intente nuevamente.",
       },
-      { status: 500 }
+      { status: StatusCodes.INTERNAL_SERVER_ERROR }
     );
   }
 }

@@ -1,6 +1,6 @@
 # Leads: formularios, email y planilla
 
-**Última revisión:** 2026-10-20.
+**Última revisión:** 2026-10-27.
 
 Un *lead* es una persona que dejó sus datos en un formulario de la web.
 Cada lead se envía por **email** y además se copia a una **planilla de Google** para hacer seguimiento.
@@ -14,11 +14,25 @@ Formulario web
               └─► POST a LEADS_SHEET_ENDPOINT (Web App de Google Apps Script)
                     └─► el script agrega una fila en la hoja "Leads"
         2. Resend manda un email a CONTACT_EMAIL        (aviso al equipo)
+        3. Resend manda un email a quien llenó el formulario (confirmación o ficha)
 ```
 
 - La planilla es **"LEADS WEB EggPertise"** (pestañas `Leads`, `Dashboard`, `Config`), en el Shared Drive "Marketing". ID en [`accesos.md`](accesos.md).
 - El script está en [`docs/apps-script/lead-capture.gs`](apps-script/lead-capture.gs). Mapea los datos **por nombre de columna** (fila 1 de la hoja `Leads`) y completa solo `ID`, `Fecha` y `Fecha (API raw)`. Si una columna no existe, la ignora sin avisar.
 - Los tres formularios están conectados. Cada uno marca su origen en la columna `Fuente` (ver [`arquitectura.md`](arquitectura.md)).
+
+## Qué mail recibe cada quien
+
+| Formulario | Aviso al equipo (`CONTACT_EMAIL`) | Mail al cliente |
+|---|---|---|
+| Contacto | Sí. Al responder, va a quien escribió | Confirmación de la consulta. Al responder, va a Tomás y a `info@` |
+| Info técnica | Sí. Al responder, va a quien escribió | Confirmación del pedido. Al responder, va a Tomás y a `info@` |
+| Ficha técnica | Sí. Al responder, va a quien pidió la ficha | La ficha con el enlace de descarga. Al responder, va a Tomás y a `info@` |
+
+- **Contacto e info técnica:** el mail al cliente se manda **después** del aviso al equipo, y solo si ese salió bien, para no prometer una respuesta que nadie va a ver. Si la confirmación falla, se registra `Confirmation email failed for a @<dominio> address` en el log y el usuario igual ve "enviado".
+- **Ficha técnica:** el aviso al equipo y la ficha al cliente se mandan **en paralelo** y se intentan los dos. El usuario ve un error solo si falla **su** mail. Si falla solo el aviso al equipo, se registra `Team notification for a ficha request failed` y el usuario ve "enviado": ya tiene la ficha, y un error lo llevaría a reintentar y duplicar el lead.
+
+El diseño de los mails y dónde editar sus textos están en [`arquitectura.md`](arquitectura.md#emails).
 
 ## Por qué puede fallar sin que nadie se entere
 

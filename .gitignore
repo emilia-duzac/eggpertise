@@ -40,3 +40,9 @@ next-env.d.ts
 
 # keep the documented template tracked
 !.env.example
+
+# vista previa de los mails (npm run email:preview)
+/email-preview/
+
+# andamiaje temporal de SDD (investigación, especificación y plan de cada cambio)
+/docs/plans/

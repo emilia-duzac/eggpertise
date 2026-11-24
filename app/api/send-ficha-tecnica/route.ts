@@ -1,42 +1,48 @@
+import { StatusCodes } from "http-status-codes";
 import { NextResponse } from "next/server";
-import {
-  getFichaTecnicaNotificationTemplate,
-  getFichaTecnicaUserTemplate,
-} from "@/lib/email-templates";
+import { DEFAULT_DATASHEET_TITLE } from "@/lib/contentful";
+import { notificationDate } from "@/lib/email/date";
+import { toSafeUrl } from "@/lib/email/escape";
+import { fichaClientEmail, fichaTeamEmail } from "@/lib/email/mails/ficha";
+import { emailProduct } from "@/lib/email/product";
+import { sendClientEmail, sendTeamEmail } from "@/lib/email/send";
+import { DATASHEET_NOT_FOUND, findProductForForm } from "@/lib/form-product";
 import { syncLeadToSpreadsheet } from "@/lib/leads-sheet";
-import { mailFrom, sendEmail } from "@/lib/resend";
+import { fichaSchema, parseFormBody } from "@/lib/validation";
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { nombre, apellido, email, telefono, pais, productoNombre, fichaTecnicaUrl, fichaTecnicaNombre } = body;
+    const parsed = await parseFormBody(request, fichaSchema);
+    if (!parsed.success) {
+      return parsed.response;
+    }
+    const { nombre, apellido, email, telefono, pais, productoSlug } = parsed.data;
 
-    // Validate required fields
-    if (!nombre || !apellido || !email || !telefono || !pais || !productoNombre || !fichaTecnicaUrl || !fichaTecnicaNombre) {
+    // The product, its datasheet and its supplier come from Contentful, never
+    // from the request: the form only says which product it is.
+    const lookup = await findProductForForm(productoSlug, DATASHEET_NOT_FOUND);
+    if (!lookup.found) {
+      return lookup.response;
+    }
+    const { producto } = lookup;
+
+    if (!producto.ficha_tecnica) {
       return NextResponse.json(
-        { error: "Todos los campos son requeridos" },
-        { status: 400 }
+        { error: DATASHEET_NOT_FOUND },
+        { status: StatusCodes.NOT_FOUND }
       );
     }
 
-    // Validate email format
-    const emailRegex = /\S+@\S+\.\S+/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: "El email no es válido" },
-        { status: 400 }
-      );
-    }
-
-    const templateData = {
-      nombre,
-      apellido,
+    const product = emailProduct(producto);
+    const fichaRequest = {
+      firstName: nombre,
+      lastName: apellido,
       email,
-      telefono,
-      pais,
-      productoNombre,
-      fichaTecnicaUrl: encodeURI(fichaTecnicaUrl),
-      fichaTecnicaNombre,
+      phone: telefono,
+      country: pais,
+      product,
+      fichaName: producto.ficha_tecnica.title || DEFAULT_DATASHEET_TITLE,
+      fichaUrl: toSafeUrl(producto.ficha_tecnica.url),
     };
 
     // Recorded before the emails so the lead survives a failed send.
@@ -45,34 +51,25 @@ export async function POST(request: Request) {
       email,
       pais,
       telefono,
-      mensaje: `Descarga de ficha técnica: ${productoNombre}`,
+      mensaje: `Descarga de ficha técnica: ${product.name}`,
       fuente: "Descarga Ficha Técnica",
     });
 
-    // Both are attempted even if one fails: a rejected admin notification
-    // must not stop the user from getting the ficha técnica they asked for.
-    const results = await Promise.allSettled([
-      // Notification to admin
-      sendEmail({
-        from: mailFrom(),
-        to: [process.env.CONTACT_EMAIL || "info@eggpertise.com"],
-        subject: `Nueva solicitud de ficha técnica: ${productoNombre}`,
-        html: getFichaTecnicaNotificationTemplate(templateData),
-      }),
-      // Ficha técnica to user
-      sendEmail({
-        from: mailFrom(),
-        to: [email],
-        subject: `Ficha Técnica - ${productoNombre}`,
-        html: getFichaTecnicaUserTemplate(templateData),
-      }),
+    // Both are attempted even if one fails: a rejected team notification must
+    // not stop the visitor from getting the ficha técnica they asked for.
+    const [teamResult, clientResult] = await Promise.allSettled([
+      sendTeamEmail(fichaTeamEmail(fichaRequest, notificationDate())),
+      sendClientEmail(email, fichaClientEmail(fichaRequest)),
     ]);
 
-    const failed = results.find(
-      (result): result is PromiseRejectedResult => result.status === "rejected"
-    );
-    if (failed) {
-      throw failed.reason;
+    // The visitor only sees an error when their own email failed. If just the
+    // notification failed they already have the ficha, and an error would make
+    // them retry and duplicate the lead.
+    if (teamResult.status === "rejected") {
+      console.error("Team notification for a ficha request failed:", teamResult.reason);
+    }
+    if (clientResult.status === "rejected") {
+      throw clientResult.reason;
     }
 
     return NextResponse.json(
@@ -80,7 +77,7 @@ export async function POST(request: Request) {
         success: true,
         message: "Ficha técnica enviada exitosamente",
       },
-      { status: 200 }
+      { status: StatusCodes.OK }
     );
   } catch (error) {
     console.error("Error sending ficha técnica:", error);
@@ -88,7 +85,7 @@ export async function POST(request: Request) {
       {
         error: "Error al enviar la ficha técnica. Por favor intente nuevamente.",
       },
-      { status: 500 }
+      { status: StatusCodes.INTERNAL_SERVER_ERROR }
     );
   }
 }
