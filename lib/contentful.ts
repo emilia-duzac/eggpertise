@@ -373,57 +373,49 @@ export interface ProductoCompleto {
   } | null;
 }
 
-const FABRICANTE_ORDER = [
-  "tratamiento-de-estiercol-eggpertise",
-  "eggpertise-compostaje",
-  "dacs",
-  "winterwarm",
-  "farmrob",
-  "jaulas",
-  "sistemas-de-jaulas",
-  "sime-tek",
-  "landmeco",
-];
+type HomeOrderField = "proveedoresOrdenados" | "productosDestacadosOrdenados";
 
-const PRODUCTO_PRINCIPAL_ORDER = [
-  "sistema-de-compostaje-y-biodigestion",
-  "magfan-plus",
-  "calefactor-dxc-80",
-  "jaulas-de-cria-recria",
-];
+const NOT_ORDERED = Number.MAX_SAFE_INTEGER;
 
-function getProductoPrincipalOrderIndex(producto: Producto): number {
-  const orderIndex = PRODUCTO_PRINCIPAL_ORDER.indexOf(producto.slug);
-
-  return orderIndex === -1 ? Number.MAX_SAFE_INTEGER : orderIndex;
+// Ids of the entries, in the order the marketing team arranged them in the
+// "Configuración de la home" entry of Contentful. One request per field so a
+// missing field or content type only affects its own list. On any failure it
+// returns [] and the caller falls back to alphabetical order.
+async function getHomeOrderIds(field: HomeOrderField): Promise<string[]> {
+  try {
+    const response = await graphqlRequest(`
+      query GetHomeOrder {
+        configuracionHomeCollection(limit: 1) {
+          items {
+            ${field}Collection {
+              items { sys { id } }
+            }
+          }
+        }
+      }
+    `);
+    const items =
+      response.data.configuracionHomeCollection.items[0]?.[`${field}Collection`]
+        ?.items ?? [];
+    return (items as ({ sys: { id: string } } | null)[])
+      .filter((item) => item !== null)
+      .map((item) => item.sys.id);
+  } catch (error) {
+    console.error(`Error fetching home order (${field}):`, error);
+    return [];
+  }
 }
 
-function sortProductosPrincipales(productos: Producto[]): Producto[] {
-  return [...productos].sort((a, b) => {
+// Listed ids first, in the given order; the rest at the end, alphabetically.
+function sortByOrderedIds<T extends { id: string; nombre: string }>(
+  items: T[],
+  orderedIds: string[]
+): T[] {
+  const position = new Map(orderedIds.map((id, index) => [id, index]));
+
+  return [...items].sort((a, b) => {
     const orderDiff =
-      getProductoPrincipalOrderIndex(a) - getProductoPrincipalOrderIndex(b);
-
-    if (orderDiff !== 0) {
-      return orderDiff;
-    }
-
-    return a.nombre.localeCompare(b.nombre, "es", { sensitivity: "base" });
-  });
-}
-
-function getFabricanteOrderIndex(distributor: Distributor): number {
-  const slug = distributor.slug;
-  const normalizedName = generateSlug(distributor.nombre);
-  const orderIndex = FABRICANTE_ORDER.findIndex(
-    (orderedSlug) => orderedSlug === slug || orderedSlug === normalizedName
-  );
-
-  return orderIndex === -1 ? Number.MAX_SAFE_INTEGER : orderIndex;
-}
-
-function sortFabricantes(distributors: Distributor[]): Distributor[] {
-  return [...distributors].sort((a, b) => {
-    const orderDiff = getFabricanteOrderIndex(a) - getFabricanteOrderIndex(b);
+      (position.get(a.id) ?? NOT_ORDERED) - (position.get(b.id) ?? NOT_ORDERED);
 
     if (orderDiff !== 0) {
       return orderDiff;
@@ -558,7 +550,10 @@ export async function getFabricantes(): Promise<Distributor[]> {
     const response = await graphqlRequest(FABRICANTES_QUERY);
     const fabricantes = response.data.fabricanteCollection
       .items as FabricanteGraphQLResponse[];
-    return sortFabricantes(fabricantes.map(parseDistributorFromGraphQL));
+    return sortByOrderedIds(
+      fabricantes.map(parseDistributorFromGraphQL),
+      await getHomeOrderIds("proveedoresOrdenados")
+    );
   } catch (error) {
     console.error("Error fetching fabricantes:", error);
     return [];
@@ -732,7 +727,10 @@ export async function getProductosPrincipales(): Promise<Producto[]> {
     const response = await graphqlRequest(PRODUCTOS_PRINCIPALES_QUERY);
     const productos = response.data.productoCollection
       .items as ProductoGraphQLResponse[];
-    return sortProductosPrincipales(productos.map(parseProductoFromGraphQL));
+    return sortByOrderedIds(
+      productos.map(parseProductoFromGraphQL),
+      await getHomeOrderIds("productosDestacadosOrdenados")
+    );
   } catch (error) {
     console.error("Error fetching productos principales:", error);
     return [];

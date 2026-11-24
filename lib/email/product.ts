@@ -2,7 +2,7 @@ import type { ProductoForForm } from "../contentful";
 import type { ProductContext } from "./types";
 
 // Manufacturers that are EggPertise's own line. Slugs are generated from the
-// manufacturer's name in Contentful (see FABRICANTE_ORDER in lib/contentful.ts).
+// manufacturer's name in Contentful (see generateSlug in lib/contentful.ts).
 const COMPOSTAJE_MANUFACTURERS = [
   "eggpertise-compostaje",
   "tratamiento-de-estiercol-eggpertise",
