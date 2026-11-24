@@ -20,7 +20,7 @@ La lista exacta de campos de cada uno está en las consultas GraphQL de `lib/con
 - **Publicar, no solo guardar.** Un borrador no aparece en el sitio.
 - **La URL sale del `slug`** (`/productos/<slug>`, `/distribuidoras/<slug>`). Cambiar un slug cambia la URL y rompe los links existentes.
 - **Productos destacados de la home:** los que tienen `principal = true`.
-- **Orden de la home:** lo define el equipo en Contentful, en la entrada **configuracionHome** (ver "Cambiar el orden de la home" más abajo). El código ya no tiene listas fijas.
+- **Orden de la home:** lo define el equipo en Contentful, en la entrada **configuracionHome** (ver [`manual-usuario/orden-de-la-home.md`](manual-usuario/orden-de-la-home.md)). El código ya no tiene listas fijas.
 - **Noticias:** se muestran las 6 más recientes por `fechaPublicacion`. Si no hay ninguna publicada, la sección se oculta.
 - **Cambios tardan hasta 4 horas** en verse (ver [`deploy.md`](deploy.md)).
 
@@ -30,15 +30,7 @@ El contenido de Contentful está en un solo idioma. La traducción del sitio se 
 
 ## Cambiar el orden de la home
 
-Pensado para el equipo de marketing: no hace falta tocar código.
-
-1. Entrá a Contentful → pestaña **Content** → filtrá por el tipo **configuracionHome** (la entrada aparece como "Untitled" y es **la única**; no crees otra).
-2. Abrí la entrada. Hay dos listas:
-   - **proveedoresOrdenados**: el orden de los proveedores en la home.
-   - **productosDestacadosOrdenados**: el orden de los productos destacados.
-3. Para reordenar, agarrá los **seis puntitos** de la izquierda de una tarjeta y arrastrala a su nuevo lugar. Para sumar uno nuevo, **Add content → Add existing content**.
-4. Apretá **Publish** (o **Publish changes**). Sin publicar, el sitio no se entera.
-5. El cambio se ve en el sitio en **hasta 4 horas**. Para verlo ya, alguien del equipo técnico puede hacer un *Redeploy* de Production (ver [`deploy.md`](deploy.md)).
+Para el equipo de marketing, con capturas y paso a paso: [`manual-usuario/orden-de-la-home.md`](manual-usuario/orden-de-la-home.md). En resumen: se edita la **única** entrada `configuracionHome` en Contentful (dos listas ordenables), se publica, y el cambio se ve en hasta 4 horas.
 
 Reglas:
 - Lo que no está en la lista aparece igual en el sitio, **al final y por orden alfabético**. Para ocultar un proveedor o un producto, despublicalo.

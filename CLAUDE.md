@@ -95,6 +95,7 @@ El flujo automático de la skill `publicar-cambio` **no** aplica a estos cambios
 | Los mails (diseño, textos o envío) | `docs/arquitectura.md`, sección Emails |
 | Consultas a Contentful o el orden de la home | `docs/contenido.md` |
 | Cargar contenido (productos, marcas, noticias) | `docs/contenido.md` |
+| Guiar a marketing o diseño en una tarea de Contentful (p. ej. cambiar el orden de la home) | `docs/manual-usuario/` (seguí el manual paso a paso, en lenguaje simple) |
 | Variables de entorno, deploy o repo | `docs/deploy.md` |
 | Dominio, DNS o el dominio de los mails | `docs/dns.md` |
 | Servicios y cuentas | `docs/accesos.md` |
