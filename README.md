@@ -82,7 +82,7 @@ app/
   api/send-ficha-tecnica/       descarga de ficha técnica
 components/                     secciones de la home, modales, WhatsApp
 components/ui/                  componentes base (shadcn/ui)
-lib/contentful.ts               consultas GraphQL y orden de marcas/productos
+lib/contentful.ts               consultas GraphQL (el orden de la home viene de Contentful)
 lib/leads-sheet.ts              envío de leads a la planilla
 lib/email/                      emails: tema, marco, componentes y un archivo por mail
 scripts/                        vista previa de los emails y generación de sus imágenes
