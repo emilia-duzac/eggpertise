@@ -12,7 +12,7 @@ app/api/*                       formularios (contacto, info técnica, ficha) →
 app/globals.css                 colores y tokens de diseño
 components/                     secciones de la home, modales, WhatsApp
 components/ui/                  componentes base (shadcn/ui)
-lib/contentful.ts               consultas a Contentful y orden de la home
+lib/contentful.ts               consultas a Contentful (el orden de la home viene de Contentful)
 lib/email/                      diseño y envío de mails
 public/                         imágenes y archivos estáticos
 docs/                           documentación del proyecto
@@ -24,7 +24,7 @@ docs/                           documentación del proyecto
 |---|---|
 | "Cambiar el texto del banner principal" | `components/hero-section.tsx` |
 | "Agregar un producto / marca / noticia" | Contentful (no código); guiar a la persona |
-| "Cambiar el orden de las marcas o productos de la home" | Listas de slugs en `lib/contentful.ts` (con confirmación) |
+| "Cambiar el orden de los proveedores o productos de la home" | Contentful (no código): entrada `configuracionHome`; guiar con el instructivo de `docs/contenido.md` |
 | "Cambiar el número o mensaje de WhatsApp" | `components/whatsapp-button.tsx` y `lib/email/contact.ts` (para mails) |
 | "Cambiar el pie de página o los datos de contacto" | `components/footer.tsx`, `components/contact-section.tsx` y `lib/email/contact.ts` |
 | "Agregar una sección nueva a la home" | Componente nuevo en `components/` + registrarlo en `app/page.tsx` |

@@ -1,6 +1,6 @@
 # Contenido (Contentful)
 
-**Última revisión:** 2026-10-20.
+**Última revisión:** 2026-11-23.
 
 Todo el contenido del sitio sale de Contentful, space `qjhuufa729ye`. Se lee con la Content Delivery API (GraphQL, solo contenido **publicado**) desde `lib/contentful.ts`. Para editar hace falta rol *Editor* o superior (ver [`accesos.md`](accesos.md)).
 
@@ -10,6 +10,7 @@ Todo el contenido del sitio sale de Contentful, space `qjhuufa729ye`. Se lee con
 |---|---|---|
 | `fabricante` | Marca o fabricante representado | `nombre`, `logo`, `descripcionCorta`, `descripcionLarga` (rich text), `imagenPortada`, `link` |
 | `producto` | Producto de un fabricante | `slug`, `nombre`, `principal` (booleano), `imagenes`, `videos`, textos y bullets de la ficha; referencia a su `fabricante` |
+| `configuracionHome` | Una sola entrada con el orden de la home | `proveedoresOrdenados` (lista de `fabricante`) y `productosDestacadosOrdenados` (lista de `producto`) |
 | `noticia` | Nota de la sección Noticias | `slug`, `fechaPublicacion` y campos de texto e imagen |
 
 La lista exacta de campos de cada uno está en las consultas GraphQL de `lib/contentful.ts`. Si agregás un campo en Contentful, el sitio no lo muestra hasta que se agregue a la consulta y al componente.
@@ -19,10 +20,29 @@ La lista exacta de campos de cada uno está en las consultas GraphQL de `lib/con
 - **Publicar, no solo guardar.** Un borrador no aparece en el sitio.
 - **La URL sale del `slug`** (`/productos/<slug>`, `/distribuidoras/<slug>`). Cambiar un slug cambia la URL y rompe los links existentes.
 - **Productos destacados de la home:** los que tienen `principal = true`.
-- **Orden de la home:** NO se define en Contentful. Está escrito a mano en `lib/contentful.ts` (`FABRICANTE_ORDER` y `PRODUCTO_PRINCIPAL_ORDER`, listas de slugs). Lo que no está en esas listas va al final, ordenado alfabéticamente. Para cambiar el orden hay que editar el código.
+- **Orden de la home:** lo define el equipo en Contentful, en la entrada **configuracionHome** (ver "Cambiar el orden de la home" más abajo). El código ya no tiene listas fijas.
 - **Noticias:** se muestran las 6 más recientes por `fechaPublicacion`. Si no hay ninguna publicada, la sección se oculta.
 - **Cambios tardan hasta 4 horas** en verse (ver [`deploy.md`](deploy.md)).
 
 ## Idiomas
 
 El contenido de Contentful está en un solo idioma. La traducción del sitio se hace con el widget de Google Translate del navegador, no con locales de Contentful (ver [`arquitectura.md`](arquitectura.md)).
+
+## Cambiar el orden de la home
+
+Pensado para el equipo de marketing: no hace falta tocar código.
+
+1. Entrá a Contentful → pestaña **Content** → filtrá por el tipo **configuracionHome** (la entrada aparece como "Untitled" y es **la única**; no crees otra).
+2. Abrí la entrada. Hay dos listas:
+   - **proveedoresOrdenados**: el orden de los proveedores en la home.
+   - **productosDestacadosOrdenados**: el orden de los productos destacados.
+3. Para reordenar, agarrá los **seis puntitos** de la izquierda de una tarjeta y arrastrala a su nuevo lugar. Para sumar uno nuevo, **Add content → Add existing content**.
+4. Apretá **Publish** (o **Publish changes**). Sin publicar, el sitio no se entera.
+5. El cambio se ve en el sitio en **hasta 4 horas**. Para verlo ya, alguien del equipo técnico puede hacer un *Redeploy* de Production (ver [`deploy.md`](deploy.md)).
+
+Reglas:
+- Lo que no está en la lista aparece igual en el sitio, **al final y por orden alfabético**. Para ocultar un proveedor o un producto, despublicalo.
+- En los productos, la lista define solo el **orden**: se muestran los que tienen marcado `principal`. Un producto de la lista sin `principal` no aparece.
+- Una referencia a algo despublicado se ignora.
+- Si la entrada no existe, no está publicada o Contentful falla, el sitio muestra el orden alfabético: no se rompe.
+- Los campos de este tipo se identifican por sus ids (`configuracionHome`, `proveedoresOrdenados`, `productosDestacadosOrdenados`): **no se pueden cambiar** sin cambiar también el código.
