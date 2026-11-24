@@ -11,7 +11,7 @@ Todo el contenido del sitio sale de Contentful, space `qjhuufa729ye`. Se lee con
 | `fabricante` | Marca o fabricante representado | `nombre`, `logo`, `descripcionCorta`, `descripcionLarga` (rich text), `imagenPortada`, `link` |
 | `producto` | Producto de un fabricante | `slug`, `nombre`, `principal` (booleano), `imagenes`, `videos`, textos y bullets de la ficha; referencia a su `fabricante` |
 | `configuracionHome` | Una sola entrada con el orden de la home | `proveedoresOrdenados` (lista de `fabricante`) y `productosDestacadosOrdenados` (lista de `producto`) |
-| `noticia` | Nota de la sección Noticias | `slug`, `fechaPublicacion` y campos de texto e imagen |
+| `noticia` | Nota de la sección Noticias. **Hoy no existe en Contentful** (a 2026-11-23): el código la pide pero el tipo no está creado, por eso la sección no se muestra | `titulo`, `slug`, `url`, `extracto`, `contenido`, `imagenDestacada`, `fechaPublicacion`, `autor` |
 
 La lista exacta de campos de cada uno está en las consultas GraphQL de `lib/contentful.ts`. Si agregás un campo en Contentful, el sitio no lo muestra hasta que se agregue a la consulta y al componente.
 
@@ -21,7 +21,7 @@ La lista exacta de campos de cada uno está en las consultas GraphQL de `lib/con
 - **La URL sale del `slug`** (`/productos/<slug>`, `/distribuidoras/<slug>`). Cambiar un slug cambia la URL y rompe los links existentes.
 - **Productos destacados de la home:** los que tienen `principal = true`.
 - **Orden de la home:** lo define el equipo en Contentful, en la entrada **configuracionHome** (ver [`manual-usuario/orden-de-la-home.md`](manual-usuario/orden-de-la-home.md)). El código ya no tiene listas fijas.
-- **Noticias:** se muestran las 6 más recientes por `fechaPublicacion`. Si no hay ninguna publicada, la sección se oculta.
+- **Noticias:** se muestran las 6 más recientes por `fechaPublicacion`. Si no hay ninguna publicada, o si el tipo `noticia` no existe (como hoy), la sección se oculta y el build deja `Error fetching noticias` en el log. Para activarla hay que crear el tipo con los campos de la tabla y publicar noticias.
 - **Cambios tardan hasta 4 horas** en verse (ver [`deploy.md`](deploy.md)).
 
 ## Idiomas
