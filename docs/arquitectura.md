@@ -1,6 +1,6 @@
 # Arquitectura y decisiones
 
-**Última revisión:** 2026-10-27. Esto es lo que no se ve leyendo el código por
+**Última revisión:** 2026-11-23. Esto es lo que no se ve leyendo el código por
 arriba.
 
 ## Flujo de datos
@@ -22,7 +22,7 @@ Las páginas usan `generateStaticParams` para generar productos y fabricantes en
 - **La copia a la planilla no rompe el formulario.** Se hace primero, para que el lead sobreviva a un fallo del email. Si falla (o no responde en 5 segundos), se registra en el log y se sigue: el usuario igual ve "enviado". Por eso una falla puede pasar desapercibida meses. Si Resend rechaza el email, en cambio, el usuario sí ve un error.
 - **Traducción:** el sitio se traduce con el widget de Google Translate (`components/google-translate.tsx`). La página base está en español. El widget guarda la cookie `googtrans` en varios dominios; el componente limpia todos los alcances para evitar que quede la página traducida de forma persistente.
 - **i18n propio sin implementar:** `docs/superpowers/` tiene un spec y un plan para i18n con `next-intl` (español y portugués con locales de Contentful). Es una **propuesta, no el estado actual**: no hay `next-intl` en `package.json` ni locales en el código.
-- **Orden de marcas y productos en la home:** listas de slugs fijas en `lib/contentful.ts`. Ver [`contenido.md`](contenido.md).
+- **Orden de proveedores y productos en la home:** lo define marketing en Contentful (`configuracionHome`). El código lo pide en una consulta aparte por lista y, si falla o no existe, ordena alfabéticamente. Ver [`contenido.md`](contenido.md).
 - **Dos lockfiles** (`package-lock.json` y `pnpm-lock.yaml`). Elegir uno y borrar el otro es una tarea pendiente.
 - **Sin tests.** No hay suite de tests ni CI en el repo.
 

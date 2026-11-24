@@ -65,7 +65,7 @@ npm run email:preview  # genera mails de ejemplo en email-preview/ (abrir email-
 ### 4.1 Reglas intocables
 
 - **No quites `ignoreBuildErrors` / `ignoreDuringBuilds`** de `next.config.mjs` como parte de otra tarea: puede destapar muchos errores. Es una tarea aparte.
-- **El orden de marcas y productos de la home** son listas de slugs fijas en `lib/contentful.ts` (`FABRICANTE_ORDER`, `PRODUCTO_PRINCIPAL_ORDER`). Es pedido del cliente, no un descuido: no lo "corrijas". Si el equipo pide cambiarlo, se hace en esas listas, confirmando antes.
+- **El orden de proveedores y productos destacados de la home lo define marketing en Contentful** (entrada `configuracionHome`, listas ordenables). No lo vuelvas a fijar en el código. Si piden cambiar el orden, es una tarea de Contentful: guiá a la persona (`docs/contenido.md`). Los ids `configuracionHome`, `proveedoresOrdenados` y `productosDestacadosOrdenados` no se renombran.
 - **La copia de leads a la planilla no debe romper el formulario.** El fallo se loguea y se traga a propósito (`lib/leads-sheet.ts`), y tiene un corte de 5 segundos.
 - **El lead se guarda antes de mandar el mail**, para no perderlo si el mail falla. No cambiar ese orden sin discutirlo.
 - **Los mails se envían siempre con los helpers de `lib/email/send.ts`**, que usan `sendEmail` y `mailFrom()` (`lib/resend.ts`). No volver a llamar a Resend directamente: el SDK no lanza error cuando rechaza un envío.
@@ -95,6 +95,7 @@ El flujo automático de la skill `publicar-cambio` **no** aplica a estos cambios
 | Los mails (diseño, textos o envío) | `docs/arquitectura.md`, sección Emails |
 | Consultas a Contentful o el orden de la home | `docs/contenido.md` |
 | Cargar contenido (productos, marcas, noticias) | `docs/contenido.md` |
+| Guiar a marketing o diseño en una tarea de Contentful (p. ej. cambiar el orden de la home) | `docs/manual-usuario/` (seguí el manual paso a paso, en lenguaje simple) |
 | Variables de entorno, deploy o repo | `docs/deploy.md` |
 | Dominio, DNS o el dominio de los mails | `docs/dns.md` |
 | Servicios y cuentas | `docs/accesos.md` |
