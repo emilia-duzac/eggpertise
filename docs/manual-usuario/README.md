@@ -6,7 +6,13 @@ Guías paso a paso para el equipo de marketing y diseño, escritas sin términos
 
 | Manual | Para qué sirve |
 |---|---|
-| [`orden-de-la-home.md`](orden-de-la-home.md) | Cambiar el orden de los proveedores y de los productos destacados de la página de inicio |
+| [`orden-de-la-home.md`](orden-de-la-home.md) · [`.html`](orden-de-la-home.html) | Cambiar el orden de los proveedores y de los productos destacados de la página de inicio |
+
+## Versión para compartir (HTML)
+
+Cada manual puede tener una versión `.html` en la misma carpeta: **un solo archivo con las imágenes incluidas**, que se abre con doble clic en cualquier navegador y se puede mandar por mail o por chat sin el resto del repositorio. Sigue la identidad visual de EggPertise (skill `identidad-visual-eggpertise`).
+
+El `.md` y el `.html` dicen lo mismo. **Si se cambia uno, hay que actualizar el otro** (pedíselo a Claude).
 
 ## Cómo se escribe un manual nuevo
 
