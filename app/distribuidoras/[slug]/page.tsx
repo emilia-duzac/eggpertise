@@ -1,5 +1,6 @@
 export const revalidate = 14400; // 4 hours
 
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -21,6 +22,36 @@ import { renderOptions } from "@/lib/rich-text-renderers";
 interface PageProps {
   params: {
     slug: string;
+  };
+}
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const distributor = await getFabricanteBySlug(params.slug);
+
+  if (!distributor) {
+    return {};
+  }
+
+  const titulo = `${distributor.nombre} - EggPertise`;
+  const descripcion =
+    distributor.descripcion_corta?.trim() ||
+    `Conocé ${distributor.nombre}, representado por EggPertise en Latinoamérica.`;
+  const url = `/distribuidoras/${distributor.slug}`;
+
+  return {
+    title: titulo,
+    description: descripcion,
+    alternates: { canonical: url },
+    openGraph: {
+      title: titulo,
+      description: descripcion,
+      url,
+      images: distributor.imagen_portada
+        ? [{ url: distributor.imagen_portada }]
+        : undefined,
+    },
   };
 }
 

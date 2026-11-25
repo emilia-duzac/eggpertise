@@ -15,9 +15,13 @@ const lato = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.eggpertise.com"),
   title: "EggPertise - Soluciones Integrales para Producción Avícola y Porcina",
   description:
     "Desde EggPertise acercamos la innovación tecnológica global a productores avícolas y porcinos de Latinoamérica, combinando asesoramiento personalizado y soluciones integrales.",
+  alternates: {
+    canonical: "/",
+  },
   generator: "v0.app",
   icons: {
     icon: [

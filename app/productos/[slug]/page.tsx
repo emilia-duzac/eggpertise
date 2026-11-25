@@ -1,5 +1,6 @@
 export const revalidate = 14400; // 4 hours
 
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -26,6 +27,36 @@ import { Card } from "@/components/ui/card";
 interface PageProps {
   params: {
     slug: string;
+  };
+}
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const producto = await getProductoBySlug(params.slug);
+
+  if (!producto) {
+    return {};
+  }
+
+  const titulo = `${producto.nombre} - EggPertise`;
+  const descripcion =
+    producto.descripcion_corta?.trim() ||
+    `Conocé ${producto.nombre}, representado por EggPertise en Latinoamérica.`;
+  const url = `/productos/${producto.slug}`;
+
+  return {
+    title: titulo,
+    description: descripcion,
+    alternates: { canonical: url },
+    openGraph: {
+      title: titulo,
+      description: descripcion,
+      url,
+      images: producto.imagen_portada
+        ? [{ url: producto.imagen_portada }]
+        : undefined,
+    },
   };
 }
 
