@@ -1,5 +1,5 @@
 // lib/contentful.ts
-import { Document } from "@contentful/rich-text-types";
+import { BLOCKS, Block, Document, Inline, Text } from "@contentful/rich-text-types";
 import { unstable_cache } from "next/cache";
 
 // Utility function to generate URL-friendly slugs from names
@@ -12,6 +12,37 @@ export function generateSlug(name: string): string {
     .replace(/\s+/g, "-") // Replace spaces with hyphens
     .replace(/-+/g, "-") // Replace multiple hyphens with single
     .replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
+}
+
+/** Plain text of a rich-text node, concatenating any text nodes inside it. */
+function extractRichTextPlainText(node: Block | Inline | Text): string {
+  if (node.nodeType === "text") return node.value;
+  return node.content.map(extractRichTextPlainText).join("");
+}
+
+/**
+ * The fabricante's real brand name (e.g. "LANDMECO"), taken from the first
+ * heading of its long description — marketing already writes it there,
+ * separate from `nombre`, which is actually the category ("ALIMENTACIÓN").
+ * Falls back to `categoria` when there's no such heading, so a missing or
+ * differently-structured description never breaks anything. When the
+ * heading names EggPertise itself (e.g. Compostaje, a line EggPertise makes
+ * rather than represents), this returns "EggPertise" instead of the full
+ * heading text.
+ */
+function extractMarcaReal(
+  descripcionLarga: Document | null | undefined,
+  categoria: string
+): string {
+  const firstHeading = descripcionLarga?.content?.find(
+    (node) => node.nodeType === BLOCKS.HEADING_1
+  );
+  const texto = firstHeading
+    ? extractRichTextPlainText(firstHeading).trim()
+    : "";
+  if (!texto) return categoria;
+  if (texto.toUpperCase().includes("EGGPERTISE")) return "EggPertise";
+  return texto;
 }
 
 // GraphQL endpoint
@@ -28,6 +59,9 @@ const FABRICANTES_QUERY = `
           url
         }
         descripcionCorta
+        descripcionLarga {
+          json
+        }
       }
     }
   }
@@ -146,6 +180,9 @@ const ALL_PRODUCTOS_COMPLETE_QUERY = `
           sys { id }
           nombre
           logo { url }
+          descripcionLarga {
+            json
+          }
         }
       }
     }
@@ -167,6 +204,9 @@ const PRODUCTOS_FOR_FORMS_QUERY = `
           sys { id }
           nombre
           logo { url }
+          descripcionLarga {
+            json
+          }
         }
       }
     }
@@ -269,6 +309,7 @@ interface FabricanteGraphQLResponse {
   nombre: string;
   logo: { url: string };
   descripcionCorta: string;
+  descripcionLarga: { json: Document };
 }
 
 interface ProductoGraphQLResponse {
@@ -314,6 +355,7 @@ interface ProductoCompleteGraphQLResponse {
     sys: { id: string };
     nombre: string;
     logo?: { url: string } | null;
+    descripcionLarga?: { json: Document } | null;
   } | null;
 }
 
@@ -334,6 +376,8 @@ export interface Distributor {
   id: string;
   slug: string;
   nombre: string;
+  /** El nombre real de la marca (ej. "LANDMECO"); `nombre` es la categoría. */
+  marca: string;
   logo: string;
   descripcion_corta: string;
 }
@@ -364,6 +408,8 @@ export interface Fabricante {
   id: string;
   slug: string;
   nombre: string;
+  /** El nombre real de la marca (ej. "LANDMECO"); `nombre` es la categoría. */
+  marca: string;
   logo: string;
   descripcion_corta: string;
   descripcion_larga: Document;
@@ -393,6 +439,8 @@ export interface ProductoCompleto {
     id: string;
     slug: string;
     nombre: string;
+    /** El nombre real de la marca (ej. "LANDMECO"); `nombre` es la categoría. */
+    marca: string;
     logo: string | null;
   } | null;
 }
@@ -457,6 +505,7 @@ function parseDistributorFromGraphQL(
     id: item.sys.id,
     slug: generateSlug(item.nombre),
     nombre: item.nombre,
+    marca: extractMarcaReal(item.descripcionLarga?.json, item.nombre),
     logo: item.logo.url,
     descripcion_corta: item.descripcionCorta,
   };
@@ -495,6 +544,7 @@ function parseFabricanteFromGraphQL(
     id: item.sys.id,
     slug: generateSlug(item.nombre),
     nombre: item.nombre,
+    marca: extractMarcaReal(item.descripcionLarga.json, item.nombre),
     logo: item.logo.url,
     descripcion_corta: item.descripcionCorta,
     descripcion_larga: item.descripcionLarga.json,
@@ -535,6 +585,10 @@ function parseProductoCompletoFromGraphQL(
           id: item.fabricante.sys.id,
           slug: generateSlug(item.fabricante.nombre),
           nombre: item.fabricante.nombre,
+          marca: extractMarcaReal(
+            item.fabricante.descripcionLarga?.json,
+            item.fabricante.nombre
+          ),
           logo: item.fabricante.logo?.url ?? null,
         }
       : null,
@@ -711,6 +765,7 @@ interface ProductoForFormGraphQLResponse {
     sys: { id: string };
     nombre: string;
     logo?: { url: string } | null;
+    descripcionLarga?: { json: Document } | null;
   } | null;
 }
 
@@ -730,6 +785,10 @@ async function fetchProductosForForms(): Promise<ProductoForForm[]> {
           id: item.fabricante.sys.id,
           slug: generateSlug(item.fabricante.nombre),
           nombre: item.fabricante.nombre,
+          marca: extractMarcaReal(
+            item.fabricante.descripcionLarga?.json,
+            item.fabricante.nombre
+          ),
           logo: item.fabricante.logo?.url ?? null,
         }
       : null,
