@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { trackEvent } from "@/lib/gtm";
 import { Download, Loader2, CheckCircle, Mail } from "lucide-react";
 
 interface FichaTecnicaModalProps {
@@ -62,6 +63,11 @@ export function FichaTecnicaModal({
         throw new Error(data.error || "Error al enviar");
       }
 
+      trackEvent({
+        event: "generate_lead",
+        form: "ficha_tecnica",
+        producto: productoSlug,
+      });
       setIsSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al enviar el email");
@@ -72,6 +78,13 @@ export function FichaTecnicaModal({
 
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
+    if (newOpen) {
+      trackEvent({
+        event: "form_start",
+        form: "ficha_tecnica",
+        producto: productoSlug,
+      });
+    }
     if (!newOpen) {
       // Reset state when closing
       setTimeout(() => {

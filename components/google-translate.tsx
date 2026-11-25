@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Script from "next/script";
 import { Globe2 } from "lucide-react";
+import { trackEvent } from "@/lib/gtm";
+import { isLanguage, type Language } from "@/lib/languages";
 
 declare global {
   interface Window {
@@ -30,6 +32,8 @@ declare global {
 
 const PAGE_LANGUAGE = "es";
 const COOKIE_NAME = "googtrans";
+// Remembers a language change across the page reload (see GoogleTranslate).
+const LANGUAGE_CHANGE_KEY = "gtm_language_change";
 const FAR_FUTURE = "expires=Fri, 31 Dec 9999 23:59:59 GMT";
 const EPOCH = "expires=Thu, 01 Jan 1970 00:00:00 GMT";
 
@@ -63,21 +67,38 @@ function setTranslationCookie(target: string) {
 }
 
 export function GoogleTranslate() {
-  const [language, setLanguage] = useState<"es" | "pt" | "en">("es");
+  const [language, setLanguage] = useState<Language>("es");
 
   useEffect(() => {
     const match = document.cookie.match(/googtrans=\/[^/]+\/([^;]+)/);
     if (match?.[1] === "pt" || match?.[1] === "en") {
       setLanguage(match[1]);
     }
+
+    // The page reloads when the language changes, so the event is announced
+    // after the reload; sending it before could be lost.
+    try {
+      const changed = sessionStorage.getItem(LANGUAGE_CHANGE_KEY);
+      if (isLanguage(changed)) {
+        sessionStorage.removeItem(LANGUAGE_CHANGE_KEY);
+        trackEvent({ event: "language_change", idioma: changed });
+      }
+    } catch {
+      // sessionStorage can be blocked; the measurement is optional.
+    }
   }, []);
 
-  const changeLanguage = (nextLanguage: "es" | "pt" | "en") => {
+  const changeLanguage = (nextLanguage: Language) => {
     clearTranslationCookie();
     if (nextLanguage !== PAGE_LANGUAGE) {
       setTranslationCookie(nextLanguage);
     }
     setLanguage(nextLanguage);
+    try {
+      sessionStorage.setItem(LANGUAGE_CHANGE_KEY, nextLanguage);
+    } catch {
+      // Optional measurement only.
+    }
     window.location.reload();
   };
 
@@ -89,7 +110,7 @@ export function GoogleTranslate() {
         aria-label="Idioma"
         value={language}
         onChange={(event) =>
-          changeLanguage(event.target.value as "es" | "pt" | "en")
+          changeLanguage(event.target.value as Language)
         }
         className="h-9 cursor-pointer appearance-none rounded-full border border-border bg-background py-1.5 pl-9 pr-8 text-sm font-medium text-foreground shadow-xs outline-none transition-colors hover:bg-accent focus-visible:ring-1 focus-visible:ring-ring"
       >

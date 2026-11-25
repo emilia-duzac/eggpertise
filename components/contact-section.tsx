@@ -2,11 +2,12 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { trackEvent } from "@/lib/gtm";
 import {
   Mail,
   Phone,
@@ -21,6 +22,9 @@ interface FormErrors {
   [key: string]: string;
 }
 
+// How long the "thanks" message stays before the form comes back.
+const FORM_RESET_DELAY_MS = 3000;
+
 export function ContactSection() {
   const [formData, setFormData] = useState({
     nombre: "",
@@ -33,6 +37,7 @@ export function ContactSection() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const startedRef = useRef(false);
 
   const validateForm = () => {
     const newErrors: FormErrors = {};
@@ -73,10 +78,12 @@ export function ContactSection() {
         throw new Error(data.error || "Error al enviar el mensaje");
       }
 
+      trackEvent({ event: "generate_lead", form: "contacto" });
       setIsSubmitted(true);
 
       // Reset form after successful submission
       setTimeout(() => {
+        startedRef.current = false; // the next use counts as a new form_start
         setFormData({
           nombre: "",
           email: "",
@@ -85,7 +92,7 @@ export function ContactSection() {
           mensaje: "",
         });
         setIsSubmitted(false);
-      }, 3000);
+      }, FORM_RESET_DELAY_MS);
     } catch (error) {
       console.error("Error submitting form:", error);
       setErrors({
@@ -150,7 +157,15 @@ export function ContactSection() {
                   </p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form
+                  onSubmit={handleSubmit}
+                  onFocus={() => {
+                    if (startedRef.current) return;
+                    startedRef.current = true;
+                    trackEvent({ event: "form_start", form: "contacto" });
+                  }}
+                  className="space-y-6"
+                >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Input

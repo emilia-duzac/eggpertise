@@ -10,6 +10,7 @@ import Link from "next/link";
 import { MessageCircle, CheckCircle2 } from "lucide-react";
 import { FichaTecnicaModal } from "@/components/ficha-tecnica-modal";
 import { SolicitarInfoTecnicaModal } from "@/components/solicitar-info-tecnica-modal";
+import { ProductViewTracker } from "@/components/product-view-tracker";
 import {
   DEFAULT_DATASHEET_TITLE,
   getProductoBySlug,
@@ -50,6 +51,11 @@ export default async function ProductPage({ params }: PageProps) {
   return (
     <main className="min-h-screen">
       <Header />
+      <ProductViewTracker
+        slug={producto.slug}
+        nombre={producto.nombre}
+        marca={producto.fabricante?.nombre}
+      />
 
       {/* Hero Section */}
       <section className="relative pt-24 pb-12 min-h-[70vh] flex items-center">
@@ -179,7 +185,7 @@ export default async function ProductPage({ params }: PageProps) {
                         producto.youtubeUrl.includes("youtu.be/")
                           ? producto.youtubeUrl.split("youtu.be/")[1]?.split("?")[0]
                           : new URLSearchParams(producto.youtubeUrl.split("?")[1]).get("v")
-                      }`}
+                      }?enablejsapi=1`}
                       title="Video del producto"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen

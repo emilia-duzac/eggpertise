@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { trackEvent } from "@/lib/gtm";
 import { FileQuestion, Loader2, CheckCircle, Mail } from "lucide-react";
 
 interface SolicitarInfoTecnicaModalProps {
@@ -50,6 +51,11 @@ export function SolicitarInfoTecnicaModal({
         throw new Error(data.error || "Error al enviar");
       }
 
+      trackEvent({
+        event: "generate_lead",
+        form: "info_tecnica",
+        producto: productoSlug,
+      });
       setIsSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al enviar");
@@ -60,6 +66,13 @@ export function SolicitarInfoTecnicaModal({
 
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
+    if (newOpen) {
+      trackEvent({
+        event: "form_start",
+        form: "info_tecnica",
+        producto: productoSlug,
+      });
+    }
     if (!newOpen) {
       setTimeout(() => {
         setEmail("");

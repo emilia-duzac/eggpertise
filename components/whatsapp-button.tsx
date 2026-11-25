@@ -3,6 +3,7 @@
 export function WhatsAppButton() {
   const whatsappUrl = "https://api.whatsapp.com/send/?phone=5491125155801&text=Hola+EggPertise%21+Quiero+informaci%C3%B3n+sobre%3A&type=phone_number&app_absent=0";
 
+  // data-ubicacion tells click-tracker.tsx where this click came from.
   return (
     <a
       href={whatsappUrl}
@@ -10,6 +11,7 @@ export function WhatsAppButton() {
       rel="noopener noreferrer"
       className="fixed bottom-6 right-6 z-50 group"
       aria-label="Contactar por WhatsApp"
+      data-ubicacion="boton_flotante"
     >
       <div className="relative">
         <div className="w-14 h-14 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 group-hover:animate-pulse">
