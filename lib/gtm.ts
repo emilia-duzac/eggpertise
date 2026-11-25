@@ -1,4 +1,5 @@
 import type { Language } from "@/lib/languages";
+import type { WhatsappCountry } from "@/lib/whatsapp";
 
 declare global {
   interface Window {
@@ -33,7 +34,7 @@ export type GtmEvent =
       // Where on the page the link is (section id, "footer", "boton_flotante"...).
       ubicacion: string;
       // WhatsApp only: which company number was opened.
-      pais_numero?: "AR" | "US" | "otro";
+      pais_numero?: WhatsappCountry | "otro";
     } & WithProducto)
   | ({
       // Someone opened a form or started typing in it (before sending).

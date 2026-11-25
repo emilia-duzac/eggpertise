@@ -4,6 +4,8 @@
  * secrets.
  */
 
+import { WHATSAPP } from "@/lib/whatsapp";
+
 export const SITE_URL = "https://www.eggpertise.com";
 
 // Images in emails need an absolute URL. They live in public/brand/email.
@@ -22,7 +24,7 @@ export const SALES_CONTACT = {
   role: "Gerente de Proyectos",
   phone: "+54 9 11 2515 5801",
   // Digits only, as wa.me expects.
-  whatsappNumber: "5491125155801",
+  whatsappNumber: WHATSAPP.AR.number,
   email: "tomas.strenitz@eggpertise.com",
 } as const;
 

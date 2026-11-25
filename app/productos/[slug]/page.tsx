@@ -11,6 +11,7 @@ import { MessageCircle, CheckCircle2 } from "lucide-react";
 import { FichaTecnicaModal } from "@/components/ficha-tecnica-modal";
 import { SolicitarInfoTecnicaModal } from "@/components/solicitar-info-tecnica-modal";
 import { ProductViewTracker } from "@/components/product-view-tracker";
+import { whatsappUrl } from "@/lib/whatsapp";
 import {
   DEFAULT_DATASHEET_TITLE,
   getProductoBySlug,
@@ -37,10 +38,10 @@ export default async function ProductPage({ params }: PageProps) {
     notFound();
   }
 
-  const whatsappMessage = encodeURIComponent(
+  const productoWhatsappUrl = whatsappUrl(
+    "AR",
     `Hola, estuve revisando la web de EggPertise y quisiera recibir asesoramiento técnico sobre ${producto.nombre}.\nNombre:\nPaís:\nTipo de producción:`
   );
-  const whatsappUrl = `https://api.whatsapp.com/send/?phone=5491125155801&text=${whatsappMessage}&type=phone_number&app_absent=0`;
 
   const otrosProductos = producto.fabricante
     ? (await getProductosByFabricante(producto.fabricante.id))
@@ -246,7 +247,7 @@ export default async function ProductPage({ params }: PageProps) {
                 className="bg-[#25D366] hover:bg-[#20BD5A] text-white px-8 py-3 shadow-lg"
               >
                 <a
-                  href={whatsappUrl}
+                  href={productoWhatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                 >

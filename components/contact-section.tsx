@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { trackEvent } from "@/lib/gtm";
+import { WHATSAPP, whatsappUrl } from "@/lib/whatsapp";
 import {
   Mail,
   Phone,
@@ -297,13 +298,13 @@ export function ContactSection() {
                   </div>
 
                   <a
-                    href="https://api.whatsapp.com/send/?phone=5491125155801&text=Hola+EggPertise%21+Quiero+informaci%C3%B3n+sobre%3A&type=phone_number&app_absent=0"
+                    href={whatsappUrl("AR")}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center space-x-3 group/phone hover:opacity-80 transition-all duration-300 cursor-pointer"
                   >
                     <Phone className="h-5 w-5 flex-shrink-0" />
-                    <span className="text-sm">+54 9 11 2515-5801</span>
+                    <span className="text-sm">{WHATSAPP.AR.display}</span>
                   </a>
 
                   <a

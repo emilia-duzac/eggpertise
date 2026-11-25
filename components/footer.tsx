@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WHATSAPP, whatsappUrl } from "@/lib/whatsapp";
 import {
   Mail,
   Phone,
@@ -84,22 +85,22 @@ export function Footer() {
                 <span>info@eggpertise.com</span>
               </a>
               <a
-                href="https://api.whatsapp.com/send/?phone=5491125155801&text=Hola+EggPertise%21+Quiero+informaci%C3%B3n+sobre%3A&type=phone_number&app_absent=0"
+                href={whatsappUrl("AR")}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
               >
                 <Phone className="h-4 w-4" />
-                <span>+54 9 11 2515-5801</span>
+                <span>{WHATSAPP.AR.display}</span>
               </a>
               <a
-                href="https://api.whatsapp.com/send/?phone=13058154905&text=Hola+EggPertise%21+Quiero+informaci%C3%B3n+sobre%3A&type=phone_number&app_absent=0"
+                href={whatsappUrl("US")}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
               >
                 <Phone className="h-4 w-4" />
-                <span>+1 (305) 815-4905</span>
+                <span>{WHATSAPP.US.display}</span>
               </a>
             </div>
             <div className="flex space-x-4 pt-2">
