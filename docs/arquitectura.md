@@ -25,6 +25,8 @@ Las páginas usan `generateStaticParams` para generar productos y fabricantes en
 - **Orden de proveedores y productos en la home:** lo define marketing en Contentful (`configuracionHome`). El código lo pide en una consulta aparte por lista y, si falla o no existe, ordena alfabéticamente. Ver [`contenido.md`](contenido.md).
 - **Dos lockfiles** (`package-lock.json` y `pnpm-lock.yaml`). Elegir uno y borrar el otro es una tarea pendiente.
 - **Sin tests.** No hay suite de tests ni CI en el repo.
+- **Un producto o marca inexistente da 404 real; una falla de Contentful, no.** `getProductoBySlug` y `getFabricanteBySlug` (`lib/contentful.ts`) no atrapan los errores de la consulta: si Contentful falla, el error se propaga y, con `revalidate = 14400`, Next sigue sirviendo la última versión buena de la página en vez de mostrar "no encontrado". Solo cuando la consulta responde bien y el slug no existe se muestra el 404.
+- **El nombre de marca que se ve en el sitio no es el campo `nombre` de Contentful.** Ver [`contenido.md`](contenido.md#el-nombre-de-la-marca-en-cada-fabricante).
 
 ## Formularios
 

@@ -1,18 +1,25 @@
 # Mapa del código y pedidos frecuentes
 
-Referencia rápida para saber dónde se resuelve cada pedido. **Última revisión:** 2026-11-23.
+Referencia rápida para saber dónde se resuelve cada pedido. **Última revisión:** 2026-11-25.
 
 ## Mapa rápido del código
 
 ```
 app/page.tsx                    home (arma las secciones de components/)
-app/productos/[slug]/           ficha de producto
-app/distribuidoras/[slug]/      página de cada fabricante
+app/productos/[slug]/           ficha de producto (page.tsx, not-found.tsx)
+app/distribuidoras/[slug]/      página de cada fabricante (page.tsx, not-found.tsx)
+app/sitemap.ts                  /sitemap.xml, armado solo con lo publicado en Contentful
+app/robots.ts                   /robots.txt
+app/layout.tsx                  metadata y datos de la empresa (Organization) comunes a todo el sitio
 app/api/*                       formularios (contacto, info técnica, ficha) → ZONA SENSIBLE
 app/globals.css                 colores y tokens de diseño
 components/                     secciones de la home, modales, WhatsApp
 components/ui/                  componentes base (shadcn/ui)
+components/json-ld.tsx          datos técnicos para buscadores (Schema.org), compartido por varias páginas
+components/not-encontrado.tsx   pantalla de "no encontrado" compartida por producto y marca
 lib/contentful.ts               consultas a Contentful (el orden de la home viene de Contentful)
+lib/site.ts                     dirección pública del sitio, para metadata y SEO
+lib/metadata.ts                 título/descripción que ve Google en cada ficha de producto o marca
 lib/email/                      diseño y envío de mails
 public/                         imágenes y archivos estáticos
 docs/                           documentación del proyecto
@@ -30,6 +37,8 @@ docs/                           documentación del proyecto
 | "Agregar una sección nueva a la home" | Componente nuevo en `components/` + registrarlo en `app/page.tsx` |
 | "Cambiar un color o tipografía" | Token en `app/globals.css`, no en cada componente |
 | "Que el mail de contacto diga otra cosa" | `lib/email/mails/` y `lib/email/contact.ts` (sección "Mails y formularios" de este documento) |
+| "El nombre de una marca sale mal (en la home, en el título de la página o al compartir el link)" | Contentful (no código): el primer título de la descripción larga del fabricante — ver `docs/contenido.md` |
+| "Cambió el dominio del sitio" | `lib/site.ts` |
 
 
 ## Mails y formularios (cuando sí se pueden tocar)
