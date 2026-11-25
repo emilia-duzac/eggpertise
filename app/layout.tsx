@@ -89,8 +89,8 @@ export default function RootLayout({
             gtag('config', 'G-LH9L77P6YJ');
           `}
         </Script>
+        {children}
         <Suspense>
-          {children}
           <Analytics />
         </Suspense>
         <GoogleTranslateProvider />
