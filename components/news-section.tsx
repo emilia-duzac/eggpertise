@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import Image from "next/image";
+import Image from "@/components/optimized-image";
 import { Noticia } from "@/lib/contentful";
 import { Calendar, User, ExternalLink } from "lucide-react";
 

@@ -1,5 +1,5 @@
 import { CheckCircle } from "lucide-react";
-import Image from "next/image";
+import Image from "@/components/optimized-image";
 
 export function AboutSection() {
   return (
