@@ -24,13 +24,16 @@ function isContentfulImage(src: ImageProps["src"]): src is string {
   }
 }
 
+// Same default quality next/image uses for the images Vercel optimizes.
+const DEFAULT_QUALITY = 75;
+
 // WebP rather than AVIF: AVIF fails on sources over 9 megapixels, and marketing
 // may upload very large photos.
 const contentfulLoader: ImageLoader = ({ src, width, quality }) => {
   const url = new URL(src, "https://images.ctfassets.net");
   url.protocol = "https:";
   url.searchParams.set("w", String(width));
-  url.searchParams.set("q", String(quality ?? 75));
+  url.searchParams.set("q", String(quality ?? DEFAULT_QUALITY));
   url.searchParams.set("fm", "webp");
   return url.toString();
 };
@@ -47,7 +50,7 @@ export default function OptimizedImage({ alt, ...props }: ImageProps) {
   // serves from another host, an external URL) is shown as is: Vercel would
   // refuse a host it doesn't know and break the page.
   if (typeof props.src === "string" && /^(https?:)?\/\//.test(props.src)) {
-    return <Image alt={alt} unoptimized {...props} />;
+    return <Image alt={alt} {...props} unoptimized />;
   }
   return <Image alt={alt} {...props} />;
 }

@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import Image from "@/components/optimized-image";
+import { IMAGE_SIZES } from "@/lib/image-sizes";
 import { Button } from "@/components/ui/button";
 import { ProductImageGallery } from "@/components/product-image-gallery";
 import Link from "next/link";
@@ -129,7 +130,7 @@ export default async function ProductPage({ params }: PageProps) {
             src={producto.imagen_portada}
             alt={producto.nombre}
             fill
-            sizes="100vw"
+            sizes={IMAGE_SIZES.fullWidth}
             className="object-cover"
             priority
           />
@@ -362,7 +363,7 @@ export default async function ProductPage({ params }: PageProps) {
                       alt={p.nombre}
                       width={400}
                       height={400}
-                      sizes="300px"
+                      sizes={IMAGE_SIZES.cardLogo}
                       className="object-contain max-w-[80%] max-h-[80%]"
                     />
                   </div>

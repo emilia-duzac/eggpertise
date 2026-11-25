@@ -1,5 +1,6 @@
 import { CheckCircle } from "lucide-react";
 import Image from "@/components/optimized-image";
+import { IMAGE_SIZES } from "@/lib/image-sizes";
 
 export function AboutSection() {
   return (
@@ -19,7 +20,7 @@ export function AboutSection() {
               src="/landing/nacho.jpeg"
               alt="Ignacio Pernicone - Fundador de EggPertise"
               fill
-              sizes="(min-width: 1024px) 50vw, 100vw"
+              sizes={IMAGE_SIZES.halfFromLg}
               className="object-cover"
             />
           </div>
@@ -93,7 +94,7 @@ export function AboutSection() {
               src="/landing/team.jpg"
               alt="Equipo de EggPertise"
               fill
-              sizes="(min-width: 1024px) 50vw, 100vw"
+              sizes={IMAGE_SIZES.halfFromLg}
               className="object-cover"
             />
           </div>

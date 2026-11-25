@@ -92,7 +92,9 @@ const ALL_FABRICANTES_COMPLETE_QUERY = `
   }
 `;
 
-// GraphQL query for products by fabricante
+// GraphQL query for products by fabricante. No explicit `order`: the brand page
+// shows products in Contentful's default order, and a fixed order would reshuffle
+// them. Paging without one is only unstable past 100 products in one brand.
 const PRODUCTOS_BY_FABRICANTE_QUERY = `
   query GetProductosByFabricante($fabricanteId: String!, $skip: Int!, $limit: Int!) {
   productoCollection(

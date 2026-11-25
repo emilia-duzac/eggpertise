@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "@/components/optimized-image";
+import { IMAGE_SIZES } from "@/lib/image-sizes";
 import HeroImage from "@/public/landing/hero.jpg";
 
 export function HeroSection() {
@@ -10,7 +11,7 @@ export function HeroSection() {
         src={HeroImage}
         alt="Hero Image"
         priority
-        sizes="100vw"
+        sizes={IMAGE_SIZES.fullWidth}
         className="absolute inset-0 w-full h-full object-cover opacity-100"
       />
       <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-black/10"></div>

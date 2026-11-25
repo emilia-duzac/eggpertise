@@ -13,7 +13,7 @@ const nextConfig = {
     remotePatterns: [{ protocol: "https", hostname: "images.ctfassets.net" }],
     // Vercel counts a transformation on every cache miss or stale hit, so keep
     // optimized images cached for 31 days (the most Vercel keeps them).
-    minimumCacheTTL: 2678400,
+    minimumCacheTTL: 60 * 60 * 24 * 31,
   },
 }
 
