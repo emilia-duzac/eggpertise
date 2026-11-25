@@ -1,5 +1,6 @@
 export const revalidate = 14400; // 4 hours
 
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -15,6 +16,7 @@ import {
   Fabricante,
   Producto,
 } from "@/lib/contentful";
+import { buildPageMetadata } from "@/lib/metadata";
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
 import { renderOptions } from "@/lib/rich-text-renderers";
 
@@ -22,6 +24,23 @@ interface PageProps {
   params: {
     slug: string;
   };
+}
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const distributor = await getFabricanteBySlug(params.slug);
+
+  if (!distributor) {
+    return {};
+  }
+
+  return buildPageMetadata({
+    nombre: distributor.nombre,
+    descripcionCorta: distributor.descripcion_corta,
+    path: `/distribuidoras/${distributor.slug}`,
+    imagen: distributor.imagen_portada,
+  });
 }
 
 // Helper function to group products by category
