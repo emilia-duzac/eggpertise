@@ -1,9 +1,8 @@
 import type { MetadataRoute } from "next";
 import { getAllFabricanteSlugs, getAllProductoSlugs } from "@/lib/contentful";
+import { SITE_URL } from "@/lib/site";
 
 export const revalidate = 14400; // 4 hours, igual que el resto del catálogo
-
-const BASE_URL = "https://www.eggpertise.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [productoSlugs, fabricanteSlugs] = await Promise.all([
@@ -13,17 +12,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     {
-      url: BASE_URL,
+      url: SITE_URL,
       changeFrequency: "weekly",
       priority: 1,
     },
     ...productoSlugs.map((slug) => ({
-      url: `${BASE_URL}/productos/${slug}`,
+      url: `${SITE_URL}/productos/${slug}`,
       changeFrequency: "monthly" as const,
       priority: 0.8,
     })),
     ...fabricanteSlugs.map((slug) => ({
-      url: `${BASE_URL}/distribuidoras/${slug}`,
+      url: `${SITE_URL}/distribuidoras/${slug}`,
       changeFrequency: "monthly" as const,
       priority: 0.7,
     })),

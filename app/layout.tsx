@@ -8,6 +8,8 @@ import { WhatsAppButton } from "@/components/whatsapp-button";
 import { GoogleTranslateProvider } from "@/components/google-translate";
 import { GoogleTagManager } from "@/components/google-tag-manager";
 import { ClickTracker } from "@/components/click-tracker";
+import { SITE_URL, DEFAULT_OG_IMAGE } from "@/lib/site";
+import { WHATSAPP } from "@/lib/whatsapp";
 
 const lato = {
   variable: "--font-body",
@@ -19,12 +21,12 @@ const ORGANIZATION_JSON_LD = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: "EggPertise",
-  url: "https://www.eggpertise.com",
-  logo: "https://www.eggpertise.com/brand/logo.png",
+  url: SITE_URL,
+  logo: `${SITE_URL}/brand/logo.png`,
   description:
     "Desde EggPertise acercamos la innovación tecnológica global a productores avícolas y porcinos de Latinoamérica, combinando asesoramiento personalizado y soluciones integrales.",
   email: "info@eggpertise.com",
-  telephone: "+54 9 11 2515-5801",
+  telephone: WHATSAPP.AR.display,
   sameAs: [
     "https://www.linkedin.com/company/eggpertise",
     "https://www.instagram.com/eggpertise",
@@ -47,7 +49,7 @@ const ORGANIZATION_JSON_LD = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.eggpertise.com"),
+  metadataBase: new URL(SITE_URL),
   title: "EggPertise - Soluciones Integrales para Producción Avícola y Porcina",
   description:
     "Desde EggPertise acercamos la innovación tecnológica global a productores avícolas y porcinos de Latinoamérica, combinando asesoramiento personalizado y soluciones integrales.",
@@ -72,11 +74,11 @@ export const metadata: Metadata = {
     title: "EggPertise - Soluciones Integrales para Producción Avícola y Porcina",
     description:
       "Desde EggPertise acercamos la innovación tecnológica global a productores avícolas y porcinos de Latinoamérica, combinando asesoramiento personalizado y soluciones integrales.",
-    url: "https://www.eggpertise.com",
+    url: SITE_URL,
     siteName: "EggPertise",
     images: [
       {
-        url: "https://www.eggpertise.com/brand/og-image.jpg",
+        url: DEFAULT_OG_IMAGE,
         width: 720,
         height: 1000,
         alt: "EggPertise - Soluciones para Producción Avícola y Porcina",

@@ -23,6 +23,7 @@ import {
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
 import { renderOptions } from "@/lib/rich-text-renderers";
 import { Card } from "@/components/ui/card";
+import { SITE_URL } from "@/lib/site";
 
 interface PageProps {
   params: {
@@ -69,7 +70,7 @@ export default async function ProductPage({ params }: PageProps) {
     notFound();
   }
 
-  const productUrl = `https://www.eggpertise.com/productos/${producto.slug}`;
+  const productUrl = `${SITE_URL}/productos/${producto.slug}`;
 
   const productJsonLd = {
     "@context": "https://schema.org",
@@ -84,14 +85,14 @@ export default async function ProductPage({ params }: PageProps) {
   };
 
   const breadcrumbItems = [
-    { "@type": "ListItem", position: 1, name: "Inicio", item: "https://www.eggpertise.com" },
+    { "@type": "ListItem", position: 1, name: "Inicio", item: SITE_URL },
     ...(producto.fabricante
       ? [
           {
             "@type": "ListItem",
             position: 2,
             name: producto.fabricante.nombre,
-            item: `https://www.eggpertise.com/distribuidoras/${producto.fabricante.slug}`,
+            item: `${SITE_URL}/distribuidoras/${producto.fabricante.slug}`,
           },
         ]
       : []),
