@@ -8,9 +8,10 @@ en curso, y conviene no perder de vista. Cuando se resuelva un ítem, se borra d
 
 ## Para Emilia (zona sensible, `next.config.mjs`)
 
-- **Faltan headers de seguridad estándar** en las respuestas del servidor
-  (`X-Content-Type-Options`, `X-Frame-Options`, `Content-Security-Policy`,
-  `Referrer-Policy`, `Permissions-Policy`). Solo está presente HSTS.
+- **Falta el header de seguridad `Content-Security-Policy`**. Hay que armarla con todo lo que carga el sitio
+  (GTM, Google Translate, Google Fonts, YouTube, Contentful) y probarla primero en
+  modo `Content-Security-Policy-Report-Only`: los tags que marketing agregue en GTM
+  quedarían bloqueados si no están en la lista.
 
   _Origen: auditoría SEO del 2026-11-24
   (`docs/plans/2026-11-24-seo-indexacion/hallazgos/findings/technical.md`)._
