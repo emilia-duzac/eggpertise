@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { trackEvent } from "@/lib/gtm";
+import { trackEvent, type GtmEvent } from "@/lib/gtm";
 
 const SOCIAL_HOSTS: Record<string, "linkedin" | "instagram" | "youtube"> = {
   "linkedin.com": "linkedin",
@@ -22,8 +22,7 @@ function getUbicacion(link: Element): string {
 }
 
 function getProducto(): string | undefined {
-  const match = window.location.pathname.match(/^\/productos\/([^/]+)/);
-  return match?.[1];
+  return window.location.pathname.match(/^\/productos\/([^/]+)/)?.[1];
 }
 
 function paisDelNumero(url: URL): "AR" | "US" | "otro" {
@@ -33,8 +32,22 @@ function paisDelNumero(url: URL): "AR" | "US" | "otro" {
   return "otro";
 }
 
+// Decides which event, if any, a link click is, from the link's address.
+function classify(url: URL, ubicacion: string): GtmEvent | null {
+  const host = url.hostname.replace(/^www\./, "");
+  const producto = getProducto();
+
+  if (url.protocol === "tel:") return { event: "click_phone", ubicacion, producto };
+  if (url.protocol === "mailto:") return { event: "click_email", ubicacion, producto };
+  if (host === "api.whatsapp.com" || host === "wa.me") {
+    return { event: "click_whatsapp", ubicacion, producto, pais_numero: paisDelNumero(url) };
+  }
+  if (SOCIAL_HOSTS[host]) return { event: "click_social", red: SOCIAL_HOSTS[host], ubicacion };
+  return null;
+}
+
 // One listener for every contact link on the site, so new buttons are measured
-// without extra code. Classifies by the link's address; sends no personal data.
+// without extra code. Sends no personal data.
 export function ClickTracker() {
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
@@ -48,23 +61,8 @@ export function ClickTracker() {
         return;
       }
 
-      const ubicacion = getUbicacion(link);
-      const host = url.hostname.replace(/^www\./, "");
-
-      if (url.protocol === "tel:") {
-        trackEvent({ event: "click_phone", ubicacion, producto: getProducto() });
-      } else if (url.protocol === "mailto:") {
-        trackEvent({ event: "click_email", ubicacion, producto: getProducto() });
-      } else if (host === "api.whatsapp.com" || host === "wa.me") {
-        trackEvent({
-          event: "click_whatsapp",
-          ubicacion,
-          pais_numero: paisDelNumero(url),
-          producto: getProducto(),
-        });
-      } else if (SOCIAL_HOSTS[host]) {
-        trackEvent({ event: "click_social", red: SOCIAL_HOSTS[host], ubicacion });
-      }
+      const event = classify(url, getUbicacion(link));
+      if (event) trackEvent(event);
     };
 
     document.addEventListener("click", onClick);

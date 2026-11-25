@@ -1,12 +1,10 @@
 import Script from "next/script";
+import { GTM_ID } from "@/lib/gtm";
 
-const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
-
-// Renders nothing when the variable is missing or malformed, so previews and
-// local builds don't load the container. The ID is interpolated into an inline
-// script, hence the format check.
+// Renders nothing without a valid GTM_ID, so previews and local builds don't
+// load the container.
 export function GoogleTagManager() {
-  if (!GTM_ID || !/^GTM-[A-Z0-9]+$/.test(GTM_ID)) return null;
+  if (!GTM_ID) return null;
 
   return (
     <>
