@@ -96,6 +96,7 @@ El flujo automático de la skill `publicar-cambio` **no** aplica a estos cambios
 | Consultas a Contentful o el orden de la home | `docs/contenido.md` |
 | Cargar contenido (productos, marcas, noticias) | `docs/contenido.md` |
 | Guiar a marketing o diseño en una tarea de Contentful (p. ej. cambiar el orden de la home) | `docs/manual-usuario/` (seguí el manual paso a paso, en lenguaje simple) |
+| Métricas, eventos de seguimiento, Google Tag Manager, Analytics, Meta o LinkedIn | `docs/metricas.md` (qué mide el sitio y cómo se arma en GTM; lleva a Emilia si toca scripts de terceros) |
 | Variables de entorno, deploy o repo | `docs/deploy.md` |
 | Dominio, DNS o el dominio de los mails | `docs/dns.md` |
 | Servicios y cuentas | `docs/accesos.md` |
