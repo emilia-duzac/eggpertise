@@ -6,16 +6,6 @@ en curso, y conviene no perder de vista. Cuando se resuelva un ítem, se borra d
 
 **Última revisión:** 2026-11-25.
 
-## Para Emilia (zona sensible, `next.config.mjs`)
-
-- **Falta el header de seguridad `Content-Security-Policy`**. Hay que armarla con todo lo que carga el sitio
-  (GTM, Google Translate, Google Fonts, YouTube, Contentful) y probarla primero en
-  modo `Content-Security-Policy-Report-Only`: los tags que marketing agregue en GTM
-  quedarían bloqueados si no están en la lista.
-
-  _Origen: auditoría SEO del 2026-11-24
-  (`docs/plans/2026-11-24-seo-indexacion/hallazgos/findings/technical.md`)._
-
 ## Para marketing (contenido, no código)
 
 - **Las fichas de producto son cortas** (entre 193 y 261 palabras en la muestra
