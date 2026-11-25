@@ -6,6 +6,8 @@ import "./globals.css";
 import { Suspense } from "react";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { GoogleTranslateProvider } from "@/components/google-translate";
+import { GoogleTagManager } from "@/components/google-tag-manager";
+import { ClickTracker } from "@/components/click-tracker";
 
 const lato = {
   variable: "--font-body",
@@ -68,6 +70,13 @@ export default function RootLayout({
           [lato.variable]: lato.style.fontFamily,
         }}
       >
+        <GoogleTagManager />
+        <ClickTracker />
+        {/*
+          Analytics loaded directly. When Analytics moves into GTM (see
+          docs/metricas.md, "Publicar 2"), remove both Scripts below in the same
+          release as the GA4 tag, or every visit is counted twice.
+        */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-LH9L77P6YJ"
           strategy="afterInteractive"
