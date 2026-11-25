@@ -20,6 +20,8 @@ const nextConfig = {
       {
         source: "/:path*",
         headers: [
+          // Browsers use the declared file type instead of guessing it.
+          { key: "X-Content-Type-Options", value: "nosniff" },
           // Other sites can't show ours inside a frame (blocks clickjacking).
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
           // Other sites only learn a visitor came from eggpertise.com, not the page.

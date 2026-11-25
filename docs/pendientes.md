@@ -8,8 +8,7 @@ en curso, y conviene no perder de vista. Cuando se resuelva un ítem, se borra d
 
 ## Para Emilia (zona sensible, `next.config.mjs`)
 
-- **Faltan headers de seguridad** `X-Content-Type-Options` y
-  `Content-Security-Policy`. La CSP hay que armarla con todo lo que carga el sitio
+- **Falta el header de seguridad `Content-Security-Policy`**. Hay que armarla con todo lo que carga el sitio
   (GTM, Google Translate, Google Fonts, YouTube, Contentful) y probarla primero en
   modo `Content-Security-Policy-Report-Only`: los tags que marketing agregue en GTM
   quedarían bloqueados si no están en la lista.
