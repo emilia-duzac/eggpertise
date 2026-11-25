@@ -46,7 +46,7 @@ export function DistributorsSection({
                 <div className="relative h-44 overflow-hidden flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
                   <Image
                     src={distributor.logo}
-                    alt={distributor.nombre}
+                    alt={distributor.marca}
                     width={400}
                     height={400}
                     className="object-contain max-w-[80%] max-h-[80%]"
@@ -55,7 +55,7 @@ export function DistributorsSection({
 
                 <CardHeader className="text-center pt-3">
                   <CardTitle className="text-xl font-serif font-bold text-foreground">
-                    {distributor.nombre}
+                    {distributor.marca}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="px-6 pb-4 flex flex-col flex-grow">
@@ -69,7 +69,7 @@ export function DistributorsSection({
                     className="w-full border-2 border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground transition-colors duration-200 font-medium px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm mt-auto"
                   >
                     <Link href={`/distribuidoras/${distributor.slug}`}>
-                      Ver Marca
+                      Ver {distributor.marca}
                     </Link>
                   </Button>
                 </CardContent>

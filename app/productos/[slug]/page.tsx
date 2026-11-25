@@ -1,5 +1,6 @@
 export const revalidate = 14400; // 4 hours
 
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -10,6 +11,8 @@ import Link from "next/link";
 import { MessageCircle, CheckCircle2 } from "lucide-react";
 import { FichaTecnicaModal } from "@/components/ficha-tecnica-modal";
 import { SolicitarInfoTecnicaModal } from "@/components/solicitar-info-tecnica-modal";
+import { ProductViewTracker } from "@/components/product-view-tracker";
+import { whatsappUrl } from "@/lib/whatsapp";
 import {
   DEFAULT_DATASHEET_TITLE,
   getProductoBySlug,
@@ -20,11 +23,31 @@ import {
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
 import { renderOptions } from "@/lib/rich-text-renderers";
 import { Card } from "@/components/ui/card";
+import { SITE_URL } from "@/lib/site";
+import { buildPageMetadata } from "@/lib/metadata";
+import { JsonLd } from "@/components/json-ld";
 
 interface PageProps {
   params: {
     slug: string;
   };
+}
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const producto = await getProductoBySlug(params.slug);
+
+  if (!producto) {
+    return {};
+  }
+
+  return buildPageMetadata({
+    nombre: producto.nombre,
+    descripcionCorta: producto.descripcion_corta,
+    path: `/productos/${producto.slug}`,
+    imagen: producto.imagen_portada,
+  });
 }
 
 export default async function ProductPage({ params }: PageProps) {
@@ -36,10 +59,50 @@ export default async function ProductPage({ params }: PageProps) {
     notFound();
   }
 
-  const whatsappMessage = encodeURIComponent(
+  const productUrl = `${SITE_URL}/productos/${producto.slug}`;
+
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: producto.nombre,
+    description: producto.descripcion_corta || undefined,
+    image: producto.imagen_portada || undefined,
+    url: productUrl,
+    brand: producto.fabricante
+      ? { "@type": "Brand", name: producto.fabricante.marca }
+      : undefined,
+  };
+
+  const breadcrumbItems = [
+    { "@type": "ListItem", position: 1, name: "Inicio", item: SITE_URL },
+    ...(producto.fabricante
+      ? [
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: producto.fabricante.marca,
+            item: `${SITE_URL}/distribuidoras/${producto.fabricante.slug}`,
+          },
+        ]
+      : []),
+    {
+      "@type": "ListItem",
+      position: producto.fabricante ? 3 : 2,
+      name: producto.nombre,
+      item: productUrl,
+    },
+  ];
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: breadcrumbItems,
+  };
+
+  const productoWhatsappUrl = whatsappUrl(
+    "AR",
     `Hola, estuve revisando la web de EggPertise y quisiera recibir asesoramiento técnico sobre ${producto.nombre}.\nNombre:\nPaís:\nTipo de producción:`
   );
-  const whatsappUrl = `https://api.whatsapp.com/send/?phone=5491125155801&text=${whatsappMessage}&type=phone_number&app_absent=0`;
 
   const otrosProductos = producto.fabricante
     ? (await getProductosByFabricante(producto.fabricante.id))
@@ -49,7 +112,14 @@ export default async function ProductPage({ params }: PageProps) {
 
   return (
     <main className="min-h-screen">
+      <JsonLd data={productJsonLd} />
+      <JsonLd data={breadcrumbJsonLd} />
       <Header />
+      <ProductViewTracker
+        slug={producto.slug}
+        nombre={producto.nombre}
+        marca={producto.fabricante?.nombre}
+      />
 
       {/* Hero Section */}
       <section className="relative pt-24 pb-12 min-h-[70vh] flex items-center">
@@ -75,7 +145,7 @@ export default async function ProductPage({ params }: PageProps) {
                   href={`/distribuidoras/${producto.fabricante.slug}`}
                   className="inline-block px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium hover:bg-white/30 transition-colors"
                 >
-                  {producto.fabricante.nombre}
+                  {producto.fabricante.marca}
                 </Link>
               </div>
             )}
@@ -179,7 +249,7 @@ export default async function ProductPage({ params }: PageProps) {
                         producto.youtubeUrl.includes("youtu.be/")
                           ? producto.youtubeUrl.split("youtu.be/")[1]?.split("?")[0]
                           : new URLSearchParams(producto.youtubeUrl.split("?")[1]).get("v")
-                      }`}
+                      }?enablejsapi=1`}
                       title="Video del producto"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
@@ -230,7 +300,7 @@ export default async function ProductPage({ params }: PageProps) {
             <p className="text-lg text-white/70 mb-10 leading-relaxed">
               Contáctanos para obtener más información sobre este producto
               {producto.fabricante &&
-                ` y otros de ${producto.fabricante.nombre}`}
+                ` y otros de ${producto.fabricante.marca}`}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -240,7 +310,7 @@ export default async function ProductPage({ params }: PageProps) {
                 className="bg-[#25D366] hover:bg-[#20BD5A] text-white px-8 py-3 shadow-lg"
               >
                 <a
-                  href={whatsappUrl}
+                  href={productoWhatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -263,7 +333,7 @@ export default async function ProductPage({ params }: PageProps) {
                   className="bg-white hover:bg-white/90 text-primary border-0 px-8 py-3"
                 >
                   <Link href={`/distribuidoras/${producto.fabricante.slug}`}>
-                    Explorar Soluciones {producto.fabricante.nombre.toUpperCase()}
+                    Explorar Soluciones {producto.fabricante.marca.toUpperCase()}
                   </Link>
                 </Button>
               )}

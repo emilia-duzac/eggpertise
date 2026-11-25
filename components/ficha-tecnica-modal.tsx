@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { trackEvent } from "@/lib/gtm";
 import { Download, Loader2, CheckCircle, Mail } from "lucide-react";
 
 interface FichaTecnicaModalProps {
@@ -62,6 +63,11 @@ export function FichaTecnicaModal({
         throw new Error(data.error || "Error al enviar");
       }
 
+      trackEvent({
+        event: "generate_lead",
+        form: "ficha_tecnica",
+        producto: productoSlug,
+      });
       setIsSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al enviar el email");
@@ -72,6 +78,13 @@ export function FichaTecnicaModal({
 
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
+    if (newOpen) {
+      trackEvent({
+        event: "form_start",
+        form: "ficha_tecnica",
+        producto: productoSlug,
+      });
+    }
     if (!newOpen) {
       // Reset state when closing
       setTimeout(() => {
@@ -144,6 +157,7 @@ export function FichaTecnicaModal({
                   <Input
                     type="text"
                     placeholder="Nombre"
+                    aria-label="Nombre"
                     value={nombre}
                     onChange={(e) => setNombre(e.target.value)}
                     required
@@ -152,6 +166,7 @@ export function FichaTecnicaModal({
                   <Input
                     type="text"
                     placeholder="Apellido"
+                    aria-label="Apellido"
                     value={apellido}
                     onChange={(e) => setApellido(e.target.value)}
                     required
@@ -161,6 +176,7 @@ export function FichaTecnicaModal({
                 <Input
                   type="email"
                   placeholder="tu@email.com"
+                  aria-label="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -170,6 +186,7 @@ export function FichaTecnicaModal({
                 <Input
                   type="tel"
                   placeholder="Teléfono"
+                  aria-label="Teléfono"
                   value={telefono}
                   onChange={(e) => setTelefono(e.target.value)}
                   required
@@ -179,6 +196,7 @@ export function FichaTecnicaModal({
                 <Input
                   type="text"
                   placeholder="País"
+                  aria-label="País"
                   value={pais}
                   onChange={(e) => setPais(e.target.value)}
                   required

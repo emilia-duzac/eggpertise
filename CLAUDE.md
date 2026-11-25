@@ -56,7 +56,7 @@ npm run email:preview  # genera mails de ejemplo en email-preview/ (abrir email-
 ```
 
 - No hay suite de tests ni CI: **los chequeos los corrés vos**, siempre (skill `verificar-cambio`).
-- Hay dos lockfiles (`package-lock.json` y `pnpm-lock.yaml`). Usá **npm** y no commitees cambios en `pnpm-lock.yaml`.
+- Hay dos lockfiles (`package-lock.json` y `pnpm-lock.yaml`). Trabajá con **npm**, pero **Vercel instala con pnpm**: cuando se agrega, cambia o quita una dependencia hay que actualizar **los dos** (`npm install` y `pnpm install --lockfile-only`). Si `pnpm-lock.yaml` queda desactualizado, el deploy falla a los pocos segundos, antes de compilar. Sin cambios de dependencias, no regeneres ninguno. Al regenerar el de pnpm, revisá el diff: puede subir versiones ajenas (paquetes en `latest`, como `geist`) y esas hay que dejarlas como estaban. Para comprobarlo como Vercel: `CI=1 pnpm install --frozen-lockfile`.
 - Si `npm run dev` ya está corriendo, reutilizalo; no levantes varios servidores. Si el puerto 3000 está ocupado, avisá en qué puerto quedó.
 - Si faltan dependencias o variables, no las busques en otros proyectos ni las inventes: avisá.
 
@@ -96,6 +96,7 @@ El flujo automático de la skill `publicar-cambio` **no** aplica a estos cambios
 | Consultas a Contentful o el orden de la home | `docs/contenido.md` |
 | Cargar contenido (productos, marcas, noticias) | `docs/contenido.md` |
 | Guiar a marketing o diseño en una tarea de Contentful (p. ej. cambiar el orden de la home) | `docs/manual-usuario/` (seguí el manual paso a paso, en lenguaje simple) |
+| Métricas, eventos de seguimiento, Google Tag Manager, Analytics, Meta o LinkedIn | `docs/metricas.md` (qué mide el sitio y cómo se arma en GTM; lleva a Emilia si toca scripts de terceros) |
 | Variables de entorno, deploy o repo | `docs/deploy.md` |
 | Dominio, DNS o el dominio de los mails | `docs/dns.md` |
 | Servicios y cuentas | `docs/accesos.md` |

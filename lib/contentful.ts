@@ -1,5 +1,5 @@
 // lib/contentful.ts
-import { Document } from "@contentful/rich-text-types";
+import { BLOCKS, Block, Document, Inline, Text } from "@contentful/rich-text-types";
 import { unstable_cache } from "next/cache";
 
 // Utility function to generate URL-friendly slugs from names
@@ -12,6 +12,37 @@ export function generateSlug(name: string): string {
     .replace(/\s+/g, "-") // Replace spaces with hyphens
     .replace(/-+/g, "-") // Replace multiple hyphens with single
     .replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
+}
+
+/** Plain text of a rich-text node, concatenating any text nodes inside it. */
+function extractRichTextPlainText(node: Block | Inline | Text): string {
+  if (node.nodeType === "text") return node.value;
+  return node.content.map(extractRichTextPlainText).join("");
+}
+
+/**
+ * The fabricante's real brand name (e.g. "LANDMECO"), taken from the first
+ * heading of its long description — marketing already writes it there,
+ * separate from `nombre`, which is actually the category ("ALIMENTACIÓN").
+ * Falls back to `categoria` when there's no such heading, so a missing or
+ * differently-structured description never breaks anything. When the
+ * heading names EggPertise itself (e.g. Compostaje, a line EggPertise makes
+ * rather than represents), this returns "EggPertise" instead of the full
+ * heading text.
+ */
+function extractMarcaReal(
+  descripcionLarga: Document | null | undefined,
+  categoria: string
+): string {
+  const firstHeading = descripcionLarga?.content?.find(
+    (node) => node.nodeType === BLOCKS.HEADING_1
+  );
+  const texto = firstHeading
+    ? extractRichTextPlainText(firstHeading).trim()
+    : "";
+  if (!texto) return categoria;
+  if (texto.toUpperCase().includes("EGGPERTISE")) return "EggPertise";
+  return texto;
 }
 
 // GraphQL endpoint
@@ -28,6 +59,9 @@ const FABRICANTES_QUERY = `
           url
         }
         descripcionCorta
+        descripcionLarga {
+          json
+        }
       }
     }
   }
@@ -92,6 +126,18 @@ const FABRICANTE_SLUGS_QUERY = `
   }
 `;
 
+// GraphQL query for the sitemap: slug plus when it was last published
+const FABRICANTE_SITEMAP_QUERY = `
+  query GetFabricanteSitemapData {
+    fabricanteCollection {
+      items {
+        sys { publishedAt }
+        nombre
+      }
+    }
+  }
+`;
+
 // GraphQL query for all products with complete data (for slug lookup)
 const ALL_PRODUCTOS_COMPLETE_QUERY = `
   query GetAllProductosComplete {
@@ -134,6 +180,9 @@ const ALL_PRODUCTOS_COMPLETE_QUERY = `
           sys { id }
           nombre
           logo { url }
+          descripcionLarga {
+            json
+          }
         }
       }
     }
@@ -155,6 +204,9 @@ const PRODUCTOS_FOR_FORMS_QUERY = `
           sys { id }
           nombre
           logo { url }
+          descripcionLarga {
+            json
+          }
         }
       }
     }
@@ -167,6 +219,18 @@ const PRODUCTO_SLUGS_QUERY = `
     productoCollection {
       items {
         sys { id }
+        nombre
+      }
+    }
+  }
+`;
+
+// GraphQL query for the sitemap: slug plus when it was last published
+const PRODUCTO_SITEMAP_QUERY = `
+  query GetProductoSitemapData {
+    productoCollection {
+      items {
+        sys { publishedAt }
         nombre
       }
     }
@@ -245,6 +309,7 @@ interface FabricanteGraphQLResponse {
   nombre: string;
   logo: { url: string };
   descripcionCorta: string;
+  descripcionLarga: { json: Document };
 }
 
 interface ProductoGraphQLResponse {
@@ -290,6 +355,7 @@ interface ProductoCompleteGraphQLResponse {
     sys: { id: string };
     nombre: string;
     logo?: { url: string } | null;
+    descripcionLarga?: { json: Document } | null;
   } | null;
 }
 
@@ -310,6 +376,8 @@ export interface Distributor {
   id: string;
   slug: string;
   nombre: string;
+  /** El nombre real de la marca (ej. "LANDMECO"); `nombre` es la categoría. */
+  marca: string;
   logo: string;
   descripcion_corta: string;
 }
@@ -340,6 +408,8 @@ export interface Fabricante {
   id: string;
   slug: string;
   nombre: string;
+  /** El nombre real de la marca (ej. "LANDMECO"); `nombre` es la categoría. */
+  marca: string;
   logo: string;
   descripcion_corta: string;
   descripcion_larga: Document;
@@ -369,6 +439,8 @@ export interface ProductoCompleto {
     id: string;
     slug: string;
     nombre: string;
+    /** El nombre real de la marca (ej. "LANDMECO"); `nombre` es la categoría. */
+    marca: string;
     logo: string | null;
   } | null;
 }
@@ -433,6 +505,7 @@ function parseDistributorFromGraphQL(
     id: item.sys.id,
     slug: generateSlug(item.nombre),
     nombre: item.nombre,
+    marca: extractMarcaReal(item.descripcionLarga?.json, item.nombre),
     logo: item.logo.url,
     descripcion_corta: item.descripcionCorta,
   };
@@ -471,6 +544,7 @@ function parseFabricanteFromGraphQL(
     id: item.sys.id,
     slug: generateSlug(item.nombre),
     nombre: item.nombre,
+    marca: extractMarcaReal(item.descripcionLarga.json, item.nombre),
     logo: item.logo.url,
     descripcion_corta: item.descripcionCorta,
     descripcion_larga: item.descripcionLarga.json,
@@ -511,13 +585,20 @@ function parseProductoCompletoFromGraphQL(
           id: item.fabricante.sys.id,
           slug: generateSlug(item.fabricante.nombre),
           nombre: item.fabricante.nombre,
+          marca: extractMarcaReal(
+            item.fabricante.descripcionLarga?.json,
+            item.fabricante.nombre
+          ),
           logo: item.fabricante.logo?.url ?? null,
         }
       : null,
   };
 }
 
-// GraphQL helper function
+// Plain fetch, on purpose: Next.js already memoizes identical fetch calls
+// (same URL + body) made during the same render, so e.g. generateMetadata and
+// the page component below calling the same *BySlug helper only hit
+// Contentful once per request. No extra caching needed here.
 async function graphqlRequest(query: string, variables?: Record<string, any>) {
   const response = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
@@ -576,35 +657,35 @@ export async function getProductosByFabricante(
   }
 }
 
+/**
+ * Looks a fabricante up by slug. Unlike other helpers in this file, it does
+ * not catch a failed Contentful query and turn it into `null`: that would
+ * make the page call notFound() and, with revalidate, Next could cache that
+ * 404 for hours even though the fabricante still exists. The query error is
+ * left to propagate; `null` only means "no fabricante matches this slug".
+ */
 export async function getFabricanteBySlug(
   slug: string
 ): Promise<Fabricante | null> {
-  try {
-    const response = await graphqlRequest(ALL_FABRICANTES_COMPLETE_QUERY);
-    const fabricantes = response.data.fabricanteCollection
-      .items as FabricanteCompleteGraphQLResponse[];
+  const response = await graphqlRequest(ALL_FABRICANTES_COMPLETE_QUERY);
+  const fabricantes = response.data.fabricanteCollection
+    .items as FabricanteCompleteGraphQLResponse[];
 
-    // Find fabricante by matching generated slug
-    const found = fabricantes.find(
-      (item) => generateSlug(item.nombre) === slug
-    );
+  // Find fabricante by matching generated slug
+  const found = fabricantes.find((item) => generateSlug(item.nombre) === slug);
 
-    if (!found) {
-      return null;
-    }
-
-    const fabricante = parseFabricanteFromGraphQL(found);
-
-    // Fetch products for this fabricante
-    const productos = await getProductosByFabricante(fabricante.id);
-    return {
-      ...fabricante,
-      productos,
-    };
-  } catch (error) {
-    console.error("Error fetching fabricante by slug:", error);
+  if (!found) {
     return null;
   }
+
+  const fabricante = parseFabricanteFromGraphQL(found);
+
+  // Fetch products for this fabricante
+  const productos = await getProductosByFabricante(fabricante.id);
+  return {
+    ...fabricante,
+    productos,
+  };
 }
 
 export async function getAllFabricanteSlugs(): Promise<string[]> {
@@ -621,26 +702,51 @@ export async function getAllFabricanteSlugs(): Promise<string[]> {
   }
 }
 
+/** A sitemap entry: the page's slug and when its content was last published. */
+export interface SitemapEntry {
+  slug: string;
+  lastModified: string;
+}
+
+export async function getFabricanteSitemapData(): Promise<SitemapEntry[]> {
+  try {
+    const response = await graphqlRequest(FABRICANTE_SITEMAP_QUERY);
+    const fabricantes = response.data.fabricanteCollection.items as {
+      sys: { publishedAt: string };
+      nombre: string;
+    }[];
+    return fabricantes.map((item) => ({
+      slug: generateSlug(item.nombre),
+      lastModified: item.sys.publishedAt,
+    }));
+  } catch (error) {
+    console.error("Error fetching fabricante sitemap data:", error);
+    return [];
+  }
+}
+
+/**
+ * Looks a producto up by slug. Unlike other helpers in this file, it does not
+ * catch a failed Contentful query and turn it into `null`: that would make
+ * the page call notFound() and, with revalidate, Next could cache that 404
+ * for hours even though the producto still exists. The query error is left
+ * to propagate; `null` only means "no producto matches this slug".
+ */
 export async function getProductoBySlug(
   slug: string
 ): Promise<ProductoCompleto | null> {
-  try {
-    const response = await graphqlRequest(ALL_PRODUCTOS_COMPLETE_QUERY);
-    const productos = response.data.productoCollection
-      .items as ProductoCompleteGraphQLResponse[];
+  const response = await graphqlRequest(ALL_PRODUCTOS_COMPLETE_QUERY);
+  const productos = response.data.productoCollection
+    .items as ProductoCompleteGraphQLResponse[];
 
-    // Find producto by matching generated slug
-    const found = productos.find((item) => generateSlug(item.nombre) === slug);
+  // Find producto by matching generated slug
+  const found = productos.find((item) => generateSlug(item.nombre) === slug);
 
-    if (!found) {
-      return null;
-    }
-
-    return parseProductoCompletoFromGraphQL(found);
-  } catch (error) {
-    console.error("Error fetching producto by slug:", error);
+  if (!found) {
     return null;
   }
+
+  return parseProductoCompletoFromGraphQL(found);
 }
 
 /** Name given to a datasheet that has no title in Contentful. */
@@ -659,6 +765,7 @@ interface ProductoForFormGraphQLResponse {
     sys: { id: string };
     nombre: string;
     logo?: { url: string } | null;
+    descripcionLarga?: { json: Document } | null;
   } | null;
 }
 
@@ -678,6 +785,10 @@ async function fetchProductosForForms(): Promise<ProductoForForm[]> {
           id: item.fabricante.sys.id,
           slug: generateSlug(item.fabricante.nombre),
           nombre: item.fabricante.nombre,
+          marca: extractMarcaReal(
+            item.fabricante.descripcionLarga?.json,
+            item.fabricante.nombre
+          ),
           logo: item.fabricante.logo?.url ?? null,
         }
       : null,
@@ -718,6 +829,23 @@ export async function getAllProductoSlugs(): Promise<string[]> {
     return productos.map((item) => generateSlug(item.nombre));
   } catch (error) {
     console.error("Error fetching producto slugs:", error);
+    return [];
+  }
+}
+
+export async function getProductoSitemapData(): Promise<SitemapEntry[]> {
+  try {
+    const response = await graphqlRequest(PRODUCTO_SITEMAP_QUERY);
+    const productos = response.data.productoCollection.items as {
+      sys: { publishedAt: string };
+      nombre: string;
+    }[];
+    return productos.map((item) => ({
+      slug: generateSlug(item.nombre),
+      lastModified: item.sys.publishedAt,
+    }));
+  } catch (error) {
+    console.error("Error fetching producto sitemap data:", error);
     return [];
   }
 }

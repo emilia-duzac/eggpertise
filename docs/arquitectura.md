@@ -1,6 +1,6 @@
 # Arquitectura y decisiones
 
-**Última revisión:** 2026-11-23. Esto es lo que no se ve leyendo el código por
+**Última revisión:** 2026-11-25. Esto es lo que no se ve leyendo el código por
 arriba.
 
 ## Flujo de datos
@@ -25,6 +25,8 @@ Las páginas usan `generateStaticParams` para generar productos y fabricantes en
 - **Orden de proveedores y productos en la home:** lo define marketing en Contentful (`configuracionHome`). El código lo pide en una consulta aparte por lista y, si falla o no existe, ordena alfabéticamente. Ver [`contenido.md`](contenido.md).
 - **Dos lockfiles** (`package-lock.json` y `pnpm-lock.yaml`). Elegir uno y borrar el otro es una tarea pendiente.
 - **Sin tests.** No hay suite de tests ni CI en el repo.
+- **Un producto o marca inexistente da 404 real; una falla de Contentful, no.** `getProductoBySlug` y `getFabricanteBySlug` (`lib/contentful.ts`) no atrapan los errores de la consulta: si Contentful falla, el error se propaga y, con `revalidate = 14400`, Next sigue sirviendo la última versión buena de la página en vez de mostrar "no encontrado". Solo cuando la consulta responde bien y el slug no existe se muestra el 404.
+- **El nombre de marca que se ve en el sitio no es el campo `nombre` de Contentful.** Ver [`contenido.md`](contenido.md#el-nombre-de-la-marca-en-cada-fabricante).
 
 ## Formularios
 
@@ -40,6 +42,15 @@ El remitente es `noreply@eggpertise.com` (dominio verificado en Resend).
 Los destinatarios van a `CONTACT_EMAIL`, o a `info@eggpertise.com` por defecto.
 
 Detalle de los leads y su planilla en [`leads.md`](leads.md).
+
+## Analítica y Tag Manager
+
+- **Google Tag Manager** se carga desde `components/google-tag-manager.tsx`, que está en `app/layout.tsx` (todas las páginas). Solo se activa si `NEXT_PUBLIC_GTM_ID` está definida y tiene forma de ID de GTM (`GTM-XXXX`); sin la variable no carga nada. Se define solo en Production, para que los previews no ensucien las métricas, y se lee al construir: hay que redeployar.
+- **Eventos:** el sitio avisa a GTM con `trackEvent()` (`lib/gtm.ts`): formularios enviados (`generate_lead`, solo después de `response.ok`), inicio de formulario, producto visto, cambio de idioma, y clics en WhatsApp, teléfono, mail y redes. Estos últimos los detecta un único listener (`components/click-tracker.tsx`) por la dirección del enlace, sin código en cada botón. **Nunca pasar datos personales** (mail, teléfono, nombre): llegarían a terceros. La lista completa de eventos y datos está en [`metricas.md`](metricas.md).
+- **Qué se hace con esos eventos no está en el código:** los tags (Pixel de Meta, GA4) y sus triggers se arman en la web de GTM. Para sumar un evento, ver [`metricas.md`](metricas.md#cómo-sumar-un-evento-nuevo). Las visitas y los clics en WhatsApp los detecta GTM solo, sin código.
+- **GA4 sigue instalado directo** con `gtag` en `app/layout.tsx` (ID `G-LH9L77P6YJ`, agregado el 2026-01-09). Si el contenedor de GTM suma una etiqueta de GA4, **cada visita se cuenta dos veces**: en ese mismo cambio hay que sacar el `gtag` del layout.
+- **Vercel Analytics** (`<Analytics />`) es independiente de lo anterior y no usa cookies.
+- **Cookies:** GA4 (`_ga`) y, cuando se active, el Pixel de Meta se cargan sin pedir consentimiento. No hay banner ni política de privacidad.
 
 ## Emails
 

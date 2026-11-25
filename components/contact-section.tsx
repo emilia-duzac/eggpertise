@@ -2,11 +2,13 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { trackEvent } from "@/lib/gtm";
+import { WHATSAPP, whatsappUrl } from "@/lib/whatsapp";
 import {
   Mail,
   Phone,
@@ -21,6 +23,9 @@ interface FormErrors {
   [key: string]: string;
 }
 
+// How long the "thanks" message stays before the form comes back.
+const FORM_RESET_DELAY_MS = 3000;
+
 export function ContactSection() {
   const [formData, setFormData] = useState({
     nombre: "",
@@ -33,6 +38,7 @@ export function ContactSection() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const startedRef = useRef(false);
 
   const validateForm = () => {
     const newErrors: FormErrors = {};
@@ -73,10 +79,12 @@ export function ContactSection() {
         throw new Error(data.error || "Error al enviar el mensaje");
       }
 
+      trackEvent({ event: "generate_lead", form: "contacto" });
       setIsSubmitted(true);
 
       // Reset form after successful submission
       setTimeout(() => {
+        startedRef.current = false; // the next use counts as a new form_start
         setFormData({
           nombre: "",
           email: "",
@@ -85,7 +93,7 @@ export function ContactSection() {
           mensaje: "",
         });
         setIsSubmitted(false);
-      }, 3000);
+      }, FORM_RESET_DELAY_MS);
     } catch (error) {
       console.error("Error submitting form:", error);
       setErrors({
@@ -150,11 +158,21 @@ export function ContactSection() {
                   </p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form
+                  onSubmit={handleSubmit}
+                  onFocus={() => {
+                    if (startedRef.current) return;
+                    startedRef.current = true;
+                    trackEvent({ event: "form_start", form: "contacto" });
+                  }}
+                  className="space-y-6"
+                >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Input
                         placeholder="Nombre*"
+                        aria-label="Nombre"
+                        aria-required="true"
                         value={formData.nombre}
                         onChange={(e) =>
                           handleInputChange("nombre", e.target.value)
@@ -173,6 +191,8 @@ export function ContactSection() {
                       <Input
                         type="email"
                         placeholder="Email*"
+                        aria-label="Email"
+                        aria-required="true"
                         value={formData.email}
                         onChange={(e) =>
                           handleInputChange("email", e.target.value)
@@ -192,6 +212,8 @@ export function ContactSection() {
                   <div className="space-y-2">
                     <Input
                       placeholder="Empresa*"
+                      aria-label="Empresa"
+                      aria-required="true"
                       value={formData.empresa}
                       onChange={(e) =>
                         handleInputChange("empresa", e.target.value)
@@ -210,6 +232,8 @@ export function ContactSection() {
                   <div className="space-y-2">
                     <Input
                       placeholder="País*"
+                      aria-label="País"
+                      aria-required="true"
                       value={formData.pais}
                       onChange={(e) =>
                         handleInputChange("pais", e.target.value)
@@ -228,6 +252,8 @@ export function ContactSection() {
                   <div className="space-y-2">
                     <Textarea
                       placeholder="Mensaje*"
+                      aria-label="Mensaje"
+                      aria-required="true"
                       value={formData.mensaje}
                       onChange={(e) =>
                         handleInputChange("mensaje", e.target.value)
@@ -282,13 +308,13 @@ export function ContactSection() {
                   </div>
 
                   <a
-                    href="https://api.whatsapp.com/send/?phone=5491125155801&text=Hola+EggPertise%21+Quiero+informaci%C3%B3n+sobre%3A&type=phone_number&app_absent=0"
+                    href={whatsappUrl("AR")}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center space-x-3 group/phone hover:opacity-80 transition-all duration-300 cursor-pointer"
                   >
                     <Phone className="h-5 w-5 flex-shrink-0" />
-                    <span className="text-sm">+54 9 11 2515-5801</span>
+                    <span className="text-sm">{WHATSAPP.AR.display}</span>
                   </a>
 
                   <a

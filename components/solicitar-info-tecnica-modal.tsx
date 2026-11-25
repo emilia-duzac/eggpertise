@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { trackEvent } from "@/lib/gtm";
 import { FileQuestion, Loader2, CheckCircle, Mail } from "lucide-react";
 
 interface SolicitarInfoTecnicaModalProps {
@@ -50,6 +51,11 @@ export function SolicitarInfoTecnicaModal({
         throw new Error(data.error || "Error al enviar");
       }
 
+      trackEvent({
+        event: "generate_lead",
+        form: "info_tecnica",
+        producto: productoSlug,
+      });
       setIsSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al enviar");
@@ -60,6 +66,13 @@ export function SolicitarInfoTecnicaModal({
 
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
+    if (newOpen) {
+      trackEvent({
+        event: "form_start",
+        form: "info_tecnica",
+        producto: productoSlug,
+      });
+    }
     if (!newOpen) {
       setTimeout(() => {
         setEmail("");
@@ -127,6 +140,7 @@ export function SolicitarInfoTecnicaModal({
                 <Input
                   type="email"
                   placeholder="tu@email.com"
+                  aria-label="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -135,6 +149,7 @@ export function SolicitarInfoTecnicaModal({
                 <Input
                   type="tel"
                   placeholder="Teléfono (con cód. de área)"
+                  aria-label="Teléfono, con código de área"
                   value={telefono}
                   onChange={(e) => setTelefono(e.target.value)}
                   required
@@ -143,6 +158,7 @@ export function SolicitarInfoTecnicaModal({
                 <Input
                   type="text"
                   placeholder="País"
+                  aria-label="País"
                   value={pais}
                   onChange={(e) => setPais(e.target.value)}
                   required
@@ -151,6 +167,7 @@ export function SolicitarInfoTecnicaModal({
                 <Input
                   type="text"
                   placeholder="Empresa"
+                  aria-label="Empresa"
                   value={empresa}
                   onChange={(e) => setEmpresa(e.target.value)}
                   required
