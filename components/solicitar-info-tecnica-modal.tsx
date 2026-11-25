@@ -140,6 +140,7 @@ export function SolicitarInfoTecnicaModal({
                 <Input
                   type="email"
                   placeholder="tu@email.com"
+                  aria-label="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -148,6 +149,7 @@ export function SolicitarInfoTecnicaModal({
                 <Input
                   type="tel"
                   placeholder="Teléfono (con cód. de área)"
+                  aria-label="Teléfono, con código de área"
                   value={telefono}
                   onChange={(e) => setTelefono(e.target.value)}
                   required
@@ -156,6 +158,7 @@ export function SolicitarInfoTecnicaModal({
                 <Input
                   type="text"
                   placeholder="País"
+                  aria-label="País"
                   value={pais}
                   onChange={(e) => setPais(e.target.value)}
                   required
@@ -164,6 +167,7 @@ export function SolicitarInfoTecnicaModal({
                 <Input
                   type="text"
                   placeholder="Empresa"
+                  aria-label="Empresa"
                   value={empresa}
                   onChange={(e) => setEmpresa(e.target.value)}
                   required

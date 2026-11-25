@@ -1,5 +1,6 @@
 export const revalidate = 14400; // 4 hours
 
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -22,11 +23,31 @@ import {
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
 import { renderOptions } from "@/lib/rich-text-renderers";
 import { Card } from "@/components/ui/card";
+import { SITE_URL } from "@/lib/site";
+import { buildPageMetadata } from "@/lib/metadata";
+import { JsonLd } from "@/components/json-ld";
 
 interface PageProps {
   params: {
     slug: string;
   };
+}
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const producto = await getProductoBySlug(params.slug);
+
+  if (!producto) {
+    return {};
+  }
+
+  return buildPageMetadata({
+    nombre: producto.nombre,
+    descripcionCorta: producto.descripcion_corta,
+    path: `/productos/${producto.slug}`,
+    imagen: producto.imagen_portada,
+  });
 }
 
 export default async function ProductPage({ params }: PageProps) {
@@ -37,6 +58,46 @@ export default async function ProductPage({ params }: PageProps) {
   if (!producto) {
     notFound();
   }
+
+  const productUrl = `${SITE_URL}/productos/${producto.slug}`;
+
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: producto.nombre,
+    description: producto.descripcion_corta || undefined,
+    image: producto.imagen_portada || undefined,
+    url: productUrl,
+    brand: producto.fabricante
+      ? { "@type": "Brand", name: producto.fabricante.nombre }
+      : undefined,
+  };
+
+  const breadcrumbItems = [
+    { "@type": "ListItem", position: 1, name: "Inicio", item: SITE_URL },
+    ...(producto.fabricante
+      ? [
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: producto.fabricante.nombre,
+            item: `${SITE_URL}/distribuidoras/${producto.fabricante.slug}`,
+          },
+        ]
+      : []),
+    {
+      "@type": "ListItem",
+      position: producto.fabricante ? 3 : 2,
+      name: producto.nombre,
+      item: productUrl,
+    },
+  ];
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: breadcrumbItems,
+  };
 
   const productoWhatsappUrl = whatsappUrl(
     "AR",
@@ -51,6 +112,8 @@ export default async function ProductPage({ params }: PageProps) {
 
   return (
     <main className="min-h-screen">
+      <JsonLd data={productJsonLd} />
+      <JsonLd data={breadcrumbJsonLd} />
       <Header />
       <ProductViewTracker
         slug={producto.slug}

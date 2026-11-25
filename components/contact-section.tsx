@@ -171,6 +171,8 @@ export function ContactSection() {
                     <div className="space-y-2">
                       <Input
                         placeholder="Nombre*"
+                        aria-label="Nombre"
+                        aria-required="true"
                         value={formData.nombre}
                         onChange={(e) =>
                           handleInputChange("nombre", e.target.value)
@@ -189,6 +191,8 @@ export function ContactSection() {
                       <Input
                         type="email"
                         placeholder="Email*"
+                        aria-label="Email"
+                        aria-required="true"
                         value={formData.email}
                         onChange={(e) =>
                           handleInputChange("email", e.target.value)
@@ -208,6 +212,8 @@ export function ContactSection() {
                   <div className="space-y-2">
                     <Input
                       placeholder="Empresa*"
+                      aria-label="Empresa"
+                      aria-required="true"
                       value={formData.empresa}
                       onChange={(e) =>
                         handleInputChange("empresa", e.target.value)
@@ -226,6 +232,8 @@ export function ContactSection() {
                   <div className="space-y-2">
                     <Input
                       placeholder="País*"
+                      aria-label="País"
+                      aria-required="true"
                       value={formData.pais}
                       onChange={(e) =>
                         handleInputChange("pais", e.target.value)
@@ -244,6 +252,8 @@ export function ContactSection() {
                   <div className="space-y-2">
                     <Textarea
                       placeholder="Mensaje*"
+                      aria-label="Mensaje"
+                      aria-required="true"
                       value={formData.mensaje}
                       onChange={(e) =>
                         handleInputChange("mensaje", e.target.value)
