@@ -517,7 +517,10 @@ function parseProductoCompletoFromGraphQL(
   };
 }
 
-// GraphQL helper function
+// Plain fetch, on purpose: Next.js already memoizes identical fetch calls
+// (same URL + body) made during the same render, so e.g. generateMetadata and
+// the page component below calling the same *BySlug helper only hit
+// Contentful once per request. No extra caching needed here.
 async function graphqlRequest(query: string, variables?: Record<string, any>) {
   const response = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",
@@ -576,35 +579,35 @@ export async function getProductosByFabricante(
   }
 }
 
+/**
+ * Looks a fabricante up by slug. Unlike other helpers in this file, it does
+ * not catch a failed Contentful query and turn it into `null`: that would
+ * make the page call notFound() and, with revalidate, Next could cache that
+ * 404 for hours even though the fabricante still exists. The query error is
+ * left to propagate; `null` only means "no fabricante matches this slug".
+ */
 export async function getFabricanteBySlug(
   slug: string
 ): Promise<Fabricante | null> {
-  try {
-    const response = await graphqlRequest(ALL_FABRICANTES_COMPLETE_QUERY);
-    const fabricantes = response.data.fabricanteCollection
-      .items as FabricanteCompleteGraphQLResponse[];
+  const response = await graphqlRequest(ALL_FABRICANTES_COMPLETE_QUERY);
+  const fabricantes = response.data.fabricanteCollection
+    .items as FabricanteCompleteGraphQLResponse[];
 
-    // Find fabricante by matching generated slug
-    const found = fabricantes.find(
-      (item) => generateSlug(item.nombre) === slug
-    );
+  // Find fabricante by matching generated slug
+  const found = fabricantes.find((item) => generateSlug(item.nombre) === slug);
 
-    if (!found) {
-      return null;
-    }
-
-    const fabricante = parseFabricanteFromGraphQL(found);
-
-    // Fetch products for this fabricante
-    const productos = await getProductosByFabricante(fabricante.id);
-    return {
-      ...fabricante,
-      productos,
-    };
-  } catch (error) {
-    console.error("Error fetching fabricante by slug:", error);
+  if (!found) {
     return null;
   }
+
+  const fabricante = parseFabricanteFromGraphQL(found);
+
+  // Fetch products for this fabricante
+  const productos = await getProductosByFabricante(fabricante.id);
+  return {
+    ...fabricante,
+    productos,
+  };
 }
 
 export async function getAllFabricanteSlugs(): Promise<string[]> {
@@ -621,26 +624,28 @@ export async function getAllFabricanteSlugs(): Promise<string[]> {
   }
 }
 
+/**
+ * Looks a producto up by slug. Unlike other helpers in this file, it does not
+ * catch a failed Contentful query and turn it into `null`: that would make
+ * the page call notFound() and, with revalidate, Next could cache that 404
+ * for hours even though the producto still exists. The query error is left
+ * to propagate; `null` only means "no producto matches this slug".
+ */
 export async function getProductoBySlug(
   slug: string
 ): Promise<ProductoCompleto | null> {
-  try {
-    const response = await graphqlRequest(ALL_PRODUCTOS_COMPLETE_QUERY);
-    const productos = response.data.productoCollection
-      .items as ProductoCompleteGraphQLResponse[];
+  const response = await graphqlRequest(ALL_PRODUCTOS_COMPLETE_QUERY);
+  const productos = response.data.productoCollection
+    .items as ProductoCompleteGraphQLResponse[];
 
-    // Find producto by matching generated slug
-    const found = productos.find((item) => generateSlug(item.nombre) === slug);
+  // Find producto by matching generated slug
+  const found = productos.find((item) => generateSlug(item.nombre) === slug);
 
-    if (!found) {
-      return null;
-    }
-
-    return parseProductoCompletoFromGraphQL(found);
-  } catch (error) {
-    console.error("Error fetching producto by slug:", error);
+  if (!found) {
     return null;
   }
+
+  return parseProductoCompletoFromGraphQL(found);
 }
 
 /** Name given to a datasheet that has no title in Contentful. */
