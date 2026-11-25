@@ -32,25 +32,6 @@ en curso, y conviene no perder de vista. Cuando se resuelva un ítem, se borra d
   _Origen: auditoría SEO del 2026-11-24
   (`docs/plans/2026-11-24-seo-indexacion/hallazgos/findings/content.md` y `geo.md`)._
 
-## Código chico, sin tocar zonas sensibles (se puede encarar como un pedido normal)
-
-- **El formulario de contacto no tiene etiquetas accesibles en sus campos**: los
-  inputs usan solo el texto de ejemplo gris (`placeholder`, como "Nombre*", "Email*"),
-  sin `<label>` ni `aria-label`. Esto afecta tanto a personas que usan lector de
-  pantalla como a agentes de IA que intenten completar el formulario solos. El
-  arreglo es solo de maquetado (agregar la etiqueta), no cambia el envío de leads ni
-  los mails.
-- **Advertencia de consola (sin impacto visible) en dos botones que abren una
-  ventana modal**: "Solicitar info técnica" y "Ver ficha técnica" en las fichas de
-  producto. La causa es que `components/ui/button.tsx` no está preparado para que
-  otro componente le pase una referencia (`React.forwardRef`), y el mecanismo de
-  ventana modal (Radix `DialogTrigger asChild`) necesita eso. Ambos botones abren y
-  funcionan bien igual; es solo una advertencia en las herramientas de desarrollador.
-
-  _Origen: auditoría SEO del 2026-11-24
-  (`docs/plans/2026-11-24-seo-indexacion/hallazgos/findings/agentic.md`) y
-  verificación del plan de indexación, 2026-11-25._
-
 ## Técnico, para investigar más adelante
 
 - **El `slug` de cada producto/marca (la URL) no sale de un campo propio de
