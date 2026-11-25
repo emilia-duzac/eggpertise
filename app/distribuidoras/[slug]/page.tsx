@@ -4,7 +4,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
-import Image from "next/image";
+import Image from "@/components/optimized-image";
+import { IMAGE_SIZES } from "@/lib/image-sizes";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -103,6 +104,7 @@ function ProductCard({ producto }: { producto: Producto }) {
           src={producto.logo_portada}
           alt={producto.nombre}
           fill
+          sizes={IMAGE_SIZES.cardGrid}
           className="object-cover"
         />
       </div>
@@ -207,6 +209,7 @@ export default async function DistributorPage({ params }: PageProps) {
             src={distributor.imagen_portada}
             alt={distributor.marca}
             fill
+            sizes={IMAGE_SIZES.fullWidth}
             className="object-cover"
             priority
           />
@@ -246,6 +249,7 @@ export default async function DistributorPage({ params }: PageProps) {
                     src={distributor.logo}
                     alt={distributor.marca}
                     fill
+                    sizes={IMAGE_SIZES.brandBadge}
                     className="object-contain"
                   />
                 </div>
@@ -258,6 +262,7 @@ export default async function DistributorPage({ params }: PageProps) {
                   src={distributor.logo}
                   alt={distributor.marca}
                   fill
+                  sizes={IMAGE_SIZES.brandBadge}
                   className="object-contain"
                 />
               </div>

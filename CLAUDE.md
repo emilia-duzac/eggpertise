@@ -104,6 +104,7 @@ El flujo automático de la skill `publicar-cambio` **no** aplica a estos cambios
 | Revisiones automáticas en GitHub | `docs/claude-en-github.md` |
 | Dónde se resuelve cada pedido, mapa del código, mails y formularios | `docs/mapa-del-codigo.md` |
 | Buenas prácticas de código, diseño, accesibilidad, traducción, seguridad | `docs/convenciones.md` |
+| Empezar cualquier tarea nueva, o ver qué quedó anotado para después | `docs/pendientes.md` |
 
 
 ## 6. Mantener esta documentación

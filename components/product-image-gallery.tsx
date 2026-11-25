@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
+import Image from "@/components/optimized-image";
+import { IMAGE_SIZES } from "@/lib/image-sizes";
 import { Card } from "@/components/ui/card";
 import {
   Carousel,
@@ -82,6 +83,7 @@ export function ProductImageGallery({
                         alt={`${productName} - Imagen ${index + 1}`}
                         width={800}
                         height={600}
+                        sizes={IMAGE_SIZES.halfFromLg}
                         style={{ width: "100%", height: "auto" }}
                         className="group-hover:scale-105 transition-transform duration-300"
                       />

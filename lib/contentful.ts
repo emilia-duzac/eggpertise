@@ -50,8 +50,9 @@ const GRAPHQL_ENDPOINT = `https://graphql.contentful.com/content/v1/spaces/${pro
 
 // GraphQL query for distributors list (minimal data)
 const FABRICANTES_QUERY = `
-  query GetFabricantes {
-    fabricanteCollection {
+  query GetFabricantes($skip: Int!, $limit: Int!) {
+    fabricanteCollection(skip: $skip, limit: $limit) {
+      total
       items {
         sys { id }
         nombre
@@ -69,8 +70,9 @@ const FABRICANTES_QUERY = `
 
 // GraphQL query for all fabricantes with complete data (for slug lookup)
 const ALL_FABRICANTES_COMPLETE_QUERY = `
-  query GetAllFabricantesComplete {
-    fabricanteCollection {
+  query GetAllFabricantesComplete($skip: Int!, $limit: Int!) {
+    fabricanteCollection(skip: $skip, limit: $limit, order: sys_id_ASC) {
+      total
       items {
         sys { id }
         nombre
@@ -90,12 +92,17 @@ const ALL_FABRICANTES_COMPLETE_QUERY = `
   }
 `;
 
-// GraphQL query for products by fabricante
+// GraphQL query for products by fabricante. No explicit `order`: the brand page
+// shows products in Contentful's default order, and a fixed order would reshuffle
+// them. Paging without one is only unstable past 100 products in one brand.
 const PRODUCTOS_BY_FABRICANTE_QUERY = `
-  query GetProductosByFabricante($fabricanteId: String!) {
+  query GetProductosByFabricante($fabricanteId: String!, $skip: Int!, $limit: Int!) {
   productoCollection(
     where: { fabricante: { sys: { id: $fabricanteId } } }
+    skip: $skip
+    limit: $limit
   ) {
+    total
     items {
       sys { id }
       nombre
@@ -116,8 +123,9 @@ const PRODUCTOS_BY_FABRICANTE_QUERY = `
 
 // GraphQL query for static generation (includes nombre for slug generation)
 const FABRICANTE_SLUGS_QUERY = `
-  query GetFabricanteSlugs {
-    fabricanteCollection {
+  query GetFabricanteSlugs($skip: Int!, $limit: Int!) {
+    fabricanteCollection(skip: $skip, limit: $limit, order: sys_id_ASC) {
+      total
       items {
         sys { id }
         nombre
@@ -128,8 +136,9 @@ const FABRICANTE_SLUGS_QUERY = `
 
 // GraphQL query for the sitemap: slug plus when it was last published
 const FABRICANTE_SITEMAP_QUERY = `
-  query GetFabricanteSitemapData {
-    fabricanteCollection {
+  query GetFabricanteSitemapData($skip: Int!, $limit: Int!) {
+    fabricanteCollection(skip: $skip, limit: $limit, order: sys_id_ASC) {
+      total
       items {
         sys { publishedAt }
         nombre
@@ -140,8 +149,9 @@ const FABRICANTE_SITEMAP_QUERY = `
 
 // GraphQL query for all products with complete data (for slug lookup)
 const ALL_PRODUCTOS_COMPLETE_QUERY = `
-  query GetAllProductosComplete {
-    productoCollection(limit: 50) {
+  query GetAllProductosComplete($skip: Int!, $limit: Int!) {
+    productoCollection(skip: $skip, limit: $limit, order: sys_id_ASC) {
+      total
       items {
         sys { id }
         nombre
@@ -192,8 +202,9 @@ const ALL_PRODUCTOS_COMPLETE_QUERY = `
 // GraphQL query for the forms: only what an email needs about a product, so the
 // lookup stays small and cheap to cache.
 const PRODUCTOS_FOR_FORMS_QUERY = `
-  query GetProductosForForms {
-    productoCollection(limit: 100) {
+  query GetProductosForForms($skip: Int!, $limit: Int!) {
+    productoCollection(skip: $skip, limit: $limit, order: sys_id_ASC) {
+      total
       items {
         nombre
         fichaTecnica {
@@ -215,8 +226,9 @@ const PRODUCTOS_FOR_FORMS_QUERY = `
 
 // GraphQL query for product slugs (includes nombre for slug generation)
 const PRODUCTO_SLUGS_QUERY = `
-  query GetProductoSlugs {
-    productoCollection {
+  query GetProductoSlugs($skip: Int!, $limit: Int!) {
+    productoCollection(skip: $skip, limit: $limit, order: sys_id_ASC) {
+      total
       items {
         sys { id }
         nombre
@@ -227,8 +239,9 @@ const PRODUCTO_SLUGS_QUERY = `
 
 // GraphQL query for the sitemap: slug plus when it was last published
 const PRODUCTO_SITEMAP_QUERY = `
-  query GetProductoSitemapData {
-    productoCollection {
+  query GetProductoSitemapData($skip: Int!, $limit: Int!) {
+    productoCollection(skip: $skip, limit: $limit, order: sys_id_ASC) {
+      total
       items {
         sys { publishedAt }
         nombre
@@ -239,8 +252,9 @@ const PRODUCTO_SITEMAP_QUERY = `
 
 // GraphQL query for main products (principal = true)
 const PRODUCTOS_PRINCIPALES_QUERY = `
-  query GetProductosPrincipales {
-    productoCollection(where: { principal: true }) {
+  query GetProductosPrincipales($skip: Int!, $limit: Int!) {
+    productoCollection(where: { principal: true }, skip: $skip, limit: $limit) {
+      total
       items {
         sys { id }
         nombre
@@ -625,12 +639,41 @@ async function graphqlRequest(query: string, variables?: Record<string, any>) {
   return data;
 }
 
+// Contentful returns at most 100 entries per request (fewer when each entry
+// carries nested collections), so list queries are fetched page by page. Each
+// query must take $skip and $limit and select the collection's `total`.
+const DEFAULT_PAGE_SIZE = 100;
+
+async function graphqlRequestAllItems<T>(
+  query: string,
+  collection: string,
+  variables: Record<string, unknown> = {},
+  pageSize = DEFAULT_PAGE_SIZE
+): Promise<T[]> {
+  const items: T[] = [];
+  for (let skip = 0; ; skip += pageSize) {
+    const response = await graphqlRequest(query, {
+      ...variables,
+      skip,
+      limit: pageSize,
+    });
+    const page = response.data[collection] as { total: number; items: T[] };
+    items.push(...page.items);
+    if (page.items.length === 0 || items.length >= page.total) return items;
+  }
+}
+
+// The complete producto query carries images, videos and rich text, so it uses
+// smaller pages to stay well under Contentful's query complexity and size limits.
+const COMPLETE_PRODUCTOS_PAGE_SIZE = 50;
+
 // GraphQL-based functions
 export async function getFabricantes(): Promise<Distributor[]> {
   try {
-    const response = await graphqlRequest(FABRICANTES_QUERY);
-    const fabricantes = response.data.fabricanteCollection
-      .items as FabricanteGraphQLResponse[];
+    const fabricantes = await graphqlRequestAllItems<FabricanteGraphQLResponse>(
+      FABRICANTES_QUERY,
+      "fabricanteCollection"
+    );
     return sortByOrderedIds(
       fabricantes.map(parseDistributorFromGraphQL),
       await getHomeOrderIds("proveedoresOrdenados")
@@ -645,11 +688,11 @@ export async function getProductosByFabricante(
   fabricanteId: string
 ): Promise<Producto[]> {
   try {
-    const response = await graphqlRequest(PRODUCTOS_BY_FABRICANTE_QUERY, {
-      fabricanteId,
-    });
-    const productos = response.data.productoCollection
-      .items as ProductoGraphQLResponse[];
+    const productos = await graphqlRequestAllItems<ProductoGraphQLResponse>(
+      PRODUCTOS_BY_FABRICANTE_QUERY,
+      "productoCollection",
+      { fabricanteId }
+    );
     return productos.map(parseProductoFromGraphQL);
   } catch (error) {
     console.error("Error fetching productos by fabricante:", error);
@@ -667,9 +710,11 @@ export async function getProductosByFabricante(
 export async function getFabricanteBySlug(
   slug: string
 ): Promise<Fabricante | null> {
-  const response = await graphqlRequest(ALL_FABRICANTES_COMPLETE_QUERY);
-  const fabricantes = response.data.fabricanteCollection
-    .items as FabricanteCompleteGraphQLResponse[];
+  const fabricantes =
+    await graphqlRequestAllItems<FabricanteCompleteGraphQLResponse>(
+      ALL_FABRICANTES_COMPLETE_QUERY,
+      "fabricanteCollection"
+    );
 
   // Find fabricante by matching generated slug
   const found = fabricantes.find((item) => generateSlug(item.nombre) === slug);
@@ -690,11 +735,10 @@ export async function getFabricanteBySlug(
 
 export async function getAllFabricanteSlugs(): Promise<string[]> {
   try {
-    const response = await graphqlRequest(FABRICANTE_SLUGS_QUERY);
-    const fabricantes = response.data.fabricanteCollection.items as {
-      sys: { id: string };
-      nombre: string;
-    }[];
+    const fabricantes = await graphqlRequestAllItems<{ nombre: string }>(
+      FABRICANTE_SLUGS_QUERY,
+      "fabricanteCollection"
+    );
     return fabricantes.map((item) => generateSlug(item.nombre));
   } catch (error) {
     console.error("Error fetching fabricante slugs:", error);
@@ -710,11 +754,10 @@ export interface SitemapEntry {
 
 export async function getFabricanteSitemapData(): Promise<SitemapEntry[]> {
   try {
-    const response = await graphqlRequest(FABRICANTE_SITEMAP_QUERY);
-    const fabricantes = response.data.fabricanteCollection.items as {
+    const fabricantes = await graphqlRequestAllItems<{
       sys: { publishedAt: string };
       nombre: string;
-    }[];
+    }>(FABRICANTE_SITEMAP_QUERY, "fabricanteCollection");
     return fabricantes.map((item) => ({
       slug: generateSlug(item.nombre),
       lastModified: item.sys.publishedAt,
@@ -735,9 +778,13 @@ export async function getFabricanteSitemapData(): Promise<SitemapEntry[]> {
 export async function getProductoBySlug(
   slug: string
 ): Promise<ProductoCompleto | null> {
-  const response = await graphqlRequest(ALL_PRODUCTOS_COMPLETE_QUERY);
-  const productos = response.data.productoCollection
-    .items as ProductoCompleteGraphQLResponse[];
+  const productos =
+    await graphqlRequestAllItems<ProductoCompleteGraphQLResponse>(
+      ALL_PRODUCTOS_COMPLETE_QUERY,
+      "productoCollection",
+      {},
+      COMPLETE_PRODUCTOS_PAGE_SIZE
+    );
 
   // Find producto by matching generated slug
   const found = productos.find((item) => generateSlug(item.nombre) === slug);
@@ -770,9 +817,10 @@ interface ProductoForFormGraphQLResponse {
 }
 
 async function fetchProductosForForms(): Promise<ProductoForForm[]> {
-  const response = await graphqlRequest(PRODUCTOS_FOR_FORMS_QUERY);
-  const items = response.data.productoCollection
-    .items as ProductoForFormGraphQLResponse[];
+  const items = await graphqlRequestAllItems<ProductoForFormGraphQLResponse>(
+    PRODUCTOS_FOR_FORMS_QUERY,
+    "productoCollection"
+  );
 
   return items.map((item) => ({
     slug: generateSlug(item.nombre),
@@ -821,11 +869,10 @@ export async function getProductoForForm(
 
 export async function getAllProductoSlugs(): Promise<string[]> {
   try {
-    const response = await graphqlRequest(PRODUCTO_SLUGS_QUERY);
-    const productos = response.data.productoCollection.items as {
-      sys: { id: string };
-      nombre: string;
-    }[];
+    const productos = await graphqlRequestAllItems<{ nombre: string }>(
+      PRODUCTO_SLUGS_QUERY,
+      "productoCollection"
+    );
     return productos.map((item) => generateSlug(item.nombre));
   } catch (error) {
     console.error("Error fetching producto slugs:", error);
@@ -835,11 +882,10 @@ export async function getAllProductoSlugs(): Promise<string[]> {
 
 export async function getProductoSitemapData(): Promise<SitemapEntry[]> {
   try {
-    const response = await graphqlRequest(PRODUCTO_SITEMAP_QUERY);
-    const productos = response.data.productoCollection.items as {
+    const productos = await graphqlRequestAllItems<{
       sys: { publishedAt: string };
       nombre: string;
-    }[];
+    }>(PRODUCTO_SITEMAP_QUERY, "productoCollection");
     return productos.map((item) => ({
       slug: generateSlug(item.nombre),
       lastModified: item.sys.publishedAt,
@@ -852,9 +898,10 @@ export async function getProductoSitemapData(): Promise<SitemapEntry[]> {
 
 export async function getProductosPrincipales(): Promise<Producto[]> {
   try {
-    const response = await graphqlRequest(PRODUCTOS_PRINCIPALES_QUERY);
-    const productos = response.data.productoCollection
-      .items as ProductoGraphQLResponse[];
+    const productos = await graphqlRequestAllItems<ProductoGraphQLResponse>(
+      PRODUCTOS_PRINCIPALES_QUERY,
+      "productoCollection"
+    );
     return sortByOrderedIds(
       productos.map(parseProductoFromGraphQL),
       await getHomeOrderIds("productosDestacadosOrdenados")

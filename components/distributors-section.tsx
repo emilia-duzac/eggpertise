@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import Image from "next/image";
+import Image from "@/components/optimized-image";
+import { IMAGE_SIZES } from "@/lib/image-sizes";
 import { Distributor } from "@/lib/contentful";
 
 interface DistributorsSectionProps {
@@ -49,6 +50,7 @@ export function DistributorsSection({
                     alt={distributor.marca}
                     width={400}
                     height={400}
+                    sizes={IMAGE_SIZES.cardLogo}
                     className="object-contain max-w-[80%] max-h-[80%]"
                   />
                 </div>

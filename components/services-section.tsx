@@ -8,7 +8,8 @@ import {
   TrendingUp,
   Award,
 } from "lucide-react";
-import Image from "next/image";
+import Image from "@/components/optimized-image";
+import { IMAGE_SIZES } from "@/lib/image-sizes";
 
 export function ServicesSection() {
   const services = [
@@ -112,6 +113,7 @@ export function ServicesSection() {
                   src={service.image}
                   alt={service.title}
                   fill
+                  sizes={IMAGE_SIZES.thirdFromLg}
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/40 to-transparent" />
