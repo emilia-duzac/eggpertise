@@ -24,6 +24,7 @@ import { documentToReactComponents } from "@contentful/rich-text-react-renderer"
 import { renderOptions } from "@/lib/rich-text-renderers";
 import { Card } from "@/components/ui/card";
 import { SITE_URL } from "@/lib/site";
+import { JsonLd } from "@/components/json-ld";
 
 interface PageProps {
   params: {
@@ -123,18 +124,8 @@ export default async function ProductPage({ params }: PageProps) {
 
   return (
     <main className="min-h-screen">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(productJsonLd).replace(/</g, "\\u003c"),
-        }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(breadcrumbJsonLd).replace(/</g, "\\u003c"),
-        }}
-      />
+      <JsonLd data={productJsonLd} />
+      <JsonLd data={breadcrumbJsonLd} />
       <Header />
       <ProductViewTracker
         slug={producto.slug}
