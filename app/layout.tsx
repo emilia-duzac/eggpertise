@@ -14,6 +14,38 @@ const lato = {
   style: { fontFamily: "'Lato', Arial, sans-serif" },
 };
 
+// Datos reales de la empresa, los mismos que ya se ven en components/footer.tsx.
+const ORGANIZATION_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "EggPertise",
+  url: "https://www.eggpertise.com",
+  logo: "https://www.eggpertise.com/brand/logo.png",
+  description:
+    "Desde EggPertise acercamos la innovación tecnológica global a productores avícolas y porcinos de Latinoamérica, combinando asesoramiento personalizado y soluciones integrales.",
+  email: "info@eggpertise.com",
+  telephone: "+54 9 11 2515-5801",
+  sameAs: [
+    "https://www.linkedin.com/company/eggpertise",
+    "https://www.instagram.com/eggpertise",
+    "https://www.youtube.com/@EggPertise",
+  ],
+  address: [
+    {
+      "@type": "PostalAddress",
+      addressLocality: "Miami",
+      addressRegion: "FL",
+      addressCountry: "US",
+    },
+    {
+      "@type": "PostalAddress",
+      addressLocality: "Pilar",
+      addressRegion: "Buenos Aires",
+      addressCountry: "AR",
+    },
+  ],
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.eggpertise.com"),
   title: "EggPertise - Soluciones Integrales para Producción Avícola y Porcina",
@@ -66,6 +98,12 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(ORGANIZATION_JSON_LD).replace(/</g, "\\u003c"),
+          }}
+        />
       </head>
       <body
         className="font-body"

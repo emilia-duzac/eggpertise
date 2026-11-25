@@ -69,6 +69,46 @@ export default async function ProductPage({ params }: PageProps) {
     notFound();
   }
 
+  const productUrl = `https://www.eggpertise.com/productos/${producto.slug}`;
+
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: producto.nombre,
+    description: producto.descripcion_corta || undefined,
+    image: producto.imagen_portada || undefined,
+    url: productUrl,
+    brand: producto.fabricante
+      ? { "@type": "Brand", name: producto.fabricante.nombre }
+      : undefined,
+  };
+
+  const breadcrumbItems = [
+    { "@type": "ListItem", position: 1, name: "Inicio", item: "https://www.eggpertise.com" },
+    ...(producto.fabricante
+      ? [
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: producto.fabricante.nombre,
+            item: `https://www.eggpertise.com/distribuidoras/${producto.fabricante.slug}`,
+          },
+        ]
+      : []),
+    {
+      "@type": "ListItem",
+      position: producto.fabricante ? 3 : 2,
+      name: producto.nombre,
+      item: productUrl,
+    },
+  ];
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: breadcrumbItems,
+  };
+
   const productoWhatsappUrl = whatsappUrl(
     "AR",
     `Hola, estuve revisando la web de EggPertise y quisiera recibir asesoramiento técnico sobre ${producto.nombre}.\nNombre:\nPaís:\nTipo de producción:`
@@ -82,6 +122,18 @@ export default async function ProductPage({ params }: PageProps) {
 
   return (
     <main className="min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(productJsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbJsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
       <Header />
       <ProductViewTracker
         slug={producto.slug}
