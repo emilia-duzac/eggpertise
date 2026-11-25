@@ -43,5 +43,11 @@ export default function OptimizedImage({ alt, ...props }: ImageProps) {
   if (isContentfulImage(props.src)) {
     return <Image alt={alt} loader={contentfulLoader} {...props} />;
   }
+  // Any other remote image (an SVG or GIF from Contentful, a file Contentful
+  // serves from another host, an external URL) is shown as is: Vercel would
+  // refuse a host it doesn't know and break the page.
+  if (typeof props.src === "string" && /^(https?:)?\/\//.test(props.src)) {
+    return <Image alt={alt} unoptimized {...props} />;
+  }
   return <Image alt={alt} {...props} />;
 }
