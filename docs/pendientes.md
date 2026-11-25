@@ -6,15 +6,6 @@ en curso, y conviene no perder de vista. Cuando se resuelva un ítem, se borra d
 
 **Última revisión:** 2026-11-25.
 
-## Para Emilia (zona sensible, `next.config.mjs`)
-
-- **Faltan headers de seguridad estándar** en las respuestas del servidor
-  (`X-Content-Type-Options`, `X-Frame-Options`, `Content-Security-Policy`,
-  `Referrer-Policy`, `Permissions-Policy`). Solo está presente HSTS.
-
-  _Origen: auditoría SEO del 2026-11-24
-  (`docs/plans/2026-11-24-seo-indexacion/hallazgos/findings/technical.md`)._
-
 ## Para marketing (contenido, no código)
 
 - **Las fichas de producto son cortas** (entre 193 y 261 palabras en la muestra
