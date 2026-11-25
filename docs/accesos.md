@@ -1,6 +1,6 @@
 # Accesos y propiedad de los servicios
 
-**Última revisión:** 2026-10-21. Actualizá la fecha cada vez que cambie algo.
+**Última revisión:** 2026-11-25. Actualizá la fecha cada vez que cambie algo.
 
 Este documento dice **dónde vive cada cosa y quién la controla**. No contiene credenciales: los valores secretos van en las variables de entorno de Vercel y, cuando exista, en un gestor de contraseñas del equipo.
 
@@ -18,6 +18,7 @@ Regla de oro: **cada servicio tiene al menos 2 administradores con cuenta `@eggp
 | **Resend (anterior)** | Es dueña de `eggpertise.com` en Resend | Cuenta de la persona anterior | Esa persona | Bloquea reclamar el dominio raíz (ver [`dns.md`](dns.md)) |
 | **Google Apps Script** | Recibe leads y los escribe en la planilla | Proyecto independiente "EggPertise - Captura de leads" | Creado con `emilia.duzac@eggpertise.com`, compartido como editor con 1 persona (PENDIENTE anotar quién) | Funcionando. Ver [`leads.md`](leads.md) |
 | **Google Sheets** | Planilla "LEADS WEB EggPertise" | `1w_ZjMuc7X2wUQxedim-ZWo7qYnTxSx6LhP2uNEmxczA` | Shared Drive "Marketing" | Acceso restringido (ya no es pública) |
+| **Google Tag Manager / Analytics / Meta / LinkedIn** | Métricas y campañas | GTM `GTM-NK5WMFBX`, GA4 `G-LH9L77P6YJ`, Pixel de Meta `1754669193333807`, LinkedIn Partner ID PENDIENTE | PENDIENTE anotar quién administra cada cuenta | Ver [`metricas.md`](metricas.md) |
 | **GoDaddy** | Registro del dominio y DNS de `eggpertise.com` | Vence 2028-04-30. Nameservers de GoDaddy | PENDIENTE: hoy se opera con la sesión de un compañero | **Falta acceso delegado propio** |
 | **Google Workspace** | Correo `@eggpertise.com` | Registros `MX` de Google | Administración de la empresa | No cambió |
 
