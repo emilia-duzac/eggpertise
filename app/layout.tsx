@@ -72,6 +72,11 @@ export default function RootLayout({
       >
         <GoogleTagManager />
         <ClickTracker />
+        {/*
+          Analytics loaded directly. When Analytics moves into GTM (see
+          docs/metricas.md, "Publicar 2"), remove both Scripts below in the same
+          release as the GA4 tag, or every visit is counted twice.
+        */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-LH9L77P6YJ"
           strategy="afterInteractive"

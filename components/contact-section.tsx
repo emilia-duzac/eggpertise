@@ -22,6 +22,9 @@ interface FormErrors {
   [key: string]: string;
 }
 
+// How long the "thanks" message stays before the form comes back.
+const FORM_RESET_DELAY_MS = 3000;
+
 export function ContactSection() {
   const [formData, setFormData] = useState({
     nombre: "",
@@ -80,6 +83,7 @@ export function ContactSection() {
 
       // Reset form after successful submission
       setTimeout(() => {
+        startedRef.current = false; // the next use counts as a new form_start
         setFormData({
           nombre: "",
           email: "",
@@ -88,7 +92,7 @@ export function ContactSection() {
           mensaje: "",
         });
         setIsSubmitted(false);
-      }, 3000);
+      }, FORM_RESET_DELAY_MS);
     } catch (error) {
       console.error("Error submitting form:", error);
       setErrors({

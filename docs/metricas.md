@@ -34,6 +34,10 @@ Cada aviso lleva el nombre del evento y algunos datos. **Nunca** lleva datos per
 | `view_item` | Se abre la página de un producto | `ecommerce.items` (id, nombre y marca del producto) | No |
 | `language_change` | Se cambia el idioma | `idioma` (`es`, `pt`, `en`) | No |
 
+**Ojo al comparar `form_start`:** en los dos formularios de producto se cuenta cuando se **abre** la ventana, y en el formulario de contacto cuando alguien **empieza a escribir** (ese formulario está siempre a la vista). Por eso las tasas de conversión de unos y otro no se pueden comparar de forma directa.
+
+Los clics se miden tanto con el clic normal como con la rueda del mouse (abrir en pestaña nueva).
+
 `ubicacion` dice dónde estaba el enlace: `boton_flotante`, `footer`, `contacto` (sección de contacto), `header`, otra sección de la página o `pagina`.
 
 Además, GTM puede medir solo, sin código: visitas a cada página, cuánto se baja en la página (scroll) y reproducciones de los videos de YouTube de los productos.

@@ -3,6 +3,7 @@
 export function WhatsAppButton() {
   const whatsappUrl = "https://api.whatsapp.com/send/?phone=5491125155801&text=Hola+EggPertise%21+Quiero+informaci%C3%B3n+sobre%3A&type=phone_number&app_absent=0";
 
+  // data-ubicacion tells click-tracker.tsx where this click came from.
   return (
     <a
       href={whatsappUrl}

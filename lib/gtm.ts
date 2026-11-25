@@ -1,3 +1,5 @@
+import type { Language } from "@/lib/languages";
+
 declare global {
   interface Window {
     dataLayer?: Record<string, unknown>[];
@@ -47,7 +49,7 @@ export type GtmEvent =
     }
   | {
       event: "language_change";
-      idioma: "es" | "pt" | "en";
+      idioma: Language;
     }
   | {
       event: "click_social";

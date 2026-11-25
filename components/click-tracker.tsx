@@ -8,6 +8,14 @@ const SOCIAL_HOSTS: Record<string, "linkedin" | "instagram" | "youtube"> = {
   "instagram.com": "instagram",
   "youtube.com": "youtube",
 };
+const WHATSAPP_HOSTS = ["api.whatsapp.com", "wa.me"];
+
+// Country calling codes of the company's WhatsApp numbers.
+const WHATSAPP_PREFIX_AR = "54";
+const WHATSAPP_PREFIX_US = "1";
+
+const DEFAULT_UBICACION = "pagina";
+const MIDDLE_MOUSE_BUTTON = 1;
 
 // Where the link lives: an explicit data-ubicacion, else the closest section
 // with an id, else the page region (header/footer).
@@ -18,7 +26,7 @@ function getUbicacion(link: Element): string {
   if (withId) return withId;
   if (link.closest("footer")) return "footer";
   if (link.closest("header")) return "header";
-  return "pagina";
+  return DEFAULT_UBICACION;
 }
 
 function getProducto(): string | undefined {
@@ -27,8 +35,8 @@ function getProducto(): string | undefined {
 
 function paisDelNumero(url: URL): "AR" | "US" | "otro" {
   const phone = url.searchParams.get("phone") ?? url.pathname.replace(/\D/g, "");
-  if (phone.startsWith("54")) return "AR";
-  if (phone.startsWith("1")) return "US";
+  if (phone.startsWith(WHATSAPP_PREFIX_AR)) return "AR";
+  if (phone.startsWith(WHATSAPP_PREFIX_US)) return "US";
   return "otro";
 }
 
@@ -39,7 +47,7 @@ function classify(url: URL, ubicacion: string): GtmEvent | null {
 
   if (url.protocol === "tel:") return { event: "click_phone", ubicacion, producto };
   if (url.protocol === "mailto:") return { event: "click_email", ubicacion, producto };
-  if (host === "api.whatsapp.com" || host === "wa.me") {
+  if (WHATSAPP_HOSTS.includes(host)) {
     return { event: "click_whatsapp", ubicacion, producto, pais_numero: paisDelNumero(url) };
   }
   if (SOCIAL_HOSTS[host]) return { event: "click_social", red: SOCIAL_HOSTS[host], ubicacion };
@@ -51,6 +59,9 @@ function classify(url: URL, ubicacion: string): GtmEvent | null {
 export function ClickTracker() {
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
+      // "auxclick" also fires for the right button; only the middle one opens a link.
+      if (e.type === "auxclick" && e.button !== MIDDLE_MOUSE_BUTTON) return;
+
       const link = (e.target as Element | null)?.closest?.("a[href]");
       if (!link) return;
 
@@ -66,7 +77,11 @@ export function ClickTracker() {
     };
 
     document.addEventListener("click", onClick);
-    return () => document.removeEventListener("click", onClick);
+    document.addEventListener("auxclick", onClick);
+    return () => {
+      document.removeEventListener("click", onClick);
+      document.removeEventListener("auxclick", onClick);
+    };
   }, []);
 
   return null;
