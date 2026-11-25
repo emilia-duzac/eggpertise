@@ -41,12 +41,15 @@ en curso, y conviene no perder de vista. Cuando se resuelva un ítem, se borra d
   Importa porque si dos productos tuvieran nombres que generan el mismo slug, o si se
   cambia el nombre de un producto, la URL cambiaría sola sin que nadie lo decida
   explícitamente en Contentful.
-- **Las consultas que listan todos los productos o todas las marcas**
-  (`getAllProductoSlugs`, `getAllFabricanteSlugs`, `generateStaticParams`, y
-  `app/sitemap.ts`) no piden un límite explícito a Contentful, que por defecto
-  devuelve hasta 100 resultados. Hoy el catálogo tiene bastante menos, así que no es
-  un problema, pero si algún día supera los 100 productos o marcas en total, hay que
-  sumarles paginación.
+- **Las consultas que traen todos los productos o todas las marcas no paginan.**
+  El tope más bajo está en `getProductoBySlug` (`lib/contentful.ts`), que arma la
+  página de cada producto: pide solo **50 productos** (`productoCollection(limit:
+  50)`) y busca el slug entre esos. Si el catálogo pasa de 50 productos, los que
+  queden afuera van a dar "página no encontrada". El resto (`getAllProductoSlugs`,
+  `getAllFabricanteSlugs`, `generateStaticParams`, `app/sitemap.ts` y la consulta de
+  productos de los formularios) no pide límite o pide 100, que es el máximo por
+  defecto de Contentful: fallarían recién al pasar de 100 productos o marcas. Hoy el
+  catálogo tiene bastante menos, pero hay que sumar paginación antes de llegar a 50.
 
   _Origen: investigación de código para el plan de indexación,
   `docs/plans/2026-11-24-seo-indexacion/investigacion.md`._
