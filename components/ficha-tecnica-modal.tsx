@@ -157,6 +157,7 @@ export function FichaTecnicaModal({
                   <Input
                     type="text"
                     placeholder="Nombre"
+                    aria-label="Nombre"
                     value={nombre}
                     onChange={(e) => setNombre(e.target.value)}
                     required
@@ -165,6 +166,7 @@ export function FichaTecnicaModal({
                   <Input
                     type="text"
                     placeholder="Apellido"
+                    aria-label="Apellido"
                     value={apellido}
                     onChange={(e) => setApellido(e.target.value)}
                     required
@@ -174,6 +176,7 @@ export function FichaTecnicaModal({
                 <Input
                   type="email"
                   placeholder="tu@email.com"
+                  aria-label="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -183,6 +186,7 @@ export function FichaTecnicaModal({
                 <Input
                   type="tel"
                   placeholder="Teléfono"
+                  aria-label="Teléfono"
                   value={telefono}
                   onChange={(e) => setTelefono(e.target.value)}
                   required
@@ -192,6 +196,7 @@ export function FichaTecnicaModal({
                 <Input
                   type="text"
                   placeholder="País"
+                  aria-label="País"
                   value={pais}
                   onChange={(e) => setPais(e.target.value)}
                   required
