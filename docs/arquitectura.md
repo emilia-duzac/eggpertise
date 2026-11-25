@@ -18,7 +18,7 @@ Las páginas usan `generateStaticParams` para generar productos y fabricantes en
 ## Cosas no obvias
 
 - **El build no valida tipos ni lint.** `next.config.mjs` tiene `typescript.ignoreBuildErrors` y `eslint.ignoreDuringBuilds` en `true`. Eso viene del proyecto original generado con v0. Correr `npx tsc --noEmit` antes de mergear. Idealmente se corrigen los errores y se quitan esas opciones.
-- **Las imágenes no se optimizan** (`images.unoptimized: true`).
+- **Imágenes:** todas pasan por `components/optimized-image.tsx` (lint prohíbe importar `next/image` directo). Las de Contentful las achica y convierte a WebP la API de imágenes de Contentful; las de `public/` las optimiza Vercel, con caché de 31 días para no gastar el cupo del plan Hobby. Por esa caché, si se reemplaza una imagen de `public/`, hay que cambiarle el nombre al archivo.
 - **La copia a la planilla no rompe el formulario.** Se hace primero, para que el lead sobreviva a un fallo del email. Si falla (o no responde en 5 segundos), se registra en el log y se sigue: el usuario igual ve "enviado". Por eso una falla puede pasar desapercibida meses. Si Resend rechaza el email, en cambio, el usuario sí ve un error.
 - **Traducción:** el sitio se traduce con el widget de Google Translate (`components/google-translate.tsx`). La página base está en español. El widget guarda la cookie `googtrans` en varios dominios; el componente limpia todos los alcances para evitar que quede la página traducida de forma persistente.
 - **i18n propio sin implementar:** `docs/superpowers/` tiene un spec y un plan para i18n con `next-intl` (español y portugués con locales de Contentful). Es una **propuesta, no el estado actual**: no hay `next-intl` en `package.json` ni locales en el código.

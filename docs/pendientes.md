@@ -8,10 +8,6 @@ en curso, y conviene no perder de vista. Cuando se resuelva un ítem, se borra d
 
 ## Para Emilia (zona sensible, `next.config.mjs`)
 
-- **Optimización de imágenes apagada en todo el sitio** (`images: { unoptimized:
-  true }`). Puede estar frenando la carga de todas las páginas. Antes de reactivarla,
-  revisar por qué se apagó — puede estar tapando otro problema (por ejemplo, dominios
-  de Contentful sin configurar en `images.remotePatterns`).
 - **Faltan headers de seguridad estándar** en las respuestas del servidor
   (`X-Content-Type-Options`, `X-Frame-Options`, `Content-Security-Policy`,
   `Referrer-Policy`, `Permissions-Policy`). Solo está presente HSTS.

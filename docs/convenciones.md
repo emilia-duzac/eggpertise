@@ -1,6 +1,6 @@
 # Convenciones de código
 
-Buenas prácticas del sitio. Las lee Claude antes de implementar (skill `sdd`, fase 4). **Última revisión:** 2026-11-23.
+Buenas prácticas del sitio. Las lee Claude antes de implementar (skill `sdd`, fase 4). **Última revisión:** 2026-11-25.
 
 ## Generales
 
@@ -19,7 +19,7 @@ Buenas prácticas del sitio. Las lee Claude antes de implementar (skill `sdd`, f
 - App Router. Los componentes son **Server Components por defecto**; usá `"use client"` solo si hace falta estado, efectos o eventos del navegador, y en el componente más chico posible.
 - Los datos de Contentful se piden en el servidor (`lib/contentful.ts`). Las páginas se regeneran cada 4 h (`revalidate = 14400`); mantené ese patrón.
 - Navegación interna con `next/link`; enlaces externos con `target="_blank"` y `rel="noopener noreferrer"`.
-- Las imágenes **no se optimizan** en este proyecto (`images.unoptimized: true`): comprimilas **antes** de subirlas (idealmente WebP/JPG, < 300 KB las de contenido), con nombre descriptivo en minúsculas y guiones, en `public/`. Usá siempre `alt` descriptivo (o `alt=""` si es decorativa).
+- Las imágenes se muestran con `@/components/optimized-image` (no con `next/image`), que las optimiza solas. Indicá `sizes` con el ancho real que ocupa la imagen en cada pantalla, o se descarga más grande de lo necesario. Las de `public/` van con nombre descriptivo en minúsculas y guiones; si reemplazás una, cambiale el nombre. Usá siempre `alt` descriptivo (o `alt=""` si es decorativa).
 - Formularios, rutas `/api/*` y validación: ver las reglas intocables de `CLAUDE.md`.
 
 ## Estilos y diseño de marca
