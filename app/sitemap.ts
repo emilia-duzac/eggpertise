@@ -1,13 +1,13 @@
 import type { MetadataRoute } from "next";
-import { getAllFabricanteSlugs, getAllProductoSlugs } from "@/lib/contentful";
+import { getProductoSitemapData, getFabricanteSitemapData } from "@/lib/contentful";
 import { SITE_URL } from "@/lib/site";
 
 export const revalidate = 14400; // 4 hours, igual que el resto del catálogo
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [productoSlugs, fabricanteSlugs] = await Promise.all([
-    getAllProductoSlugs(),
-    getAllFabricanteSlugs(),
+  const [productos, fabricantes] = await Promise.all([
+    getProductoSitemapData(),
+    getFabricanteSitemapData(),
   ]);
 
   return [
@@ -16,13 +16,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly",
       priority: 1,
     },
-    ...productoSlugs.map((slug) => ({
+    ...productos.map(({ slug, lastModified }) => ({
       url: `${SITE_URL}/productos/${slug}`,
+      lastModified,
       changeFrequency: "monthly" as const,
       priority: 0.8,
     })),
-    ...fabricanteSlugs.map((slug) => ({
+    ...fabricantes.map(({ slug, lastModified }) => ({
       url: `${SITE_URL}/distribuidoras/${slug}`,
+      lastModified,
       changeFrequency: "monthly" as const,
       priority: 0.7,
     })),

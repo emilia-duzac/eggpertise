@@ -92,6 +92,18 @@ const FABRICANTE_SLUGS_QUERY = `
   }
 `;
 
+// GraphQL query for the sitemap: slug plus when it was last published
+const FABRICANTE_SITEMAP_QUERY = `
+  query GetFabricanteSitemapData {
+    fabricanteCollection {
+      items {
+        sys { publishedAt }
+        nombre
+      }
+    }
+  }
+`;
+
 // GraphQL query for all products with complete data (for slug lookup)
 const ALL_PRODUCTOS_COMPLETE_QUERY = `
   query GetAllProductosComplete {
@@ -167,6 +179,18 @@ const PRODUCTO_SLUGS_QUERY = `
     productoCollection {
       items {
         sys { id }
+        nombre
+      }
+    }
+  }
+`;
+
+// GraphQL query for the sitemap: slug plus when it was last published
+const PRODUCTO_SITEMAP_QUERY = `
+  query GetProductoSitemapData {
+    productoCollection {
+      items {
+        sys { publishedAt }
         nombre
       }
     }
@@ -624,6 +648,29 @@ export async function getAllFabricanteSlugs(): Promise<string[]> {
   }
 }
 
+/** A sitemap entry: the page's slug and when its content was last published. */
+export interface SitemapEntry {
+  slug: string;
+  lastModified: string;
+}
+
+export async function getFabricanteSitemapData(): Promise<SitemapEntry[]> {
+  try {
+    const response = await graphqlRequest(FABRICANTE_SITEMAP_QUERY);
+    const fabricantes = response.data.fabricanteCollection.items as {
+      sys: { publishedAt: string };
+      nombre: string;
+    }[];
+    return fabricantes.map((item) => ({
+      slug: generateSlug(item.nombre),
+      lastModified: item.sys.publishedAt,
+    }));
+  } catch (error) {
+    console.error("Error fetching fabricante sitemap data:", error);
+    return [];
+  }
+}
+
 /**
  * Looks a producto up by slug. Unlike other helpers in this file, it does not
  * catch a failed Contentful query and turn it into `null`: that would make
@@ -723,6 +770,23 @@ export async function getAllProductoSlugs(): Promise<string[]> {
     return productos.map((item) => generateSlug(item.nombre));
   } catch (error) {
     console.error("Error fetching producto slugs:", error);
+    return [];
+  }
+}
+
+export async function getProductoSitemapData(): Promise<SitemapEntry[]> {
+  try {
+    const response = await graphqlRequest(PRODUCTO_SITEMAP_QUERY);
+    const productos = response.data.productoCollection.items as {
+      sys: { publishedAt: string };
+      nombre: string;
+    }[];
+    return productos.map((item) => ({
+      slug: generateSlug(item.nombre),
+      lastModified: item.sys.publishedAt,
+    }));
+  } catch (error) {
+    console.error("Error fetching producto sitemap data:", error);
     return [];
   }
 }
