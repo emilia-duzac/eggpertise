@@ -69,7 +69,7 @@ export default async function ProductPage({ params }: PageProps) {
     image: producto.imagen_portada || undefined,
     url: productUrl,
     brand: producto.fabricante
-      ? { "@type": "Brand", name: producto.fabricante.nombre }
+      ? { "@type": "Brand", name: producto.fabricante.marca }
       : undefined,
   };
 
@@ -80,7 +80,7 @@ export default async function ProductPage({ params }: PageProps) {
           {
             "@type": "ListItem",
             position: 2,
-            name: producto.fabricante.nombre,
+            name: producto.fabricante.marca,
             item: `${SITE_URL}/distribuidoras/${producto.fabricante.slug}`,
           },
         ]
@@ -145,7 +145,7 @@ export default async function ProductPage({ params }: PageProps) {
                   href={`/distribuidoras/${producto.fabricante.slug}`}
                   className="inline-block px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium hover:bg-white/30 transition-colors"
                 >
-                  {producto.fabricante.nombre}
+                  {producto.fabricante.marca}
                 </Link>
               </div>
             )}
@@ -300,7 +300,7 @@ export default async function ProductPage({ params }: PageProps) {
             <p className="text-lg text-white/70 mb-10 leading-relaxed">
               Contáctanos para obtener más información sobre este producto
               {producto.fabricante &&
-                ` y otros de ${producto.fabricante.nombre}`}
+                ` y otros de ${producto.fabricante.marca}`}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -333,7 +333,7 @@ export default async function ProductPage({ params }: PageProps) {
                   className="bg-white hover:bg-white/90 text-primary border-0 px-8 py-3"
                 >
                   <Link href={`/distribuidoras/${producto.fabricante.slug}`}>
-                    Explorar Soluciones {producto.fabricante.nombre.toUpperCase()}
+                    Explorar Soluciones {producto.fabricante.marca.toUpperCase()}
                   </Link>
                 </Button>
               )}
