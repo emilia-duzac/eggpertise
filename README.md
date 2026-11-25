@@ -12,7 +12,7 @@ Sitio institucional y de catálogo de EggPertise (eggpertise.com): fabricantes r
 | Node.js | 18.17 (mínimo de Next 14; PENDIENTE confirmar la versión que usa Vercel) |
 | npm | el que viene con Node |
 
-El repo tiene `package-lock.json` y `pnpm-lock.yaml`. Usá **npm** y no commitees cambios en el otro lockfile. Para manejar versiones de Node se recomienda `nvm`.
+El repo tiene `package-lock.json` y `pnpm-lock.yaml`. Usá **npm**, pero Vercel instala con pnpm: si agregás, cambiás o quitás una dependencia, actualizá también `pnpm-lock.yaml` (`pnpm install --lockfile-only`); si no, el deploy falla. Detalle en `CLAUDE.md`. Para manejar versiones de Node se recomienda `nvm`.
 
 ## Instalación
 

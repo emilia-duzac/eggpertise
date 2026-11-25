@@ -56,7 +56,7 @@ npm run email:preview  # genera mails de ejemplo en email-preview/ (abrir email-
 ```
 
 - No hay suite de tests ni CI: **los chequeos los corrés vos**, siempre (skill `verificar-cambio`).
-- Hay dos lockfiles (`package-lock.json` y `pnpm-lock.yaml`). Usá **npm** y no commitees cambios en `pnpm-lock.yaml`.
+- Hay dos lockfiles (`package-lock.json` y `pnpm-lock.yaml`). Trabajá con **npm**, pero **Vercel instala con pnpm**: cuando se agrega, cambia o quita una dependencia hay que actualizar **los dos** (`npm install` y `pnpm install --lockfile-only`). Si `pnpm-lock.yaml` queda desactualizado, el deploy falla a los pocos segundos, antes de compilar. Sin cambios de dependencias, no regeneres ninguno. Al regenerar el de pnpm, revisá el diff: puede subir versiones ajenas (paquetes en `latest`, como `geist`) y esas hay que dejarlas como estaban. Para comprobarlo como Vercel: `CI=1 pnpm install --frozen-lockfile`.
 - Si `npm run dev` ya está corriendo, reutilizalo; no levantes varios servidores. Si el puerto 3000 está ocupado, avisá en qué puerto quedó.
 - Si faltan dependencias o variables, no las busques en otros proyectos ni las inventes: avisá.
 
