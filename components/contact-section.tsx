@@ -74,7 +74,7 @@ export function ContactSection() {
         throw new Error(data.error || "Error al enviar el mensaje");
       }
 
-      trackEvent("form_contacto");
+      trackEvent({ event: "generate_lead", form: "contacto" });
       setIsSubmitted(true);
 
       // Reset form after successful submission

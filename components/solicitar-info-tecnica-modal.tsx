@@ -51,7 +51,11 @@ export function SolicitarInfoTecnicaModal({
         throw new Error(data.error || "Error al enviar");
       }
 
-      trackEvent("form_info_tecnica");
+      trackEvent({
+        event: "generate_lead",
+        form: "info_tecnica",
+        producto: productoSlug,
+      });
       setIsSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al enviar");
