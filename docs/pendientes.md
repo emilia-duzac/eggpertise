@@ -21,9 +21,6 @@ en curso, y conviene no perder de vista. Cuando se resuelva un ítem, se borra d
 
 ## Para marketing (contenido, no código)
 
-- **La home no nombra ninguna marca representada por su nombre en el texto** (solo
-  aparecen en los logos e imágenes). Si alguien le pregunta a una IA "¿qué marcas
-  representa EggPertise?", hoy no se puede responder bien con lo que hay en el texto.
 - **Las fichas de producto son cortas** (entre 193 y 261 palabras en la muestra
   revisada) y no tienen tabla técnica ni preguntas frecuentes genuinas.
 - **No hay casos de clientes, instalaciones ni testimonios** en ninguna página — la
