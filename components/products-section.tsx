@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import Image from "next/image";
+import Image from "@/components/optimized-image";
 import { Producto } from "@/lib/contentful";
 
 interface ProductsSectionProps {
@@ -47,6 +47,7 @@ export function ProductsSection({ productos }: ProductsSectionProps) {
                     alt={producto.nombre}
                     width={400}
                     height={400}
+                    sizes="300px"
                     className="object-contain max-w-[80%] max-h-[80%]"
                   />
                 </div>

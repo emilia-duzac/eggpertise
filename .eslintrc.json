@@ -1,3 +1,23 @@
 {
-  "extends": "next/core-web-vitals"
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "next/image",
+            "importNames": ["default"],
+            "message": "Usá @/components/optimized-image para que la imagen se optimice."
+          }
+        ]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["components/optimized-image.tsx"],
+      "rules": { "no-restricted-imports": "off" }
+    }
+  ]
 }

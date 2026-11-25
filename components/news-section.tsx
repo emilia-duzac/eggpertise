@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import Image from "next/image";
+import Image from "@/components/optimized-image";
 import { Noticia } from "@/lib/contentful";
 import { Calendar, User, ExternalLink } from "lucide-react";
 
@@ -29,6 +29,7 @@ function NewsCard({ noticia }: { noticia: Noticia }) {
           src={noticia.imagen_destacada}
           alt={noticia.titulo}
           fill
+          sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
           className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
       </div>
