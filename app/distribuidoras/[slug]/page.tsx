@@ -16,6 +16,7 @@ import {
   Fabricante,
   Producto,
 } from "@/lib/contentful";
+import { buildPageMetadata } from "@/lib/metadata";
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
 import { renderOptions } from "@/lib/rich-text-renderers";
 
@@ -34,25 +35,12 @@ export async function generateMetadata({
     return {};
   }
 
-  const titulo = `${distributor.nombre} - EggPertise`;
-  const descripcion =
-    distributor.descripcion_corta?.trim() ||
-    `Conocé ${distributor.nombre}, representado por EggPertise en Latinoamérica.`;
-  const url = `/distribuidoras/${distributor.slug}`;
-
-  return {
-    title: titulo,
-    description: descripcion,
-    alternates: { canonical: url },
-    openGraph: {
-      title: titulo,
-      description: descripcion,
-      url,
-      images: distributor.imagen_portada
-        ? [{ url: distributor.imagen_portada }]
-        : undefined,
-    },
-  };
+  return buildPageMetadata({
+    nombre: distributor.nombre,
+    descripcionCorta: distributor.descripcion_corta,
+    path: `/distribuidoras/${distributor.slug}`,
+    imagen: distributor.imagen_portada,
+  });
 }
 
 // Helper function to group products by category

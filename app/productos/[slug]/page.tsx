@@ -24,6 +24,7 @@ import { documentToReactComponents } from "@contentful/rich-text-react-renderer"
 import { renderOptions } from "@/lib/rich-text-renderers";
 import { Card } from "@/components/ui/card";
 import { SITE_URL } from "@/lib/site";
+import { buildPageMetadata } from "@/lib/metadata";
 import { JsonLd } from "@/components/json-ld";
 
 interface PageProps {
@@ -41,25 +42,12 @@ export async function generateMetadata({
     return {};
   }
 
-  const titulo = `${producto.nombre} - EggPertise`;
-  const descripcion =
-    producto.descripcion_corta?.trim() ||
-    `Conocé ${producto.nombre}, representado por EggPertise en Latinoamérica.`;
-  const url = `/productos/${producto.slug}`;
-
-  return {
-    title: titulo,
-    description: descripcion,
-    alternates: { canonical: url },
-    openGraph: {
-      title: titulo,
-      description: descripcion,
-      url,
-      images: producto.imagen_portada
-        ? [{ url: producto.imagen_portada }]
-        : undefined,
-    },
-  };
+  return buildPageMetadata({
+    nombre: producto.nombre,
+    descripcionCorta: producto.descripcion_corta,
+    path: `/productos/${producto.slug}`,
+    imagen: producto.imagen_portada,
+  });
 }
 
 export default async function ProductPage({ params }: PageProps) {
