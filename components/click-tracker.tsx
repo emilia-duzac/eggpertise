@@ -29,8 +29,8 @@ function getProducto(): string | undefined {
 }
 
 function paisDelNumero(url: URL): WhatsappCountry | "otro" {
-  const phone = url.searchParams.get("phone") ?? url.pathname.replace(/\D/g, "");
-  return countryOfNumber(phone);
+  // api.whatsapp.com/send?phone=N, or wa.me/N.
+  return countryOfNumber(url.searchParams.get("phone") ?? url.pathname);
 }
 
 // Decides which event, if any, a link click is, from the link's address.

@@ -4,8 +4,6 @@
  * secrets.
  */
 
-import { WHATSAPP } from "@/lib/whatsapp";
-
 export const SITE_URL = "https://www.eggpertise.com";
 
 // Images in emails need an absolute URL. They live in public/brand/email.
@@ -23,8 +21,10 @@ export const SALES_CONTACT = {
   firstName: "Tomás",
   role: "Gerente de Proyectos",
   phone: "+54 9 11 2515 5801",
-  // Digits only, as wa.me expects.
-  whatsappNumber: WHATSAPP.AR.number,
+  // Digits only, as wa.me expects. Same number as WHATSAPP.AR in lib/whatsapp.ts:
+  // it is repeated here because lib/email must not import from outside its
+  // folder (scripts/preview-emails.cjs compiles it on its own). Change both.
+  whatsappNumber: "5491125155801",
   email: "tomas.strenitz@eggpertise.com",
 } as const;
 
@@ -58,6 +58,8 @@ export function salesContactText(): string {
   return `${SALES_CONTACT.name} · ${SALES_CONTACT.role}\nWhatsApp: ${SALES_CONTACT.phone}\nEmail: ${SALES_CONTACT.email}`;
 }
 
+// wa.me on purpose: it is the short link WhatsApp recommends for messages. The
+// site uses api.whatsapp.com (see lib/whatsapp.ts); both open the same chat.
 export function whatsappLink(message: string): string {
   return `https://wa.me/${SALES_CONTACT.whatsappNumber}?text=${encodeURIComponent(message)}`;
 }
