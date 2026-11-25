@@ -49,6 +49,7 @@ export function DistributorsSection({
                     alt={distributor.marca}
                     width={400}
                     height={400}
+                    sizes="300px"
                     className="object-contain max-w-[80%] max-h-[80%]"
                   />
                 </div>

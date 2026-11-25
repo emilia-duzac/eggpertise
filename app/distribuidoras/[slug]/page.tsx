@@ -103,6 +103,7 @@ function ProductCard({ producto }: { producto: Producto }) {
           src={producto.logo_portada}
           alt={producto.nombre}
           fill
+          sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
           className="object-cover"
         />
       </div>
@@ -207,6 +208,7 @@ export default async function DistributorPage({ params }: PageProps) {
             src={distributor.imagen_portada}
             alt={distributor.marca}
             fill
+            sizes="100vw"
             className="object-cover"
             priority
           />
@@ -246,6 +248,7 @@ export default async function DistributorPage({ params }: PageProps) {
                     src={distributor.logo}
                     alt={distributor.marca}
                     fill
+                    sizes="240px"
                     className="object-contain"
                   />
                 </div>
@@ -258,6 +261,7 @@ export default async function DistributorPage({ params }: PageProps) {
                   src={distributor.logo}
                   alt={distributor.marca}
                   fill
+                  sizes="240px"
                   className="object-contain"
                 />
               </div>

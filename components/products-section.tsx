@@ -47,6 +47,7 @@ export function ProductsSection({ productos }: ProductsSectionProps) {
                     alt={producto.nombre}
                     width={400}
                     height={400}
+                    sizes="300px"
                     className="object-contain max-w-[80%] max-h-[80%]"
                   />
                 </div>
