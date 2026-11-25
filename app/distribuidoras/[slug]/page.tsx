@@ -36,7 +36,7 @@ export async function generateMetadata({
   }
 
   return buildPageMetadata({
-    nombre: distributor.nombre,
+    nombre: distributor.marca,
     descripcionCorta: distributor.descripcion_corta,
     path: `/distribuidoras/${distributor.slug}`,
     imagen: distributor.imagen_portada,
@@ -205,7 +205,7 @@ export default async function DistributorPage({ params }: PageProps) {
         <div className="absolute inset-0 z-0">
           <Image
             src={distributor.imagen_portada}
-            alt={distributor.nombre}
+            alt={distributor.marca}
             fill
             className="object-cover"
             priority
@@ -244,7 +244,7 @@ export default async function DistributorPage({ params }: PageProps) {
                 <div className="absolute inset-2 sm:inset-[10px] md:inset-3 rounded-full overflow-hidden">
                   <Image
                     src={distributor.logo}
-                    alt={distributor.nombre}
+                    alt={distributor.marca}
                     fill
                     className="object-contain"
                   />
@@ -256,7 +256,7 @@ export default async function DistributorPage({ params }: PageProps) {
               <div className="absolute inset-2 sm:inset-[10px] md:inset-3 rounded-full overflow-hidden">
                 <Image
                   src={distributor.logo}
-                  alt={distributor.nombre}
+                  alt={distributor.marca}
                   fill
                   className="object-contain"
                 />
@@ -287,7 +287,7 @@ export default async function DistributorPage({ params }: PageProps) {
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-10">
                 <h2 className="text-3xl md:text-4xl font-serif font-bold text-foreground">
-                  Productos de {distributor.nombre}
+                  Productos de {distributor.marca}
                 </h2>
               </div>
 
@@ -309,7 +309,7 @@ export default async function DistributorPage({ params }: PageProps) {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-serif font-bold text-white mb-6">
-              ¿Interesado en {distributor.nombre}?
+              ¿Interesado en {distributor.marca}?
             </h2>
             <p className="text-xl text-white/70 mb-12 leading-relaxed">
               Contáctanos para obtener más información sobre nuestros productos

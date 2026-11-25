@@ -9,6 +9,7 @@ export function HeroSection() {
       <Image
         src={HeroImage}
         alt="Hero Image"
+        priority
         className="absolute inset-0 w-full h-full object-cover opacity-100"
       />
       <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-black/10"></div>

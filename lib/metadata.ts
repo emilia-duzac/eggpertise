@@ -22,10 +22,13 @@ export function buildPageMetadata({
   path,
   imagen,
 }: PageMetadataInput): Metadata {
-  const titulo = `${nombre} - EggPertise`;
+  const esEggPertise = nombre.trim().toLowerCase() === "eggpertise";
+  const titulo = esEggPertise ? nombre : `${nombre} - EggPertise`;
   const descripcion =
     descripcionCorta?.trim() ||
-    `Conocé ${nombre}, representado por EggPertise en Latinoamérica.`;
+    (esEggPertise
+      ? `Conocé esta solución de EggPertise en Latinoamérica.`
+      : `Conocé ${nombre}, representado por EggPertise en Latinoamérica.`);
 
   return {
     title: titulo,

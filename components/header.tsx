@@ -57,7 +57,7 @@ export function Header() {
             onClick={(e) => handleSmoothScroll(e, "top")}
             className="flex items-center space-x-2 cursor-pointer"
           >
-            <Image src={Logo} alt="EggPertise" width={110} height={110} />
+            <Image src={Logo} alt="EggPertise" width={110} height={110} priority />
           </a>
 
           {/* Desktop Navigation - centered links */}
