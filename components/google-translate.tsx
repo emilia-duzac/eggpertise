@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Script from "next/script";
 import { Globe2 } from "lucide-react";
+import { trackEvent } from "@/lib/gtm";
 
 declare global {
   interface Window {
@@ -70,6 +71,18 @@ export function GoogleTranslate() {
     if (match?.[1] === "pt" || match?.[1] === "en") {
       setLanguage(match[1]);
     }
+
+    // The page reloads when the language changes, so the event is announced
+    // after the reload; sending it before could be lost.
+    try {
+      const changed = sessionStorage.getItem("gtm_language_change");
+      if (changed === "es" || changed === "pt" || changed === "en") {
+        sessionStorage.removeItem("gtm_language_change");
+        trackEvent({ event: "language_change", idioma: changed });
+      }
+    } catch {
+      // sessionStorage can be blocked; the measurement is optional.
+    }
   }, []);
 
   const changeLanguage = (nextLanguage: "es" | "pt" | "en") => {
@@ -78,6 +91,11 @@ export function GoogleTranslate() {
       setTranslationCookie(nextLanguage);
     }
     setLanguage(nextLanguage);
+    try {
+      sessionStorage.setItem("gtm_language_change", nextLanguage);
+    } catch {
+      // Optional measurement only.
+    }
     window.location.reload();
   };
 

@@ -26,6 +26,23 @@ export type GtmEvent =
       producto?: string;
     }
   | {
+      // Someone opened a form or started typing in it (before sending).
+      event: "form_start";
+      form: "contacto" | "ficha_tecnica" | "info_tecnica";
+      producto?: string;
+    }
+  | {
+      // A product page was opened. Follows GA4's view_item shape.
+      event: "view_item";
+      ecommerce: {
+        items: { item_id: string; item_name: string; item_brand?: string }[];
+      };
+    }
+  | {
+      event: "language_change";
+      idioma: "es" | "pt" | "en";
+    }
+  | {
       event: "click_social";
       red: "linkedin" | "instagram" | "youtube";
       ubicacion: string;
@@ -35,5 +52,7 @@ export type GtmEvent =
 export function trackEvent(data: GtmEvent) {
   if (typeof window === "undefined") return;
   window.dataLayer = window.dataLayer || [];
+  // GTM keeps the last ecommerce object; clear it so items never carry over.
+  if ("ecommerce" in data) window.dataLayer.push({ ecommerce: null });
   window.dataLayer.push({ ...data });
 }

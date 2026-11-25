@@ -78,6 +78,13 @@ export function FichaTecnicaModal({
 
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
+    if (newOpen) {
+      trackEvent({
+        event: "form_start",
+        form: "ficha_tecnica",
+        producto: productoSlug,
+      });
+    }
     if (!newOpen) {
       // Reset state when closing
       setTimeout(() => {

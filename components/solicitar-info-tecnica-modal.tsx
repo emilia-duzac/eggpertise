@@ -66,6 +66,13 @@ export function SolicitarInfoTecnicaModal({
 
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
+    if (newOpen) {
+      trackEvent({
+        event: "form_start",
+        form: "info_tecnica",
+        producto: productoSlug,
+      });
+    }
     if (!newOpen) {
       setTimeout(() => {
         setEmail("");
