@@ -52,9 +52,9 @@ export const renderOptions = {
     ),
     [BLOCKS.QUOTE]: (node: any, children: any) => (
       <blockquote className="border-l-4 border-primary bg-primary/5 pl-6 pr-6 py-4 my-8 italic text-foreground/80 rounded-r-lg">
-        <div className="text-primary text-2xl mb-2">"</div>
+        <div className="text-primary text-2xl mb-2">&quot;</div>
         <div className="text-lg leading-relaxed">{children}</div>
-        <div className="text-primary text-2xl text-right">"</div>
+        <div className="text-primary text-2xl text-right">&quot;</div>
       </blockquote>
     ),
     [BLOCKS.HR]: () => (

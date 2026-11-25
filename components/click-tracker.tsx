@@ -2,18 +2,13 @@
 
 import { useEffect } from "react";
 import { trackEvent, type GtmEvent } from "@/lib/gtm";
+import { WHATSAPP_HOSTS, countryOfNumber, type WhatsappCountry } from "@/lib/whatsapp";
 
 const SOCIAL_HOSTS: Record<string, "linkedin" | "instagram" | "youtube"> = {
   "linkedin.com": "linkedin",
   "instagram.com": "instagram",
   "youtube.com": "youtube",
 };
-const WHATSAPP_HOSTS = ["api.whatsapp.com", "wa.me"];
-
-// Country calling codes of the company's WhatsApp numbers.
-const WHATSAPP_PREFIX_AR = "54";
-const WHATSAPP_PREFIX_US = "1";
-
 const DEFAULT_UBICACION = "pagina";
 const MIDDLE_MOUSE_BUTTON = 1;
 
@@ -33,11 +28,9 @@ function getProducto(): string | undefined {
   return window.location.pathname.match(/^\/productos\/([^/]+)/)?.[1];
 }
 
-function paisDelNumero(url: URL): "AR" | "US" | "otro" {
-  const phone = url.searchParams.get("phone") ?? url.pathname.replace(/\D/g, "");
-  if (phone.startsWith(WHATSAPP_PREFIX_AR)) return "AR";
-  if (phone.startsWith(WHATSAPP_PREFIX_US)) return "US";
-  return "otro";
+function paisDelNumero(url: URL): WhatsappCountry | "otro" {
+  // api.whatsapp.com/send?phone=N, or wa.me/N.
+  return countryOfNumber(url.searchParams.get("phone") ?? url.pathname);
 }
 
 // Decides which event, if any, a link click is, from the link's address.
