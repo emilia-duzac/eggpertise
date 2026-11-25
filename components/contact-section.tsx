@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { trackEvent } from "@/lib/gtm";
 import {
   Mail,
   Phone,
@@ -73,6 +74,7 @@ export function ContactSection() {
         throw new Error(data.error || "Error al enviar el mensaje");
       }
 
+      trackEvent("form_contacto");
       setIsSubmitted(true);
 
       // Reset form after successful submission

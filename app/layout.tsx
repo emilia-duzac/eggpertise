@@ -6,6 +6,7 @@ import "./globals.css";
 import { Suspense } from "react";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { GoogleTranslateProvider } from "@/components/google-translate";
+import { GoogleTagManager } from "@/components/google-tag-manager";
 
 const lato = {
   variable: "--font-body",
@@ -68,6 +69,7 @@ export default function RootLayout({
           [lato.variable]: lato.style.fontFamily,
         }}
       >
+        <GoogleTagManager />
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-LH9L77P6YJ"
           strategy="afterInteractive"

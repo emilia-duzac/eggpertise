@@ -52,6 +52,7 @@ Se cargan en Vercel (*Settings → Environment Variables*). Después de cambiarl
 | `CONTACT_EMAIL` | **No definida a propósito**: los avisos van a `info@eggpertise.com`. Definirla solo para cambiar la casilla | No | No | No sensible |
 | `LEADS_SHEET_ENDPOINT` | URL `/exec` de la implementación del Apps Script | Sí | No | Sensible |
 | `LEADS_SHEET_TOKEN` | Secreto compartido; es el mismo `SHARED_SECRET` que está dentro del script | Sí | No | Sensible |
+| `NEXT_PUBLIC_GTM_ID` | ID del contenedor de Google Tag Manager (`GTM-NK5WMFBX`). Es público: viaja en el HTML. PENDIENTE de cargar en Vercel | Sí | No | No sensible |
 
 `RESEND_API_KEY` y las variables de la planilla están solo en Production a propósito: así un preview no escribe en la planilla real ni manda mails. En un preview, enviar un formulario **falla con un error**, y es lo esperado.
 
